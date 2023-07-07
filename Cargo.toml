@@ -1,0 +1,61 @@
+[package]
+name = "ic-canister-kit"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[profile.release]
+lto = true
+opt-level = 'z'
+codegen-units = 1
+
+[features]
+default = [
+    "identity",
+    "cycles",
+    "canister_status",
+    "canister_call",
+    "canister_managed",
+    "times",
+    "random",
+    "mix",
+    "ledger",
+    "logs",
+    "pages",
+    "results",
+    "tasks",
+    "nft",
+]
+identity = ["candid", "sha2", "crc32fast", "hex"] # 身份相关
+cycles = ["candid", "ic-cdk"] # Cycles相关
+cycles_balance = ["cycles"] # Cycles 余额查询接口
+cycles_receive = ["cycles"] # Cycles 充值接口
+canister_status = ["candid", "ic-cdk"] # 罐子状态
+canister_status_query = ["canister_status"] # 罐子状态 查询接口
+canister_call = ["identity", "candid", "ic-cdk"] # 罐子调用
+canister_managed = ["canister_status"] # 管理罐子
+times = ["ic-cdk"] # 时间相关
+random = ["ic-cdk"] # 随机数
+mix = ["random"] # 混合数字
+ledger = ["identity"] # 账本钱包
+logs = ["times"] # 日志记录
+pages = [] # 分页查询
+results = [] # 结果类型
+tasks = ["ic-cdk-timers"] # 定时任务
+nft = ["identity"] # 定时任务
+
+[dependencies]
+candid = { version = "0.8.4", optional = true }        # ic-cdk required
+ic-cdk = { version = "0.9.2", optional = true }
+ic-cdk-timers = { version = "0.3.0", optional = true } # 定时器
+
+sha2 = { version = "0.10.6", optional = true }     # hash
+crc32fast = { version = "1.3.2", optional = true } # 循环校验
+hex = { version = "0.4.3", optional = true }       # 16进制
+
+# ic-kit = "0.4.8"
+# cap-sdk = "0.2.4"
+# cap-sdk-core = "0.2.3"
