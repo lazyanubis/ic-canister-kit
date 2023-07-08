@@ -41,5 +41,20 @@ pub use crate::pages::{Page, PageData};
 #[cfg(feature = "results")]
 pub use crate::results::MotokoResult;
 
+#[cfg(feature = "tasks")]
+pub use crate::tasks::{HeartbeatConfig, ScheduleConfig};
+
+#[cfg(feature = "stable")]
+pub use crate::stable::Stable;
+
+#[cfg(feature = "initial")]
+pub use crate::initial::Initial;
+
+#[cfg(feature = "permissions")]
+pub use crate::permissions::{Permission, Permissions};
+
+#[cfg(feature = "maintainable")]
+pub use crate::maintainable::Maintainable;
+
 #[cfg(feature = "nft")]
 pub use crate::nft::types::*;

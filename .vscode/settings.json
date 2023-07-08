@@ -4,7 +4,10 @@
     "Atid",
     "hasher",
     "nanos",
+    "nocapture",
+    "nonfungible",
     "Subaccount",
     "subaccounts"
-  ]
+  ],
+  "rust-analyzer.linkedProjects": ["./Cargo.toml"]
 }

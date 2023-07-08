@@ -15,11 +15,12 @@ pub struct TransferFee {
     pub e8s: u64, // 价格，icp，注意是 10^8 形式的
 }
 
-#[allow(non_camel_case_types)]
 #[derive(candid::CandidType, candid::Deserialize, serde::Serialize, Debug, Clone)]
 pub enum TransferUser {
-    address(AccountIdentifierHex),
-    principal(UserId),
+    #[serde(rename = "address")]
+    Address(AccountIdentifierHex),
+    #[serde(rename = "principal")]
+    Principal(UserId),
 }
 
 pub mod ledger_canister {

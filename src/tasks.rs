@@ -5,13 +5,13 @@ use super::times::Timestamp;
 // ================== 心跳任务 ==================
 
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
-pub struct HeartbeatData {
+pub struct HeartbeatConfig {
     pub enabled: bool,    // 是否启用
     pub last: Timestamp,  // 上次心跳检测时间，纳秒，每次触发后需要更新 last
     pub sleep: Timestamp, // 检测间隔  纳秒
 }
 
-impl Default for HeartbeatData {
+impl Default for HeartbeatConfig {
     fn default() -> Self {
         Self {
             enabled: true,
@@ -21,7 +21,7 @@ impl Default for HeartbeatData {
     }
 }
 
-impl HeartbeatData {
+impl HeartbeatConfig {
     pub fn beat(&mut self) -> Option<Timestamp> {
         // 1. 如果没有启用
         if !self.enabled {
@@ -46,12 +46,12 @@ impl HeartbeatData {
 pub use ic_cdk_timers::TimerId;
 
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
-pub struct TimerData {
+pub struct ScheduleConfig {
     pub enabled: bool,       // 是否启用
     pub interval: Timestamp, // 触发间隔 纳秒
 }
 
-impl Default for TimerData {
+impl Default for ScheduleConfig {
     fn default() -> Self {
         Self {
             enabled: true,
@@ -60,7 +60,7 @@ impl Default for TimerData {
     }
 }
 
-impl TimerData {
+impl ScheduleConfig {
     pub fn clear(&self, timer_id: Option<TimerId>) {
         if timer_id.is_some() {
             // 关闭

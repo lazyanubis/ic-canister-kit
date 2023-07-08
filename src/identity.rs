@@ -9,6 +9,18 @@ pub type SubAccount = Vec<u8>; // 子账户 必须是 32 长度
 pub type AccountIdentifier = Vec<u8>; // 账户
 pub type AccountIdentifierHex = String; // 账户 一般是 account id，如果用户使用的是 principal 也要和 sub_account 一起转换成对应的 account id
 
+// 获取调用者 principal id
+#[inline]
+pub fn caller() -> CallerId {
+    ic_cdk::api::caller()
+}
+
+// 获取本罐子的 principal id
+#[inline]
+pub fn self_canister_id() -> CanisterId {
+    ic_cdk::api::id()
+}
+
 pub fn unwrap_account_identifier_hex(
     account_identifier: AccountIdentifierHex,
 ) -> AccountIdentifier {

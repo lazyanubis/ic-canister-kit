@@ -2,10 +2,13 @@
 name = "ic-canister-kit"
 version = "0.0.1"
 edition = "2021"
+license = "Apache-2.0"
+readme = "README.md"
+include = ["src", "Cargo.toml", "LICENSE", "README.md"]
 
-[lib]
-path = "src/lib.rs"
-crate-type = ["cdylib"]
+# [lib]
+# path = "src/lib.rs"
+# crate-type = ["cdylib"]
 
 [profile.release]
 lto = true
@@ -13,7 +16,28 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-default = [
+default = ["identity"]
+identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
+cycles = ["candid", "ic-cdk"] # Cycles相关
+canister_status = ["identity", "candid", "ic-cdk"] # 罐子状态
+canister_call = ["identity", "candid", "ic-cdk"] # 罐子调用
+canister_managed = ["canister_status"] # 管理罐子
+times = ["ic-cdk"] # 时间相关
+random = ["ic-cdk"] # 随机数
+mix = ["random", "sha2", "base32"] # 混合数字
+ledger = ["identity", "serde"] # 账本钱包
+logs = ["times"] # 日志记录
+pages = [] # 分页查询
+results = [] # 结果类型
+tasks = ["ic-cdk-timers"] # 定时任务
+stable = ["ic-cdk"] # 持久化
+initial = ["stable"] # 权限
+permissions = ["stable", "candid"] # 权限
+maintainable = ["stable"] # 权限
+nft = ["identity", "stable"] # NFT
+nft_ext = ["nft"] # NFT EXT 标准
+nft_ticket = ["nft"] # NFT 是否具有门票功能
+all = [
     "identity",
     "cycles",
     "canister_status",
@@ -27,25 +51,14 @@ default = [
     "pages",
     "results",
     "tasks",
+    "stable",
+    "initial",
+    "permissions",
+    "maintainable",
     "nft",
+    "nft_ext",
+    "nft_ticket",
 ]
-identity = ["candid", "sha2", "crc32fast", "hex"] # 身份相关
-cycles = ["candid", "ic-cdk"] # Cycles相关
-cycles_balance = ["cycles"] # Cycles 余额查询接口
-cycles_receive = ["cycles"] # Cycles 充值接口
-canister_status = ["candid", "ic-cdk"] # 罐子状态
-canister_status_query = ["canister_status"] # 罐子状态 查询接口
-canister_call = ["identity", "candid", "ic-cdk"] # 罐子调用
-canister_managed = ["canister_status"] # 管理罐子
-times = ["ic-cdk"] # 时间相关
-random = ["ic-cdk"] # 随机数
-mix = ["random"] # 混合数字
-ledger = ["identity"] # 账本钱包
-logs = ["times"] # 日志记录
-pages = [] # 分页查询
-results = [] # 结果类型
-tasks = ["ic-cdk-timers"] # 定时任务
-nft = ["identity"] # 定时任务
 
 [dependencies]
 candid = { version = "0.8.4", optional = true }        # ic-cdk required
@@ -55,6 +68,11 @@ ic-cdk-timers = { version = "0.3.0", optional = true } # 定时器
 sha2 = { version = "0.10.6", optional = true }     # hash
 crc32fast = { version = "1.3.2", optional = true } # 循环校验
 hex = { version = "0.4.3", optional = true }       # 16进制
+
+base32 = { version = "0.4.0", optional = true } # base32 加密解密
+
+serde = { version = "*", optional = true } # 序列化/反序列化框架
+# serde_json = { version = "1.0.95", optional = true }            # json
 
 # ic-kit = "0.4.8"
 # cap-sdk = "0.2.4"

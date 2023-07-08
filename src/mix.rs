@@ -90,34 +90,46 @@ fn restore_numbers(ns: Vec<u8>) -> Vec<u8> {
 }
 
 // 根据指定序号生成一个加密字符串
-pub fn encode_index_code(salt: &[u8], index: u32, random: Vec<u8>) -> String {
+pub fn encode_index_code(salt: &[u8], index: u32, random: Vec<u8>) -> Vec<u8> {
     let trimmed = trim_index(index); // 去除前置 0
     let mix = mix_numbers(trimmed, random); // 用随机数拓展位数
     let mut plain = Vec::from(&mix[..]);
     plain.extend_from_slice(salt); // 加盐
-    let digest = sha256::digest(&plain[..]).into_bytes(); // 取得 hash 结果
+    use sha2::Digest;
+    let mut hasher = sha2::Sha256::new();
+    hasher.update(&plain[..]);
+    let digest: [u8; 32] = hasher.finalize().into(); // 取得 hash 结果
     let mut show = Vec::from(&digest[0..4]); // 取前 4 位作为校验
     show.extend_from_slice(&mix); // 补上拓展后的数据
+    show
+}
+
+pub fn encode_index_code_base32(salt: &[u8], index: u32, random: Vec<u8>) -> String {
+    let show = encode_index_code(salt, index, random);
     let code = base32::encode(base32::Alphabet::RFC4648 { padding: false }, &show);
-    // ic_cdk::println!("encode code: {} -> {}", index, code);
     code
 }
 
 // 根据加密字符串解析回序号
-pub fn decode_index_code(salt: &[u8], code: &str) -> Option<u32> {
-    let show = base32::decode(base32::Alphabet::RFC4648 { padding: false }, code).unwrap();
+pub fn decode_index_code(salt: &[u8], show: Vec<u8>) -> Result<u32, String> {
     if show.len() <= 4 {
-        return None; // 长度不对
+        return Err(format!("wrong length")); // 长度不对
     }
     let mix = &show[4..];
     let mut plain = Vec::from(&mix[..]);
     plain.extend_from_slice(salt); // 加盐
-    let digest = sha256::digest(&plain[..]).into_bytes(); // 取得 hash 结果
+    use sha2::Digest;
+    let mut hasher = sha2::Sha256::new();
+    hasher.update(&plain[..]);
+    let digest: [u8; 32] = hasher.finalize().into(); // 取得 hash 结果
     if &show[0..4] != &digest[0..4] {
-        return None; // 校验失败
+        return Err(format!("wrong data")); // 校验失败
     }
     let trimmed = restore_numbers(mix.iter().map(|n| *n).collect());
     let index = restore_index(trimmed);
-    // ic_cdk::println!("decode code: {} -> {}", code, index);
-    Some(index)
+    Ok(index)
+}
+pub fn decode_index_code_base32(salt: &[u8], code: &str) -> Result<u32, String> {
+    let show = base32::decode(base32::Alphabet::RFC4648 { padding: false }, code).unwrap();
+    decode_index_code(salt, show)
 }

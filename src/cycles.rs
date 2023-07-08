@@ -10,13 +10,6 @@ pub fn wallet_balance() -> candid::Nat {
     return candid::Nat::from(ic_cdk::api::canister_balance128()); // Cycles.balance()
 }
 
-#[cfg(feature = "wallet_balance")]
-#[ic_cdk::query(name = "wallet_balance")]
-#[candid::candid_method(query, rename = "wallet_balance")]
-pub fn _wallet_balance() -> candid::Nat {
-    wallet_balance()
-}
-
 /// 接受转入 cycles
 // #[inline]
 pub fn wallet_receive() -> WalletReceiveResult {
@@ -39,9 +32,14 @@ pub fn wallet_receive() -> WalletReceiveResult {
     }
 }
 
-#[cfg(feature = "wallet_receive")]
-#[ic_cdk::query(name = "wallet_receive")]
-#[candid::candid_method(query, rename = "wallet_receive")]
-pub fn _wallet_receive() -> WalletReceiveResult {
-    wallet_receive()
-}
+// #[ic_cdk::query(name = "wallet_balance")]
+// #[candid::candid_method(query, rename = "wallet_balance")]
+// pub fn wallet_balance() -> candid::Nat {
+//     ic_canister_kit::cycles::wallet_balance()
+// }
+
+// #[ic_cdk::query(name = "wallet_receive")]
+// #[candid::candid_method(query, rename = "wallet_receive")]
+// pub fn wallet_receive() -> WalletReceiveResult {
+//     ic_canister_kit::cycles::wallet_receive()
+// }

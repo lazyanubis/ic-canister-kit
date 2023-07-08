@@ -111,21 +111,20 @@ pub async fn deploy_canister(
     let wasm_module = wasm.unwrap();
 
     // 1. 创建一个新的罐子
-    let result = create_canister(settings, initial_cycles).await?;
-    let record = result.unwrap();
+    let record = create_canister(settings, initial_cycles).await?;
     ic_cdk::println!("new canister id: {:?}", record.canister_id.to_text());
 
     // 2. 安装代码
-    let result = install_code(InstallCodeArgument {
+    install_code(InstallCodeArgument {
         mode: CanisterInstallMode::Install,
         canister_id: record.canister_id.clone(),
         wasm_module,
-        arg,
+        arg: arg.unwrap_or(vec![]),
     })
     .await?;
 
     // 3. 启动罐子
-    let result = start_canister(record.clone()).await?;
+    start_canister(record.clone()).await?;
 
     // 4. 查询当前状态
     let result: CanisterStatusResult = canister_status(record).await;
@@ -143,7 +142,9 @@ pub async fn create_canister(
     cycles: u128,
 ) -> Result<CanisterIdRecord, String> {
     let result = ic_cdk::api::management_canister::main::create_canister(
-        CreateCanisterArgument { settings },
+        CreateCanisterArgument {
+            settings: settings.clone(),
+        },
         cycles,
     )
     .await;
@@ -268,7 +269,7 @@ pub async fn do_canister_upgrade(
         mode: CanisterInstallMode::Upgrade,
         canister_id,
         wasm_module: wasm,
-        arg,
+        arg: arg.unwrap_or(vec![]),
     })
     .await
 }
@@ -282,7 +283,7 @@ pub async fn do_canister_reinstall(
         mode: CanisterInstallMode::Reinstall,
         canister_id,
         wasm_module: wasm,
-        arg,
+        arg: arg.unwrap_or(vec![]),
     })
     .await
 }
@@ -304,4 +305,15 @@ pub async fn call_canister_status(canister_id: &CanisterId) -> CanisterStatusRes
     let call_result: Result<(CanisterStatusResult,), CallError> =
         ic_cdk::call(canister_id.clone(), "canister_status", ()).await;
     unwrap_call_result(canister_id, "canister_status", call_result)
+}
+
+pub async fn call_canister<
+    T: candid::utils::ArgumentEncoder,
+    R: for<'a> candid::utils::ArgumentDecoder<'a>,
+>(
+    canister_id: CanisterId,
+    method: &str,
+    args: T,
+) -> Result<R, CallError> {
+    ic_cdk::call(canister_id.clone(), &method, args).await
 }
