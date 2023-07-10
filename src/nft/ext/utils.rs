@@ -4,6 +4,10 @@ use super::types::*;
 
 const TDS: [u8; 4] = [10, 116, 105, 100]; //b"\x0Atid"
 
+pub fn parse_token_identifier_with_self_canister(index: ExtTokenIndex) -> ExtTokenIdentifier {
+    parse_token_identifier(self_canister_id(), index)
+}
+
 pub fn parse_token_identifier(canister_id: CanisterId, index: ExtTokenIndex) -> ExtTokenIdentifier {
     let mut array = vec![];
 

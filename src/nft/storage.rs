@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 
-use crate::{identity::wrap_account_identifier, stable::Stable, types::UserId};
+use crate::{
+    identity::wrap_account_identifier,
+    stable::Stable,
+    types::{NFTOwnable, UserId},
+};
 
 use super::types::{MediaData, NFTInfo, Nft, NftView};
 
@@ -91,6 +95,11 @@ impl NftStorage {
     pub fn set_nft_thumbnail(&mut self, index: usize, thumbnail: Option<MediaData>) {
         if let Some(nft) = self.nfts.get_mut(index) {
             nft.thumbnail = thumbnail;
+        }
+    }
+    pub fn set_nft_ownable(&mut self, index: usize, ownable: NFTOwnable) {
+        if let Some(nft) = self.nfts.get_mut(index) {
+            nft.ownable = ownable;
         }
     }
     pub fn get_nft_rarity(&self, index: usize) -> String {

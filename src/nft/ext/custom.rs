@@ -25,6 +25,11 @@ pub trait ExtCustom {
         token_id: ExtTokenIdentifier,
         media: Option<MediaData>,
     );
+    fn set_nft_ownable_by_token_identifier(
+        &mut self,
+        token_id: ExtTokenIdentifier,
+        ownable: NFTOwnable,
+    );
 
     fn get_nft_rarity_by_token_identifier(&self, token_id: ExtTokenIdentifier) -> String;
     fn get_nft_metadata_by_token_identifier(
@@ -83,6 +88,17 @@ impl ExtCustom for NftStorage {
         if let Ok(index) = token_index {
             let index = index as usize;
             self.set_nft_thumbnail(index, thumbnail);
+        }
+    }
+    fn set_nft_ownable_by_token_identifier(
+        &mut self,
+        token_id: ExtTokenIdentifier,
+        ownable: NFTOwnable,
+    ) {
+        let token_index = super::utils::parse_token_index_with_self_canister(&token_id);
+        if let Ok(index) = token_index {
+            let index = index as usize;
+            self.set_nft_ownable(index, ownable);
         }
     }
 
