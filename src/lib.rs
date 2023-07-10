@@ -49,7 +49,13 @@ pub mod permissions;
 #[cfg(feature = "maintainable")]
 pub mod maintainable;
 
+#[cfg(feature = "uploads")]
+pub mod uploads;
+
 #[cfg(feature = "nft")]
 pub mod nft;
+
+#[cfg(feature = "http")]
+pub mod http;
 
 pub mod types;

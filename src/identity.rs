@@ -1,6 +1,8 @@
 pub type CanisterId = candid::Principal;
+pub type CanisterIdHex = String;
 
 pub type UserId = candid::Principal;
+pub type UserIdHex = String;
 
 pub type CallerId = candid::Principal;
 
@@ -27,7 +29,7 @@ pub fn unwrap_account_identifier_hex(
     hex::decode(&account_identifier).unwrap()
 }
 
-pub fn wrap_account_identifier(account_identifier: AccountIdentifier) -> AccountIdentifierHex {
+pub fn wrap_account_identifier(account_identifier: &AccountIdentifier) -> AccountIdentifierHex {
     hex::encode(&account_identifier)
 }
 
@@ -42,7 +44,7 @@ pub fn parse_account_identifier_hex(
     user_id: &UserId,
     sub_account: &Option<SubAccount>,
 ) -> AccountIdentifierHex {
-    wrap_account_identifier(parse_account_identifier(user_id, sub_account))
+    wrap_account_identifier(&parse_account_identifier(user_id, sub_account))
 }
 
 fn parse_account_identifier_bytes(

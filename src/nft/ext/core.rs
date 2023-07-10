@@ -80,7 +80,7 @@ impl ExtCore for NftStorage {
 
     // 2. balance 查询余额 对于 NFT 查询余额就是 有就是 1 无就是 0 EXT标准
     fn balance(&self, args: ExtBalanceArgs) -> ExtBalanceResult {
-        let index = match super::utils::parse_token_index(&args.token) {
+        let index = match super::utils::parse_token_index_with_self_canister(&args.token) {
             Ok(index) => index as usize,
             Err(e) => return MotokoResult::Err(e),
         }; // token 标识的正确性也要检查
@@ -113,7 +113,7 @@ impl ExtCore for NftStorage {
             );
         };
         // token 标识的正确性也要检查
-        let index = match super::utils::parse_token_index(&args.token) {
+        let index = match super::utils::parse_token_index_with_self_canister(&args.token) {
             Ok(index) => index as usize,
             Err(_) => {
                 return (

@@ -22,7 +22,7 @@ pub trait ExtCommon {
 impl ExtCommon for NftStorage {
     // 1. metadata 查找某 token 的元数据 EXT标准
     fn metadata(&self, token: ExtTokenIdentifier) -> ExtMetadataResult {
-        let index = match super::utils::parse_token_index(&token) {
+        let index = match super::utils::parse_token_index_with_self_canister(&token) {
             Ok(index) => index as usize,
             Err(e) => return MotokoResult::Err(e),
         }; // token 标识的正确性也要检查

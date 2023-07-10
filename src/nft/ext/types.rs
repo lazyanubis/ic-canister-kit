@@ -8,7 +8,7 @@ pub use super::common::{ExtMetadataResult, ExtSupplyResult};
 pub use super::core::{
     ExtBalanceArgs, ExtBalanceResult, ExtTransferArgs, ExtTransferError, ExtTransferResult,
 };
-pub use super::non_fungible::{ExtBearerResult, ExtMintArgs};
+pub use super::nonfungible::{ExtBearerResult, ExtMintArgs};
 
 pub type ExtTokenIndex = u32; // 每个币序号  不能是 64 位的，为了防止别人计算的 token identifier 不一样
 pub type ExtTokenIdentifier = String; // 合约标识符，实际是: 0x0Atid + canister id + index   u8 数组和起来后形成一个像 principal 一样的字符串

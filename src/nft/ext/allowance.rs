@@ -36,7 +36,7 @@ pub trait ExtAllowance {
 impl ExtAllowance for NftStorage {
     // 1. allowance 查询允许额度
     fn allowance(&self, args: ExtAllowanceArgs) -> ExtAllowanceResult {
-        let index = match super::utils::parse_token_index(&args.token) {
+        let index = match super::utils::parse_token_index_with_self_canister(&args.token) {
             Ok(index) => index as usize,
             Err(e) => return MotokoResult::Err(e),
         }; // token 标识的正确性也要检查
@@ -65,7 +65,8 @@ impl ExtAllowance for NftStorage {
     // 2. approve 授权额度
     // ? 标准接口返回值应该是 () 但是有人需要以布尔值表示授权成功或失败，因此修改
     fn approve(&mut self, args: ExtApproveArgs) -> bool {
-        let index = super::utils::parse_token_index(&args.token).unwrap() as usize; // token 标识的正确性也要检查
+        let index =
+            super::utils::parse_token_index_with_self_canister(&args.token).unwrap() as usize; // token 标识的正确性也要检查
 
         let caller = ExtUser::parse_account_identifier(&ic_cdk::api::caller(), &args.subaccount); // 授权必须是调用者本人
 

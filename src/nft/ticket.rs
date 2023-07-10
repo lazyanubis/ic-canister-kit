@@ -3,6 +3,7 @@ use serde::Deserialize;
 
 use crate::stable::Stable;
 use crate::times::{now, Duration, Timestamp};
+use crate::types::NFTOwnable;
 
 #[derive(CandidType, Deserialize, Debug, Default)]
 pub struct ForbiddenDuration {
@@ -36,11 +37,11 @@ impl Stable<NftTicketState, NftTicketState> for NftTicket {
 
 #[derive(CandidType, Deserialize, Debug)]
 pub enum NftTicketStatus {
-    NoBody(Duration),            // 当前所有人都看不到, 里面是距离开始时间
-    InvalidToken,                // 无效的 id
-    Forbidden,                   // 无权查看
-    Owner(Duration, String),     // 当前所有者能看到, 里面是距离结束时间
-    Anonymous(Duration, String), // 会议结束后所有人都可以看, 里面是结束多长时间了
+    NoBody(Duration),                // 当前所有人都看不到, 里面是距离开始时间
+    InvalidToken,                    // 无效的 id
+    Forbidden,                       // 无权查看
+    Owner(Duration, NFTOwnable),     // 当前所有者能看到, 里面是距离结束时间
+    Anonymous(Duration, NFTOwnable), // 会议结束后所有人都可以看, 里面是结束多长时间了
 }
 
 impl NftTicket {
@@ -59,9 +60,9 @@ impl NftTicket {
             return NftTicketStatus::NoBody(self.activity_start - now); // 还没到开放的时间
         } else if now < self.activity_end {
             // ! 需要检查权限
-            return NftTicketStatus::Owner(self.activity_end - now, format!(""));
+            return NftTicketStatus::Owner(self.activity_end - now, NFTOwnable::None);
         } else {
-            return NftTicketStatus::Anonymous(now - self.activity_end, format!(""));
+            return NftTicketStatus::Anonymous(now - self.activity_end, NFTOwnable::None);
             // 无需检查权限
         }
     }

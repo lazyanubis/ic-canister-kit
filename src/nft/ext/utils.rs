@@ -19,11 +19,18 @@ pub fn parse_token_identifier(canister_id: CanisterId, index: ExtTokenIndex) -> 
 }
 
 // 检查 token 标识是否合法
+pub fn parse_token_index_with_self_canister(
+    _token_identifier: &ExtTokenIdentifier,
+) -> Result<ExtTokenIndex, ExtCommonError> {
+    parse_token_index(self_canister_id(), _token_identifier)
+}
+
 pub fn parse_token_index(
+    canister_id: CanisterId,
     _token_identifier: &ExtTokenIdentifier,
 ) -> Result<ExtTokenIndex, ExtCommonError> {
     let (canister, index) = _parse_token_identifier(_token_identifier);
-    if &canister[..] != self_canister_id().as_slice() {
+    if &canister[..] != canister_id.as_slice() {
         // canister 不是本 canister 的 id，说明 token 不对
         return Err(ExtCommonError::InvalidToken(_token_identifier.to_string()));
     }

@@ -31,12 +31,14 @@ pages = [] # 分页查询
 results = [] # 结果类型
 tasks = ["ic-cdk-timers"] # 定时任务
 stable = ["ic-cdk"] # 持久化
-initial = ["stable"] # 权限
+initial = ["stable"] # 初始化
 permissions = ["stable", "candid"] # 权限
-maintainable = ["stable"] # 权限
+maintainable = ["stable"] # 维护
+uploads = ["stable"] # 分片上传
 nft = ["identity", "stable"] # NFT
 nft_ext = ["nft"] # NFT EXT 标准
 nft_ticket = ["nft"] # NFT 是否具有门票功能
+http = ["candid", "serde", "serde_json"] # http 相关
 all = [
     "identity",
     "cycles",
@@ -55,9 +57,11 @@ all = [
     "initial",
     "permissions",
     "maintainable",
+    "uploads",
     "nft",
     "nft_ext",
     "nft_ticket",
+    "http",
 ]
 
 [dependencies]
@@ -71,8 +75,8 @@ hex = { version = "0.4.3", optional = true }       # 16进制
 
 base32 = { version = "0.4.0", optional = true } # base32 加密解密
 
-serde = { version = "*", optional = true } # 序列化/反序列化框架
-# serde_json = { version = "1.0.95", optional = true }            # json
+serde = { version = "*", optional = true, features = ["derive"] } # 序列化/反序列化框架
+serde_json = { version = "1.0.95", optional = true }              # json
 
 # ic-kit = "0.4.8"
 # cap-sdk = "0.2.4"

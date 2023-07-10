@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
 use candid::CandidType;
 use serde::Deserialize;
 
-use crate::identity::{AccountIdentifier, UserId};
+use crate::identity::{AccountIdentifier, AccountIdentifierHex, UserId, UserIdHex};
 
 pub use super::storage::{NftStorage, NftStorageState};
 
@@ -13,50 +11,40 @@ pub use super::ext::types::*;
 #[cfg(feature = "nft_ticket")]
 pub use super::ticket::{NftTicket, NftTicketState, NftTicketStatus};
 
-#[derive(CandidType, Deserialize, Default, Debug)]
-pub struct MediaData {
+#[derive(CandidType, Deserialize, Default, Debug, Clone)]
+pub struct InnerData {
     pub headers: Vec<(String, String)>,
     pub data: Vec<u8>, // 实际数据
 }
 
-#[derive(CandidType, Deserialize, Debug)]
-pub enum Media {
-    Url(String),
-    Media(MediaData),
+#[derive(CandidType, Deserialize, Default, Debug, Clone)]
+pub struct OuterData {
+    pub headers: Vec<(String, String)>,
+    pub url: String, // 实际 url
 }
 
-// 元数据的响应头值类型
-// #[allow(clippy::enum_variant_names)]
 #[derive(CandidType, Deserialize, Debug, Clone)]
-pub enum MetadataValue {
-    Text(String),  // 文本类型
-    Blob(Vec<u8>), // 二进制类型
-    Nat(u128),     // 数字类型 rust 居然有 128 位的数字
-    Nat8(u8),      // u8 类型
-    Nat16(u16),    // u16 类型
-    Nat32(u32),    // u32 类型
-    Nat64(u64),    // u64 类型
-}
-
-// 元数据的键值对
-#[derive(CandidType, Deserialize, Debug, Clone)]
-pub struct Metadata {
-    pub header: HashMap<String, MetadataValue>, // 键值对
-    pub data: Vec<u8>,                          // 实际数据
-}
-
-#[derive(CandidType, Deserialize, Debug)]
-pub enum MetadataMedia {
-    Url(String),
-    Metadata(Metadata),
+pub enum MediaData {
+    Inner(InnerData),
+    Outer(OuterData),
 }
 
 #[derive(CandidType, Deserialize, Debug, Default)]
 pub struct NFTInfo {
-    pub name: String,               // NFT 的名称
-    pub symbol: String,             // NFT 的符号
-    pub logo: Option<Media>,        // logo 信息
-    pub maintaining: Option<Media>, // 升级时候需要统一显示的 logo
+    pub name: String,                   // NFT 的名称
+    pub symbol: String,                 // NFT 的符号
+    pub logo: Option<MediaData>,        // logo 信息
+    pub thumbnail: Option<MediaData>,   // thumbnail 信息
+    pub maintaining: Option<MediaData>, // 升级时候需要统一显示的 logo
+}
+
+#[derive(CandidType, Deserialize, Debug, Clone)]
+pub enum NFTOwnable {
+    None,
+    Text(String),
+    Media(MediaData),
+    Data(Vec<u8>),
+    List(Vec<NFTOwnable>),
 }
 
 // NFT 的结构体
@@ -68,9 +56,19 @@ pub struct Nft {
     pub owner: AccountIdentifier, // 所属人
     pub approved: Option<UserId>, // 授权人 最多只有一个
     // 伴生数据
-    pub rarity: String,           // 稀有度
-    pub content: Option<Vec<u8>>, // nft的内容
-    pub metadata: Vec<Metadata>,  // 该 nft 的元数据 图片数据放这里
-    pub thumbnail: Option<Media>, // 缩略图
-    pub secret: String,           // 也许需要保存一个隐私信息
+    pub rarity: String,               // 稀有度
+    pub content: Option<Vec<u8>>,     // nft的内容
+    pub metadata: Vec<MediaData>,     // 该 nft 的元数据 图片数据放这里
+    pub thumbnail: Option<MediaData>, // 缩略图
+    pub ownable: NFTOwnable,          // 也许需要保存一个隐私信息
+}
+
+// NFT 的结构体
+// 显示canister 核心的 nft 数据，即所有权和授权，只要抱住了这 2 个数据，那么其他数据都是无所谓的
+#[derive(CandidType, Deserialize, Debug)]
+pub struct NftView {
+    pub name: String, // nft 的唯一，这个数字才是真正的 nft
+    // 所有权
+    pub owner: AccountIdentifierHex, // 所属人
+    pub approved: Option<UserIdHex>, // 授权人 最多只有一个
 }

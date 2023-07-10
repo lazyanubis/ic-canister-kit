@@ -56,5 +56,11 @@ pub use crate::permissions::{Permission, Permissions};
 #[cfg(feature = "maintainable")]
 pub use crate::maintainable::Maintainable;
 
+#[cfg(feature = "uploads")]
+pub use crate::uploads::UploadCache;
+
 #[cfg(feature = "nft")]
 pub use crate::nft::types::*;
+
+#[cfg(feature = "http")]
+pub use crate::http::{CustomHttpRequest, CustomHttpResponse, HttpResponse, TransformArgs};
