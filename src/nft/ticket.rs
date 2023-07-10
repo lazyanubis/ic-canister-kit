@@ -66,4 +66,13 @@ impl NftTicket {
             // 无需检查权限
         }
     }
+    pub fn set_activity_start(&mut self, start: Timestamp) {
+        self.activity_start = start;
+    }
+    pub fn set_activity_end(&mut self, end: Timestamp) {
+        self.activity_end = end;
+    }
+    pub fn set_transfer_forbidden(&mut self, forbidden: Vec<ForbiddenDuration>) {
+        self.transfer_forbidden = forbidden;
+    }
 }

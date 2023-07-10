@@ -9,7 +9,7 @@ pub use super::storage::{NftStorage, NftStorageState};
 pub use super::ext::types::*;
 
 #[cfg(feature = "nft_ticket")]
-pub use super::ticket::{NftTicket, NftTicketState, NftTicketStatus};
+pub use super::ticket::{ForbiddenDuration, NftTicket, NftTicketState, NftTicketStatus};
 
 #[derive(CandidType, Deserialize, Default, Debug, Clone)]
 pub struct InnerData {

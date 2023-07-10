@@ -12,7 +12,7 @@ pub type ExtBearerResult = MotokoResult<ExtAccountIdentifierHex, ExtCommonError>
 
 // =============== 铸币 ===============
 // 铸币参数
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone)]
 pub struct ExtMintArgs {
     pub to: ExtUser, // 铸币目标用户，可以直接是字符串，也可以是 principal
     pub metadata: Option<Vec<u8>>,
