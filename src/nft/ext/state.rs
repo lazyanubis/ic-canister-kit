@@ -51,7 +51,6 @@ impl ExtState for NftStorage {
     fn get_tokens(&self) -> Vec<(ExtTokenIndex, ExtTokenMetadata)> {
         self.nfts
             .iter()
-            .filter(|n| n.approved.is_some())
             .map(|n| {
                 (
                     n.index as u32,
