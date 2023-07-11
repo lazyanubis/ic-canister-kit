@@ -4,9 +4,14 @@ use serde::Deserialize;
 use crate::identity::UserId;
 
 pub use super::allowance::{ExtAllowanceArgs, ExtAllowanceResult, ExtApproveArgs};
+pub use super::batch::{
+    ExtBalanceBatchArgs, ExtBalanceBatchResult, ExtBatchError, ExtTransferBatchArgs,
+    ExtTransferBatchResult,
+};
 pub use super::common::{ExtMetadataResult, ExtSupplyResult};
 pub use super::core::{
     ExtBalanceArgs, ExtBalanceResult, ExtTransferArgs, ExtTransferError, ExtTransferResult,
+    StableTransferArgs,
 };
 pub use super::nonfungible::{ExtBearerResult, ExtMintArgs};
 

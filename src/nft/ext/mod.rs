@@ -12,4 +12,6 @@ pub mod allowance;
 
 pub mod nonfungible;
 
+pub mod batch;
+
 pub mod state;

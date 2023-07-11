@@ -10,6 +10,7 @@ use crate::{
 use super::types::*;
 
 // ================ 查询余额 =================
+
 // 查询余额参数
 #[derive(CandidType, Deserialize)]
 pub struct ExtBalanceArgs {
@@ -72,9 +73,11 @@ impl ExtCore for NftStorage {
     // 1. extensions 获取拓展信息 EXT标准
     fn extensions(&self) -> Vec<String> {
         vec![
-            "@ext/common".to_string(),    // 1. metadata 元数据查询  2. supply 总供应量
+            // ? 用户应当自己选择实现的方法
+            "@ext/common".to_string(), // 1. metadata 元数据查询  2. supply 总供应量
             "@ext/allowance".to_string(), // 1. allowance 查询允许额度 2. approve 授权额度
             "@ext/nonfungible".to_string(), // 1. bearer 查询所有人 2. mintNFT 铸币
+            "@ext/batch".to_string(),  // 1. balance_batch 批量查询余额 2. transfer_batch 批量转账
         ]
     }
 

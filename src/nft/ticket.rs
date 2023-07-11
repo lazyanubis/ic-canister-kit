@@ -37,11 +37,11 @@ impl Stable<NftTicketState, NftTicketState> for NftTicket {
 
 #[derive(CandidType, Deserialize, Debug)]
 pub enum NftTicketStatus {
-    NoBody(Duration),                // 当前所有人都看不到, 里面是距离开始时间
+    NoBody(Duration),                // 当前所有人都看不到, 里面是距离会议开始时间
     InvalidToken,                    // 无效的 id
-    Forbidden(Duration),             // 无权查看
+    Forbidden(Duration),             // 无权查看 里面是距离会议结束时间
     Owner(Duration, NFTOwnable),     // 当前所有者能看到, 里面是距离结束时间
-    Anonymous(Duration, NFTOwnable), // 会议结束后所有人都可以看, 里面是结束多长时间了
+    Anonymous(Duration, NFTOwnable), // 会议结束后所有人都可以看, 里面会议已经结束多长时间了
 }
 
 impl NftTicket {
