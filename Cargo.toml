@@ -6,6 +6,7 @@ license = "Apache-2.0"
 readme = "README.md"
 include = ["src", "Cargo.toml", "LICENSE", "README.md"]
 description = "A ic canister package"
+authors = ["Anubis Awooo"]
 
 # [lib]
 # path = "src/lib.rs"
