@@ -11,6 +11,9 @@ pub use super::ext::types::*;
 #[cfg(feature = "nft_ticket")]
 pub use super::ticket::{ForbiddenDuration, NftTicket, NftTicketState, NftTicketStatus};
 
+#[cfg(feature = "nft_limit")]
+pub use super::limit::{LimitDuration, NftLimit, NftLimitState};
+
 #[derive(CandidType, Deserialize, Default, Debug, Clone)]
 pub struct InnerData {
     pub headers: Vec<(String, String)>,

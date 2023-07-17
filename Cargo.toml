@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -40,6 +40,7 @@ uploads = ["stable"] # 分片上传
 nft = ["identity", "stable"] # NFT
 nft_ext = ["nft"] # NFT EXT 标准
 nft_ticket = ["nft"] # NFT 是否具有门票功能
+nft_limit = ["nft"] # NFT 是否限制指定时间的功能
 http = ["candid", "serde", "serde_json"] # http 相关
 all = [
     "identity",
@@ -63,6 +64,7 @@ all = [
     "nft",
     "nft_ext",
     "nft_ticket",
+    "nft_limit",
     "http",
 ]
 
