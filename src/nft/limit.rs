@@ -2,13 +2,18 @@ use candid::CandidType;
 use serde::Deserialize;
 
 use crate::stable::Stable;
-use crate::times::{now, Duration, Timestamp};
-use crate::types::NFTOwnable;
+use crate::times::{now, Timestamp};
 
-#[derive(CandidType, Deserialize, Debug, Default)]
+#[derive(CandidType, Deserialize, Debug, Default, Clone)]
 pub struct LimitDuration {
     start: Timestamp,
     end: Timestamp,
+}
+
+impl LimitDuration {
+    pub fn new(start: Timestamp, end: Timestamp) -> Self {
+        LimitDuration { start, end }
+    }
 }
 
 #[derive(CandidType, Deserialize, Debug, Default)]
@@ -42,5 +47,9 @@ impl NftLimit {
 
     pub fn set_limits(&mut self, limits: Vec<LimitDuration>) {
         self.limits = limits;
+    }
+
+    pub fn get_limits(&self) -> Vec<LimitDuration> {
+        self.limits.clone()
     }
 }

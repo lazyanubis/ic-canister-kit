@@ -5,7 +5,7 @@ use crate::stable::Stable;
 use crate::times::{now, Duration, Timestamp};
 use crate::types::NFTOwnable;
 
-#[derive(CandidType, Deserialize, Debug, Default)]
+#[derive(CandidType, Deserialize, Debug, Default, Clone)]
 pub struct ForbiddenDuration {
     start: Timestamp,
     end: Timestamp,
@@ -74,5 +74,12 @@ impl NftTicket {
     }
     pub fn set_transfer_forbidden(&mut self, forbidden: Vec<ForbiddenDuration>) {
         self.transfer_forbidden = forbidden;
+    }
+
+    pub fn get_activity(&self) -> (Timestamp, Timestamp) {
+        (self.activity_start, self.activity_end)
+    }
+    pub fn get_transfer_forbidden(&self) -> Vec<ForbiddenDuration> {
+        self.transfer_forbidden.clone()
     }
 }
