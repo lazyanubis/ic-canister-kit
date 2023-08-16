@@ -10,3 +10,6 @@ pub mod ticket;
 
 #[cfg(feature = "nft_limit")]
 pub mod limit;
+
+#[cfg(feature = "nft_traits")]
+pub mod traits;
