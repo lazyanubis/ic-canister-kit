@@ -124,7 +124,7 @@ impl NftStorage {
             })
             .collect()
     }
-    pub fn supply(&self) -> usize {
+    pub fn length(&self) -> usize {
         self.nfts.len()
     }
 }
