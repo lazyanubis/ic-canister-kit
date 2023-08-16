@@ -22,6 +22,9 @@ impl Stable<NftTraitsState, NftTraitsState> for NftTraits {
 }
 
 impl NftTraits {
+    pub fn set_traits(&mut self, traits: Vec<(String, String)>) {
+        self.traits = traits;
+    }
     pub fn get_traits(&self) -> Vec<(String, String)> {
         self.traits.clone()
     }
