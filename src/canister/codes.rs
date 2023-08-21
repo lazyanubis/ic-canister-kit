@@ -11,13 +11,12 @@ pub type CanisterInitArg = Vec<u8>; // 部署罐子代码初始化参数
 
 // 安装罐子代码
 pub async fn install_code(
-    mode: CanisterInstallMode,
     canister_id: CanisterId,
     wasm_module: CanisterCodeWasm,
     arg: CanisterInitArg,
 ) -> Result<(), String> {
     let call_result = ic_cdk::api::management_canister::main::install_code(InstallCodeArgument {
-        mode,
+        mode: CanisterInstallMode::Install,
         canister_id,
         wasm_module,
         arg,
@@ -26,9 +25,58 @@ pub async fn install_code(
     if call_result.is_err() {
         let err = call_result.unwrap_err();
         return Result::Err(format!(
-            "canister: {} install_code: {:?} failed: {:?} {}",
-            arg.canister_id.to_text(),
-            arg.mode,
+            "canister: {} install_code failed: {:?} {}",
+            canister_id.to_text(),
+            err.0,
+            err.1
+        ));
+    }
+    Result::Ok(())
+}
+
+// 升级代码
+pub async fn upgrade_code(
+    canister_id: CanisterId,
+    wasm_module: CanisterCodeWasm,
+    arg: Option<CanisterInitArg>,
+) -> Result<(), String> {
+    let call_result = ic_cdk::api::management_canister::main::install_code(InstallCodeArgument {
+        mode: CanisterInstallMode::Upgrade,
+        canister_id,
+        wasm_module,
+        arg: arg.unwrap_or(vec![]),
+    })
+    .await;
+    if call_result.is_err() {
+        let err = call_result.unwrap_err();
+        return Result::Err(format!(
+            "canister: {} upgrade_code failed: {:?} {}",
+            canister_id.to_text(),
+            err.0,
+            err.1
+        ));
+    }
+    Result::Ok(())
+}
+
+// 重新安装代码
+pub async fn reinstall_code(
+    canister_id: CanisterId,
+    wasm_module: CanisterCodeWasm,
+    arg: CanisterInitArg,
+) -> Result<(), String> {
+    let call_result = ic_cdk::api::management_canister::main::install_code(InstallCodeArgument {
+        mode: CanisterInstallMode::Reinstall,
+        canister_id,
+        wasm_module,
+        arg,
+    })
+    .await;
+    if call_result.is_err() {
+        let err = call_result.unwrap_err();
+        return Result::Err(format!(
+            "canister: {} reinstall_code failed: {:?} {}",
+            canister_id.to_text(),
             err.0,
             err.1
         ));

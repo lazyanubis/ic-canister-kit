@@ -10,7 +10,7 @@ use crate::identity::CanisterId;
 
 #[ic_cdk::update(name = "canister_status")]
 #[candid::candid_method(update, rename = "canister_status")]
-async fn canister_status() -> CanisterStatusResult {
+async fn canister_status() -> ic_canister_kit::canister::status::CanisterStatusResult {
     ic_canister_kit::canister::status::canister_status(ic_canister_kit::identity::self_canister_id()).await
 }
 
@@ -47,4 +47,55 @@ pub async fn canister_info(
     .0;
 
     response
+}
+
+// 启动罐子
+pub async fn start_canister(canister_id: CanisterId) -> Result<(), String> {
+    let call_result =
+        ic_cdk::api::management_canister::main::start_canister(CanisterIdRecord { canister_id })
+            .await;
+    if call_result.is_err() {
+        let err = call_result.unwrap_err();
+        return Result::Err(format!(
+            "canister: {} start_canister failed: {:?} {}",
+            canister_id.to_text(),
+            err.0,
+            err.1
+        ));
+    }
+    Result::Ok(())
+}
+
+// 停止罐子
+pub async fn stop_canister(canister_id: CanisterId) -> Result<(), String> {
+    let call_result =
+        ic_cdk::api::management_canister::main::stop_canister(CanisterIdRecord { canister_id })
+            .await;
+    if call_result.is_err() {
+        let err = call_result.unwrap_err();
+        return Result::Err(format!(
+            "canister: {} stop_canister failed: {:?} {}",
+            canister_id.to_text(),
+            err.0,
+            err.1
+        ));
+    }
+    Result::Ok(())
+}
+
+// 删除罐子
+pub async fn delete_canister(canister_id: CanisterId) -> Result<(), String> {
+    let call_result =
+        ic_cdk::api::management_canister::main::delete_canister(CanisterIdRecord { canister_id })
+            .await;
+    if call_result.is_err() {
+        let err = call_result.unwrap_err();
+        return Result::Err(format!(
+            "canister: {} delete_canister failed: {:?} {}",
+            canister_id.to_text(),
+            err.0,
+            err.1
+        ));
+    }
+    Result::Ok(())
 }

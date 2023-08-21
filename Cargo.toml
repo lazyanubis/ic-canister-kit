@@ -22,34 +22,38 @@ default = ["all"]
 # 和身份相关的
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 # 和罐子相关的
-canister_cycles = ["candid", "ic-cdk"]             # 罐子余额
-canister_status = ["identity"]                     # 罐子状态
-canister_create = ["identity"]                     # 罐子创建
-canister_settings = ["identity"]                   # 罐子设置
-canister_codes = ["identity"]                      # 罐子代码
-canister_deploy = ["identity", "candid", "ic-cdk"] # 罐子状态
-canister_call = ["identity", "candid", "ic-cdk"]   # 罐子调用
-canister_managed = ["canister_status"]             # 管理罐子
+canister_cycles = ["candid", "serde"] # 罐子余额
+canister_status = ["identity"] # 罐子状态
+canister_create = ["identity"] # 罐子创建
+canister_settings = ["identity"] # 罐子设置
+canister_codes = ["identity"] # 罐子代码
+canister_deploy = [
+    "canister_create",
+    "canister_codes",
+    "canister_status",
+] # 罐子部署
+canister_call = ["identity"] # 罐子调用
+canister_managed = ["canister_status"] # 管理罐子
 
-times = ["ic-cdk"]                       # 时间相关
-random = ["ic-cdk"]                      # 随机数
-mix = ["random", "sha2", "base32"]       # 混合数字
-ledger = ["identity", "serde"]           # 账本钱包
-logs = ["times"]                         # 日志记录
-pages = []                               # 分页查询
-results = []                             # 结果类型
-tasks = ["ic-cdk-timers"]                # 定时任务
-stable = ["ic-cdk"]                      # 持久化
-initial = ["stable"]                     # 初始化
-permissions = ["stable", "candid"]       # 权限
-maintainable = ["stable"]                # 维护
-uploads = ["stable"]                     # 分片上传
-nft = ["identity", "stable"]             # NFT
-nft_ext = ["nft"]                        # NFT EXT 标准
-nft_ticket = ["nft"]                     # NFT 是否具有门票功能
-nft_limit = ["nft"]                      # NFT 是否限制指定时间的功能
-nft_traits = ["nft"]                     # NFT 的属性记录
-http = ["candid", "serde", "serde_json"] # http 相关
+# times = ["ic-cdk"]                       # 时间相关
+# random = ["ic-cdk"]                      # 随机数
+# mix = ["random", "sha2", "base32"]       # 混合数字
+# ledger = ["identity", "serde"]           # 账本钱包
+# logs = ["times"]                         # 日志记录
+# pages = []                               # 分页查询
+# results = []                             # 结果类型
+# tasks = ["ic-cdk-timers"]                # 定时任务
+# stable = ["ic-cdk"]                      # 持久化
+# initial = ["stable"]                     # 初始化
+# permissions = ["stable", "candid"]       # 权限
+# maintainable = ["stable"]                # 维护
+# uploads = ["stable"]                     # 分片上传
+# nft = ["identity", "stable"]             # NFT
+# nft_ext = ["nft"]                        # NFT EXT 标准
+# nft_ticket = ["nft"]                     # NFT 是否具有门票功能
+# nft_limit = ["nft"]                      # NFT 是否限制指定时间的功能
+# nft_traits = ["nft"]                     # NFT 的属性记录
+# http = ["candid", "serde", "serde_json"] # http 相关
 
 all = [
     "identity",
@@ -58,9 +62,9 @@ all = [
     "canister_create",
     "canister_settings",
     "canister_codes",
-    # "canister_deploy",
-    # "canister_call",
-    # "canister_managed",
+    "canister_deploy",
+    "canister_call",
+    "canister_managed",
     # "times",
     # "random",
     # "mix",

@@ -1,5 +1,10 @@
-/// 和 罐子 的 Cycles 相关
+use ic_cdk::api::management_canister::provisional::CanisterIdRecord;
 
+use crate::identity::CanisterId;
+
+use super::{unwrap_call_result, CallError};
+
+/// 和 罐子 的 Cycles 相关
 /*
 
 引入包后, 直接使用如下方法即可增加查询和接收 cycles 的接口
@@ -12,7 +17,7 @@ pub fn wallet_balance() -> candid::Nat {
 
 #[ic_cdk::query(name = "wallet_receive")]
 #[candid::candid_method(query, rename = "wallet_receive")]
-pub fn wallet_receive() -> WalletReceiveResult {
+pub fn wallet_receive() -> ic_canister_kit::canister::cycles::WalletReceiveResult {
     ic_canister_kit::canister::cycles::wallet_receive()
 }
 
@@ -50,4 +55,40 @@ pub fn wallet_receive() -> WalletReceiveResult {
     WalletReceiveResult {
         accepted: accepted as u64,
     }
+}
+
+// 充值余额
+// ! 是 Controller 才能充值
+pub async fn deposit_cycles(canister_id: CanisterId, cycles: u128) -> Result<(), String> {
+    let call_result = ic_cdk::api::management_canister::main::deposit_cycles(
+        CanisterIdRecord { canister_id },
+        cycles,
+    )
+    .await;
+    if call_result.is_err() {
+        let err = call_result.unwrap_err();
+        return Result::Err(format!(
+            "canister: {} deposit_cycles {} failed: {:?} {}",
+            canister_id.to_text(),
+            cycles,
+            err.0,
+            err.1
+        ));
+    }
+    Result::Ok(())
+}
+
+// 查询罐子余额
+pub async fn call_wallet_balance(canister_id: &CanisterId) -> candid::Nat {
+    let call_result: Result<(candid::Nat,), CallError> =
+        ic_cdk::api::call::call(canister_id.clone(), "wallet_balance", ()).await;
+    unwrap_call_result(canister_id, "wallet_balance", call_result)
+}
+
+// 充值罐子余额
+pub async fn call_wallet_receive(canister_id: &CanisterId, cycles: u64) -> WalletReceiveResult {
+    let call_result: Result<(WalletReceiveResult,), CallError> =
+        ic_cdk::api::call::call_with_payment(canister_id.clone(), "wallet_receive", (), cycles)
+            .await;
+    unwrap_call_result(canister_id, "wallet_receive", call_result)
 }
