@@ -17,11 +17,14 @@ async fn canister_status() -> CanisterStatusResult {
 */
 
 // 罐子状态结果
+pub type CanisterStatus = ic_cdk::api::management_canister::main::CanisterStatusType;
+pub type CanisterSettings = ic_cdk::api::management_canister::main::DefiniteCanisterSettings;
 pub type CanisterStatusResult = ic_cdk::api::management_canister::main::CanisterStatusResponse;
 
 // 罐子信息结果
 pub type CanisterInfoResult = ic_cdk::api::management_canister::main::CanisterInfoResponse;
 
+// 查询罐子状态
 pub async fn canister_status(canister_id: CanisterId) -> CanisterStatusResult {
     let response =
         ic_cdk::api::management_canister::main::canister_status(CanisterIdRecord { canister_id })
@@ -32,6 +35,7 @@ pub async fn canister_status(canister_id: CanisterId) -> CanisterStatusResult {
     response
 }
 
+// 查询罐子信息
 pub async fn canister_info(
     canister_id: CanisterId,
     num_requested_changes: Option<u64>,

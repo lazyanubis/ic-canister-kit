@@ -22,10 +22,12 @@ default = ["all"]
 # 和身份相关的
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 # 和罐子相关的
-canister_cycles = ["candid", "ic-cdk"]             # 罐子 Cycles 相关
-canister_status = ["identity", "candid", "ic-cdk"] # 罐子状态
-canister_call = ["identity", "candid", "ic-cdk"]   # 罐子调用
-canister_managed = ["canister_status"]             # 管理罐子
+canister_cycles = ["candid", "ic-cdk"]                                # 罐子 Cycles 相关
+canister_status = ["identity", "candid", "ic-cdk"]                    # 罐子状态
+canister_create = ["canister_status", "identity", "candid", "ic-cdk"] # 罐子状态
+canister_deploy = ["identity", "candid", "ic-cdk"]                    # 罐子状态
+canister_call = ["identity", "candid", "ic-cdk"]                      # 罐子调用
+canister_managed = ["canister_status"]                                # 管理罐子
 
 times = ["ic-cdk"] # 时间相关
 random = ["ic-cdk"] # 随机数
@@ -50,6 +52,8 @@ all = [
     "identity",
     "canister_cycles",
     "canister_status",
+    "canister_create",
+    "canister_deploy",
     "canister_call",
     "canister_managed",
     "times",

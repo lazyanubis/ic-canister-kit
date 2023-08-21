@@ -3,10 +3,6 @@ pub mod identity;
 
 pub mod canister;
 
-
-#[cfg(feature = "canister_call")]
-pub mod canister_call;
-
 #[cfg(feature = "canister_managed")]
 pub mod canister_managed;
 
