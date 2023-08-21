@@ -39,8 +39,8 @@ canister_managed = [
     "canister_codes",
     "canister_deploy",
 ] # 管理罐子
-
-# times = ["ic-cdk"]                       # 时间相关
+# 和时间相关的
+common_times = ["ic-cdk"] # 时间相关
 # random = ["ic-cdk"]                      # 随机数
 # mix = ["random", "sha2", "base32"]       # 混合数字
 # ledger = ["identity", "serde"]           # 账本钱包
@@ -70,7 +70,7 @@ all = [
     "canister_deploy",
     "canister_call",
     "canister_managed",
-    # "times",
+    "common_times",
     # "random",
     # "mix",
     # "ledger",

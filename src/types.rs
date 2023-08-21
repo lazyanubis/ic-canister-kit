@@ -5,11 +5,7 @@ pub use crate::identity::{
 
 pub use crate::canister::types::*;
 
-
-
-
-#[cfg(feature = "times")]
-pub use crate::times::{Duration, Timestamp};
+pub use crate::common::types::*;
 
 #[cfg(feature = "random")]
 pub use crate::random::RandomProduce;

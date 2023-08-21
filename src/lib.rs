@@ -3,11 +3,7 @@ pub mod identity;
 
 pub mod canister;
 
-#[cfg(feature = "canister_managed")]
-pub mod canister_managed;
-
-#[cfg(feature = "times")]
-pub mod times;
+pub mod common;
 
 #[cfg(feature = "random")]
 pub mod random;
