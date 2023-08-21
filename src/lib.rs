@@ -1,8 +1,7 @@
 #[cfg(feature = "identity")]
 pub mod identity;
 
-#[cfg(feature = "cycles")]
-pub mod cycles;
+pub mod canister;
 
 #[cfg(feature = "canister_status")]
 pub mod canister_status;

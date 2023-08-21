@@ -1,3 +1,23 @@
+/// 和 罐子 的 Cycles 相关
+
+/*
+
+引入包后, 直接使用如下方法即可增加查询和接收 cycles 的接口
+
+#[ic_cdk::query(name = "wallet_balance")]
+#[candid::candid_method(query, rename = "wallet_balance")]
+pub fn wallet_balance() -> candid::Nat {
+    ic_canister_kit::canister::cycles::wallet_balance()
+}
+
+#[ic_cdk::query(name = "wallet_receive")]
+#[candid::candid_method(query, rename = "wallet_receive")]
+pub fn wallet_receive() -> WalletReceiveResult {
+    ic_canister_kit::canister::cycles::wallet_receive()
+}
+
+*/
+
 /// 接受转入 cycles 的结果类型
 #[derive(candid::CandidType, candid::Deserialize, Debug)]
 pub struct WalletReceiveResult {
@@ -31,15 +51,3 @@ pub fn wallet_receive() -> WalletReceiveResult {
         accepted: accepted as u64,
     }
 }
-
-// #[ic_cdk::query(name = "wallet_balance")]
-// #[candid::candid_method(query, rename = "wallet_balance")]
-// pub fn wallet_balance() -> candid::Nat {
-//     ic_canister_kit::cycles::wallet_balance()
-// }
-
-// #[ic_cdk::query(name = "wallet_receive")]
-// #[candid::candid_method(query, rename = "wallet_receive")]
-// pub fn wallet_receive() -> WalletReceiveResult {
-//     ic_canister_kit::cycles::wallet_receive()
-// }

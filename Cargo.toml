@@ -20,11 +20,14 @@ codegen-units = 1
 [features]
 # default = ["identity"]
 default = ["all"]
+# 和身份相关的
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
-cycles = ["candid", "ic-cdk"] # Cycles相关
+# 和罐子相关的
+canister_cycles = ["candid", "ic-cdk"]             # 罐子 Cycles 相关
 canister_status = ["identity", "candid", "ic-cdk"] # 罐子状态
-canister_call = ["identity", "candid", "ic-cdk"] # 罐子调用
-canister_managed = ["canister_status"] # 管理罐子
+canister_call = ["identity", "candid", "ic-cdk"]   # 罐子调用
+canister_managed = ["canister_status"]             # 管理罐子
+
 times = ["ic-cdk"] # 时间相关
 random = ["ic-cdk"] # 随机数
 mix = ["random", "sha2", "base32"] # 混合数字
@@ -46,7 +49,7 @@ nft_traits = ["nft"] # NFT 的属性记录
 http = ["candid", "serde", "serde_json"] # http 相关
 all = [
     "identity",
-    "cycles",
+    "canister_cycles",
     "canister_status",
     "canister_call",
     "canister_managed",

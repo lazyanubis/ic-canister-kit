@@ -3,8 +3,7 @@ pub use crate::identity::{
     AccountIdentifier, AccountIdentifierHex, CallerId, CanisterId, SubAccount, UserId,
 };
 
-#[cfg(feature = "cycles")]
-pub use crate::cycles::WalletReceiveResult;
+pub use crate::canister::types::*;
 
 #[cfg(feature = "canister_status")]
 pub use crate::canister_status::{
