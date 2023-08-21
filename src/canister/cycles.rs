@@ -2,7 +2,7 @@ use ic_cdk::api::management_canister::provisional::CanisterIdRecord;
 
 use crate::identity::CanisterId;
 
-use super::{unwrap_call_result, CallError};
+use super::{types::CallError, unwrap_call_result};
 
 /// 和 罐子 的 Cycles 相关
 /*

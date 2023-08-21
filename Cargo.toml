@@ -28,12 +28,17 @@ canister_create = ["identity"] # 罐子创建
 canister_settings = ["identity"] # 罐子设置
 canister_codes = ["identity"] # 罐子代码
 canister_deploy = [
+    "canister_status",
     "canister_create",
     "canister_codes",
-    "canister_status",
 ] # 罐子部署
 canister_call = ["identity"] # 罐子调用
-canister_managed = ["canister_status"] # 管理罐子
+canister_managed = [
+    "canister_cycles",
+    "canister_status",
+    "canister_codes",
+    "canister_deploy",
+] # 管理罐子
 
 # times = ["ic-cdk"]                       # 时间相关
 # random = ["ic-cdk"]                      # 随机数

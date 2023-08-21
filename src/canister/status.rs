@@ -2,6 +2,8 @@ use ic_cdk::api::management_canister::main::{CanisterIdRecord, CanisterInfoReque
 
 use crate::identity::CanisterId;
 
+use super::{unwrap_call_result, CallError};
+
 /// 和 罐子 的 状态 相关
 
 /*
@@ -98,4 +100,11 @@ pub async fn delete_canister(canister_id: CanisterId) -> Result<(), String> {
         ));
     }
     Result::Ok(())
+}
+
+// 查询罐子状态
+pub async fn call_canister_status(canister_id: &CanisterId) -> CanisterStatusResult {
+    let call_result: Result<(CanisterStatusResult,), CallError> =
+        ic_cdk::call(canister_id.clone(), "canister_status", ()).await;
+    unwrap_call_result(canister_id, "canister_status", call_result)
 }

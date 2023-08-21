@@ -37,6 +37,21 @@ impl CanisterInfo {
     }
 }
 
+#[derive(candid::CandidType, candid::Deserialize, Debug)]
+pub struct CanisterInfoShow {
+    pub canister_id: String,
+    pub status: CanisterStatusResult,
+}
+
+impl From<CanisterInfo> for CanisterInfoShow {
+    fn from(value: CanisterInfo) -> Self {
+        CanisterInfoShow {
+            canister_id: value.canister_id.to_text(),
+            status: value.status,
+        }
+    }
+}
+
 // 部署罐子
 pub async fn deploy_canister(
     settings: Option<CanisterSettings>,

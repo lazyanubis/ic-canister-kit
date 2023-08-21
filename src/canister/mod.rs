@@ -1,5 +1,7 @@
 use crate::identity::CanisterId;
 
+use self::types::CallError;
+
 #[cfg(feature = "canister_cycles")]
 pub mod cycles;
 
@@ -21,11 +23,12 @@ pub mod deploy;
 #[cfg(feature = "canister_call")]
 pub mod call;
 
+#[cfg(feature = "canister_managed")]
+pub mod managed;
+
 pub mod types;
 
-// 错误处理
-// 罐子调用会产生的错误
-type CallError = (ic_cdk::api::call::RejectionCode, std::string::String);
+// ========================= 错误处理 =========================
 
 // 解开方法调用结果
 fn unwrap_call_result<R: std::fmt::Debug>(

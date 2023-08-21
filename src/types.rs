@@ -6,17 +6,7 @@ pub use crate::identity::{
 pub use crate::canister::types::*;
 
 
-#[cfg(feature = "canister_call")]
-pub use crate::canister_call::{
-    CanisterIdRecord, CanisterInfo, CanisterInfoShow, CanisterInstallMode, CanisterSettings,
-    CreateCanisterArgument, InstallCodeArgument, UpdateSettingsArgument,
-};
 
-#[cfg(feature = "canister_managed")]
-pub use crate::canister_managed::{
-    ManagedCanisterChecking, ManagedCanisterConfig, ManagedCanisterInitial,
-    ManagedCanisterMaintained, ManagedCanisterRefreshResult, ManagedCanisterStates,
-};
 
 #[cfg(feature = "times")]
 pub use crate::times::{Duration, Timestamp};

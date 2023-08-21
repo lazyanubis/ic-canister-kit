@@ -1,10 +1,12 @@
-use super::identity::CanisterId;
+use ic_cdk::api::management_canister::main::CanisterSettings;
 
-use super::canister_status::CanisterStatusResult;
+use crate::identity::CanisterId;
 
-use super::canister_call::{
-    call_canister_status, call_wallet_receive, CanisterInfo, CanisterInfoShow, CanisterInitArg,
-    CanisterSettings, CanisterWasm,
+use super::{
+    codes::{CanisterCodeWasm, CanisterInitArg},
+    cycles::call_wallet_receive,
+    deploy::{CanisterInfo, CanisterInfoShow},
+    status::{call_canister_status, CanisterStatusResult},
 };
 
 // ========== 接口所需 ==========
@@ -105,7 +107,7 @@ impl ManagedCanisterConfig {
         &self,
         count: u32,
         settings: Option<CanisterSettings>,
-        wasm: Option<CanisterWasm>,
+        wasm_module: Option<CanisterCodeWasm>,
         arg: Option<CanisterInitArg>,
     ) -> Result<CanisterInfo, String> {
         if 0 < self.initial.max_canister_count && self.initial.max_canister_count <= count {
@@ -115,6 +117,6 @@ impl ManagedCanisterConfig {
             ));
         }
         let initial_cycles = self.initial.initial_canister_cycles;
-        super::canister_call::deploy_canister(settings, initial_cycles, wasm, arg).await
+        super::deploy::deploy_canister(settings, initial_cycles, wasm_module, arg).await
     }
 }

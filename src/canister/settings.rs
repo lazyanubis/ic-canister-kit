@@ -12,7 +12,7 @@ pub async fn update_settings(
     let call_result =
         ic_cdk::api::management_canister::main::update_settings(UpdateSettingsArgument {
             canister_id,
-            settings,
+            settings: settings.clone(),
         })
         .await;
     if call_result.is_err() {
