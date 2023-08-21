@@ -1,13 +1,13 @@
 {
   "cSpell.words": [
-    "Aaccount",
+    "aaccount",
     "Atid",
     "hasher",
+    "motoko",
     "nanos",
     "nocapture",
     "nonfungible",
-    "Subaccount",
+    "subaccount",
     "subaccounts"
-  ],
-  "rust-analyzer.linkedProjects": ["./Cargo.toml"]
+  ]
 }

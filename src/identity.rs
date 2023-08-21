@@ -1,15 +1,23 @@
-pub type CanisterId = candid::Principal;
-pub type CanisterIdHex = String;
+// 和 principal 和 identity 相关
 
-pub type UserId = candid::Principal;
-pub type UserIdHex = String;
+// 罐子 ID
+pub type CanisterId = candid::Principal; // 类型别名
+pub type CanisterIdHex = String; // 16 进制文本
 
-pub type CallerId = candid::Principal;
+// 用户 ID
+pub type UserId = candid::Principal; // 类型别名
+pub type UserIdHex = String; // 16 进制文本
 
-pub type SubAccount = Vec<u8>; // 子账户 必须是 32 长度
+// 调用者 ID
+pub type CallerId = candid::Principal; // 类型别名
 
-pub type AccountIdentifier = Vec<u8>; // 账户
-pub type AccountIdentifierHex = String; // 账户 一般是 account id，如果用户使用的是 principal 也要和 sub_account 一起转换成对应的 account id
+// 子账户
+pub type SubAccount = [u8; 32]; // 长度必须是 32 长度
+
+// 账户 ID 通过 Principal 配合子账户计算得来
+// 账户 一般是 account id，如果用户使用的是 principal 也要和 sub_account 一起转换成对应的 account id
+pub type AccountIdentifier = [u8; 32]; // 账户
+pub type AccountIdentifierHex = String; // 16 进制文本
 
 // 获取调用者 principal id
 #[inline]
@@ -23,50 +31,41 @@ pub fn self_canister_id() -> CanisterId {
     ic_cdk::api::id()
 }
 
+// ! 列表变数值, 长度必须是 32
+fn to_array(vec: Vec<u8>) -> [u8; 32] {
+    assert!(vec.len() == 32);
+    let mut array: [u8; 32] = [0; 32];
+    for i in 0..32 {
+        array[i] = vec[i];
+    }
+    array
+}
+
+// 还原 Account
 pub fn unwrap_account_identifier_hex(
     account_identifier: AccountIdentifierHex,
 ) -> AccountIdentifier {
-    hex::decode(&account_identifier).unwrap()
+    let vec = hex::decode(&account_identifier).unwrap();
+    assert!(vec.len() == 32, "Invalid Account Id");
+    to_array(vec)
 }
 
+// 文本 Account
 pub fn wrap_account_identifier(account_identifier: &AccountIdentifier) -> AccountIdentifierHex {
     hex::encode(&account_identifier)
 }
 
+// 转换成 Account
 pub fn parse_account_identifier(
     user_id: &UserId,
     sub_account: &Option<SubAccount>,
 ) -> AccountIdentifier {
-    parse_account_identifier_bytes(user_id, &sub_account)
-}
-
-pub fn parse_account_identifier_hex(
-    user_id: &UserId,
-    sub_account: &Option<SubAccount>,
-) -> AccountIdentifierHex {
-    wrap_account_identifier(&parse_account_identifier(user_id, sub_account))
-}
-
-fn parse_account_identifier_bytes(
-    user_id: &UserId,
-    sub_account: &Option<SubAccount>,
-) -> AccountIdentifier {
-    let sub_account: Vec<u8> = sub_account.clone().unwrap_or_else(|| [0; 32].to_vec()); // 默认子账户 应该全是 0
+    let sub_account: [u8; 32] = sub_account.clone().unwrap_or_else(|| [0; 32]); // 默认子账户 应该全是 0
 
     assert!(sub_account.len() == 32, "Invalid SubAccount");
 
-    // ! 惊险啊，这个数组的长度是有区别的啊
-    // ? 不用补齐 32 位
-    // let mut sub_account: Vec<u8> = sub_account;
-    // loop {
-    //     if sub_account.len() >= 32 {
-    //         break;
-    //     }
-    //     sub_account.insert(0, 0);
-    // }
-
     use sha2::Digest;
-    let mut hasher = sha2::Sha224::new();
+    let mut hasher = sha2::Sha224::new(); // 生成 28 个 byte 的 hash 值
     hasher.update(b"\x0Aaccount-id");
     hasher.update(user_id.as_slice());
     hasher.update(&sub_account[..]);
@@ -74,19 +73,47 @@ fn parse_account_identifier_bytes(
 
     let mut hasher = crc32fast::Hasher::new();
     hasher.update(&hash);
-    let crc32_bytes = hasher.finalize().to_be_bytes();
+    let crc32_bytes = hasher.finalize().to_be_bytes(); // 校验码
 
-    let mut result = [0u8; 32];
-    result[0..4].copy_from_slice(&crc32_bytes[..]);
+    let mut result: [u8; 32] = [0u8; 32];
+    result[0..4].copy_from_slice(&crc32_bytes[..]); // 校验码放前面
     result[4..32].copy_from_slice(hash.as_ref());
 
-    result.to_vec()
+    result
 }
 
-pub fn parse_u64_to_sub_account(sub_account: u64) -> AccountIdentifier {
+// 转换成文本 Account
+pub fn parse_account_identifier_hex(
+    user_id: &UserId,
+    sub_account: &Option<SubAccount>,
+) -> AccountIdentifierHex {
+    wrap_account_identifier(&parse_account_identifier(user_id, sub_account))
+}
+
+// 数字变成子账户
+pub fn parse_u64_to_sub_account(sub_account: u64) -> SubAccount {
     let mut list: [u8; 32] = [0; 32];
     for i in 0..8 {
-        list[24 + i] = (sub_account >> 8 * (7 - i)) as u8
+        list[24 + i] = ((sub_account >> 8 * (7 - i)) & 0xff) as u8
     }
-    list.to_vec()
+    list
+}
+
+// 转换成 Account
+pub fn parse_account_identifier_by_vec(
+    user_id: &UserId,
+    sub_account: &Option<Vec<u8>>,
+) -> AccountIdentifier {
+    if let Some(vec) = sub_account {
+        assert!(vec.len() == 32, "Invalid SubAccount");
+    }
+    parse_account_identifier(user_id, &sub_account.and_then(|vec| Some(to_array(vec))))
+}
+
+// 转换成文本 Account
+pub fn parse_account_identifier_hex_by_vec(
+    user_id: &UserId,
+    sub_account: &Option<Vec<u8>>,
+) -> AccountIdentifierHex {
+    wrap_account_identifier(&parse_account_identifier_by_vec(user_id, sub_account))
 }
