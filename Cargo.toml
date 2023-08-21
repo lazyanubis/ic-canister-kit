@@ -18,7 +18,6 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-# default = ["identity"]
 default = ["all"]
 # 和身份相关的
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关

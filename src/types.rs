@@ -5,10 +5,6 @@ pub use crate::identity::{
 
 pub use crate::canister::types::*;
 
-#[cfg(feature = "canister_status")]
-pub use crate::canister_status::{
-    CanisterStatus, CanisterStatusArg, CanisterStatusResult, DefiniteCAnisterSettings,
-};
 
 #[cfg(feature = "canister_call")]
 pub use crate::canister_call::{
