@@ -17,8 +17,6 @@ async fn canister_status() -> CanisterStatusResult {
 */
 
 // 罐子状态结果
-pub type CanisterStatus = ic_cdk::api::management_canister::main::CanisterStatusType;
-pub type CanisterSettings = ic_cdk::api::management_canister::main::DefiniteCanisterSettings;
 pub type CanisterStatusResult = ic_cdk::api::management_canister::main::CanisterStatusResponse;
 
 // 罐子信息结果

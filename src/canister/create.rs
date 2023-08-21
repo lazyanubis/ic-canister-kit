@@ -1,15 +1,12 @@
-use ic_cdk::api::management_canister::main::CreateCanisterArgument;
+use ic_cdk::api::management_canister::main::{CanisterSettings, CreateCanisterArgument};
 
 use crate::identity::CanisterId;
 
 /// 创建新的罐子
 
-// 创建新的罐子需要的信息
-pub type CreateCanisterSettings = ic_cdk::api::management_canister::provisional::CanisterSettings;
-
 // 创建罐子
 pub async fn create_canister(
-    settings: Option<CreateCanisterSettings>,
+    settings: Option<CanisterSettings>,
     cycles: u128,
 ) -> Result<CanisterId, String> {
     let result = ic_cdk::api::management_canister::main::create_canister(
