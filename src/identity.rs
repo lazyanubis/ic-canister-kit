@@ -32,7 +32,7 @@ pub fn self_canister_id() -> CanisterId {
 }
 
 // ! 列表变数值, 长度必须是 32
-fn to_array(vec: Vec<u8>) -> [u8; 32] {
+fn to_array(vec: &Vec<u8>) -> [u8; 32] {
     assert!(vec.len() == 32);
     let mut array: [u8; 32] = [0; 32];
     for i in 0..32 {
@@ -47,7 +47,7 @@ pub fn unwrap_account_identifier_hex(
 ) -> AccountIdentifier {
     let vec = hex::decode(&account_identifier).unwrap();
     assert!(vec.len() == 32, "Invalid Account Id");
-    to_array(vec)
+    to_array(&vec)
 }
 
 // 文本 Account
@@ -107,7 +107,12 @@ pub fn parse_account_identifier_by_vec(
     if let Some(vec) = sub_account {
         assert!(vec.len() == 32, "Invalid SubAccount");
     }
-    parse_account_identifier(user_id, &sub_account.and_then(|vec| Some(to_array(vec))))
+    let sub_account = if let Some(vec) = sub_account {
+        Some(to_array(vec))
+    } else {
+        None
+    };
+    parse_account_identifier(user_id, &sub_account)
 }
 
 // 转换成文本 Account

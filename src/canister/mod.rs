@@ -51,6 +51,7 @@ fn unwrap_call_result<R: std::fmt::Debug>(
 }
 
 // 解开方法调用结果
+#[allow(dead_code)]
 fn unwrap_call_result_with_error<R: std::fmt::Debug>(
     canister_id: &CanisterId,
     method: &str,
