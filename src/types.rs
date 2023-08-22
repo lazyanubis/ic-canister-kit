@@ -11,11 +11,11 @@ pub use crate::token::types::*;
 
 pub use crate::common::types::*;
 
+#[cfg(feature = "stable")]
+pub use crate::stable::types::*;
+
 #[cfg(feature = "logs")]
 pub use crate::logs::{Log, LogLevel};
-
-#[cfg(feature = "pages")]
-pub use crate::pages::{Page, PageData};
 
 #[cfg(feature = "results")]
 pub use crate::results::MotokoResult;

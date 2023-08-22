@@ -12,12 +12,6 @@ pub mod common;
 #[cfg(feature = "stable")]
 pub mod stable;
 
-#[cfg(feature = "logs")]
-pub mod logs;
-
-#[cfg(feature = "pages")]
-pub mod pages;
-
 #[cfg(feature = "results")]
 pub mod results;
 
