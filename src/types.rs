@@ -14,17 +14,8 @@ pub use crate::common::types::*;
 #[cfg(feature = "stable")]
 pub use crate::stable::types::*;
 
-#[cfg(feature = "logs")]
-pub use crate::logs::{Log, LogLevel};
-
-#[cfg(feature = "results")]
-pub use crate::results::MotokoResult;
-
 #[cfg(feature = "tasks")]
 pub use crate::tasks::{HeartbeatConfig, ScheduleConfig};
-
-#[cfg(feature = "stable")]
-pub use crate::stable::Stable;
 
 #[cfg(feature = "initial")]
 pub use crate::initial::Initial;
