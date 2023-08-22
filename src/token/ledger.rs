@@ -1,6 +1,10 @@
-/// icp 类的账本罐子接口
-use crate::identity::CanisterId;
 use candid::{CandidType, Deserialize};
+
+use crate::identity::CanisterId;
+
+use super::CallError;
+
+/// icp 类的账本罐子接口
 
 // Ledger 标准
 // name : () -> (Name) query;
@@ -9,10 +13,10 @@ use candid::{CandidType, Deserialize};
 // account_balance : (BinaryAccountBalanceArgs) -> (Tokens) query;
 // transfer_fee : (record {}) -> (TransferFee) query;
 // transfer : (TransferArgs) -> (Result_1);
-
-// =================== 基本类型 ======================
-
-type CallError = (ic_cdk::api::call::RejectionCode, std::string::String);
+// 下面的接口应该用不到
+// archives : () -> (Archives) query;
+// query_blocks : (GetBlocksArgs) -> (QueryBlocksResponse) query;
+// query_encoded_blocks : (GetBlocksArgs) -> (QueryEncodedBlocksResponse) query;
 
 // =================== 账本方法 ===================
 
@@ -193,7 +197,8 @@ pub struct LedgerTransferArgs {
     pub created_at_time: Option<LedgerTimestamp>,
 }
 pub type LedgerBlockIndex = u64; // 转账成功后返回的交易高度
-                                 // 转账可能出现的错误
+
+// 转账可能出现的错误
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub enum LedgerTransferError {
     // 手续费不正确

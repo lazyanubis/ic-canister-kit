@@ -47,7 +47,8 @@ number_random = ["ic-cdk"]                       # 随机数
 number_mix = ["number_random", "sha2", "base32"] # 混合数字
 
 # 代币相关
-token_ledger = ["identity", "serde"] # LEDGER 标准
+token_ledger = ["identity", "serde"] # Ledger 标准
+token_icrc1 = ["identity", "serde"]  # ICRC1 标准
 
 # 通用工具
 common_times = ["ic-cdk"] # 时间相关
@@ -80,6 +81,7 @@ all = [
     "number_random",
     "number_mix",
     "token_ledger",
+    "token_icrc1",
     "common_times",
     # "logs",
     # "pages",
