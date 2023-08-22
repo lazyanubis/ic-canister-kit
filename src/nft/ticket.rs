@@ -21,7 +21,7 @@ pub struct NftTicket {
 pub type NftTicketState = (Timestamp, Timestamp, Vec<ForbiddenDuration>);
 
 impl Stable<NftTicketState, NftTicketState> for NftTicket {
-    fn save(&mut self) -> NftTicketState {
+    fn store(&mut self) -> NftTicketState {
         let activity_start = std::mem::take(&mut self.activity_start);
         let activity_end = std::mem::take(&mut self.activity_end);
         let transfer_forbidden = std::mem::take(&mut self.transfer_forbidden);

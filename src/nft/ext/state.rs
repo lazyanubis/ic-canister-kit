@@ -21,7 +21,7 @@ impl ExtState for NftStorage {
     fn get_registry(&self) -> Vec<(ExtTokenIndex, ExtAccountIdentifierHex)> {
         self.nfts
             .iter()
-            .map(|n| (n.index as u32, ExtUser::to_hex(&n.owner)))
+            .map(|n| (n.index as u32, ExtUser::to_hex(&n.owner.to_vec())))
             .collect()
     }
 

@@ -68,11 +68,11 @@ stable_maintainable = ["stable"]                  # 维护
 stable_permissions = ["stable", "candid"]         # 权限
 stable_logs = ["stable", "times", "common_pages"] # 日志记录
 stable_uploads = ["stable"]                       # 分片上传
-# nft = ["identity", "stable"]             # NFT
-# nft_ext = ["nft"]                        # NFT EXT 标准
-# nft_ticket = ["nft"]                     # NFT 是否具有门票功能
-# nft_limit = ["nft"]                      # NFT 是否限制指定时间的功能
-# nft_traits = ["nft"]                     # NFT 的属性记录
+nft = ["identity", "stable"]                      # NFT
+nft_ext = ["nft"]                                 # NFT EXT 标准
+nft_ticket = ["nft"]                              # NFT 是否具有门票功能
+nft_limit = ["nft"]                               # NFT 是否限制指定时间的功能
+nft_traits = ["nft"]                              # NFT 的属性记录
 
 all = [
     "identity",
@@ -99,11 +99,11 @@ all = [
     "stable_permissions",
     "stable_logs",
     "stable_uploads",
-    # "nft",
-    # "nft_ext",
-    # "nft_ticket",
-    # "nft_limit",
-    # "nft_traits",
+    "nft",
+    "nft_ext",
+    "nft_ticket",
+    "nft_limit",
+    "nft_traits",
 ]
 
 [dependencies]

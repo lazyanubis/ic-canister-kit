@@ -2,8 +2,8 @@ use candid::CandidType;
 use serde::Deserialize;
 
 use crate::{
-    identity::caller,
-    results::MotokoResult,
+    common::result::MotokoResult,
+    identity::{caller, to_account_identifier},
     types::{CanisterId, NftStorage},
 };
 
@@ -91,7 +91,7 @@ impl ExtCore for NftStorage {
         let owner = args.user.to_account_identity(); // 参数指定的所有者
 
         let balance = self.nfts.get(index).and_then(|nft| {
-            if nft.owner == owner {
+            if nft.owner.to_vec() == owner {
                 return Some(1);
             }
             return Some(0);
@@ -175,7 +175,7 @@ fn do_transfer(
     if let Some(err) = match storage.nfts.get_mut(index) {
         Some(_nft) => {
             // 1. 检查是不是所有者
-            if _nft.owner != owner {
+            if _nft.owner.to_vec() != owner {
                 // 连所属人都指定错误，别转账了
                 return Err(ExtTransferError::Unauthorized(ExtUser::to_hex(&owner)));
             }
@@ -208,7 +208,7 @@ fn do_transfer(
         // 移除授权信息
         _nft.approved = None;
         // 更改所有者
-        _nft.owner = receiver.clone();
+        _nft.owner = to_account_identifier(&receiver);
         // =========== 修改完毕 ===========
     }
 
@@ -222,7 +222,7 @@ pub async fn notify_transfer_message(
 ) -> Result<Option<candid::Nat>, String> {
     let method = "tokenTransferNotification";
     let call_result: Result<(Option<candid::Nat>,), (ic_cdk::api::call::RejectionCode, String)> =
-        crate::canister_call::call_canister(
+        crate::canister::call::call_canister(
             canister_id,
             method,
             (args.token, args.from, args.amount, args.memo),

@@ -24,7 +24,7 @@ pub struct NftLimit {
 pub type NftLimitState = (Vec<LimitDuration>,);
 
 impl Stable<NftLimitState, NftLimitState> for NftLimit {
-    fn save(&mut self) -> NftLimitState {
+    fn store(&mut self) -> NftLimitState {
         let limits = std::mem::take(&mut self.limits);
         (limits,)
     }

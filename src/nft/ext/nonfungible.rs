@@ -1,8 +1,9 @@
 use candid::CandidType;
 use serde::Deserialize;
 
-use crate::identity::self_canister_id;
-use crate::{results::MotokoResult, types::NftStorage};
+use crate::common::result::MotokoResult;
+use crate::identity::{self_canister_id, to_account_identifier};
+use crate::types::NftStorage;
 
 use super::super::types::*;
 
@@ -34,7 +35,7 @@ impl ExtNonFungible for NftStorage {
         }; // token 标识的正确性也要检查
 
         match self.nfts.get(index) {
-            Some(nft) => MotokoResult::Ok(ExtUser::to_hex(&nft.owner)),
+            Some(nft) => MotokoResult::Ok(ExtUser::to_hex(&nft.owner.to_vec())),
             None => MotokoResult::Err(ExtCommonError::InvalidToken(token)),
         }
     }
@@ -51,13 +52,13 @@ impl ExtNonFungible for NftStorage {
         self.nfts.push(Nft {
             index: token_index, // nft 的 id，这个数字才是真正的 nft
             name: super::utils::parse_token_identifier(self_canister_id(), token_index as u32), // nft 的名字
-            owner: receiver,           // 所属人
-            approved: None,            // 授权人 最多只有一个
-            rarity: String::from(""),  // 新铸币没有稀有度
-            content,                   // nft的内容 新建时的内容，貌似没有用处
-            metadata: vec![],          // 该 nft 的元数据
-            thumbnail: None,           // 缩略图
-            ownable: NFTOwnable::None, // 隐私信息
+            owner: to_account_identifier(&receiver), // 所属人
+            approved: None,                          // 授权人 最多只有一个
+            rarity: String::from(""),                // 新铸币没有稀有度
+            content,                                 // nft的内容 新建时的内容，貌似没有用处
+            metadata: vec![],                        // 该 nft 的元数据
+            thumbnail: None,                         // 缩略图
+            ownable: NFTOwnable::None,               // 隐私信息
         });
         // 调用 check_hash 方法，把新的 nft 添加到哈希表中
         // check_hash_after_nft_changed(token_index, &_state); // TODO

@@ -11,7 +11,7 @@ pub struct NftTraits {
 pub type NftTraitsState = (Vec<(String, String)>,);
 
 impl Stable<NftTraitsState, NftTraitsState> for NftTraits {
-    fn save(&mut self) -> NftTraitsState {
+    fn store(&mut self) -> NftTraitsState {
         let traits = std::mem::take(&mut self.traits);
         (traits,)
     }

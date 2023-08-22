@@ -1,5 +1,4 @@
-pub mod types;
-
+// 存储是一定有的
 pub mod storage;
 
 #[cfg(feature = "nft_ext")]
@@ -13,3 +12,5 @@ pub mod limit;
 
 #[cfg(feature = "nft_traits")]
 pub mod traits;
+
+pub mod types;

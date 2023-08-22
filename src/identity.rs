@@ -41,6 +41,12 @@ fn to_array(vec: &Vec<u8>) -> [u8; 32] {
     array
 }
 
+// 转变为有效的账户
+pub fn to_account_identifier(account: &Vec<u8>) -> AccountIdentifier {
+    assert!(account.len() == 32, "Invalid Account");
+    to_array(&account)
+}
+
 // 还原 Account
 pub fn unwrap_account_identifier_hex(
     account_identifier: AccountIdentifierHex,

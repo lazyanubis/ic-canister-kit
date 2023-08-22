@@ -1,7 +1,7 @@
 use candid::CandidType;
 use serde::Deserialize;
 
-use crate::results::MotokoResult;
+use crate::common::result::MotokoResult;
 
 use super::super::types::NftStorage;
 use super::types::{

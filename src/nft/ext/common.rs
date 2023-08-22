@@ -1,4 +1,4 @@
-use crate::{results::MotokoResult, types::NftStorage};
+use crate::{common::result::MotokoResult, types::NftStorage};
 
 use super::types::*;
 

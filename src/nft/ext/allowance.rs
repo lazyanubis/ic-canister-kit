@@ -1,7 +1,7 @@
 use candid::CandidType;
 use serde::Deserialize;
 
-use crate::{identity::UserId, results::MotokoResult, types::NftStorage};
+use crate::{common::result::MotokoResult, identity::UserId, types::NftStorage};
 
 use super::types::*;
 
@@ -45,7 +45,7 @@ impl ExtAllowance for NftStorage {
 
         match self.nfts.get(index) {
             Some(nft) => {
-                if nft.owner != owner {
+                if nft.owner.to_vec() != owner {
                     // token 和 指定的 owner 不一致
                     return MotokoResult::Err(ExtCommonError::Other(format!("Invalid owner")));
                 }
@@ -77,7 +77,7 @@ impl ExtAllowance for NftStorage {
             Some(nft) => {
                 // 需要检查权限
                 // 1. 检查是不是当前的所有者
-                if nft.owner != caller {
+                if nft.owner.to_vec() != caller {
                     return false;
                 }
 

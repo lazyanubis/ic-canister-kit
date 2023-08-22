@@ -8,6 +8,8 @@ use crate::{
 
 use super::types::{MediaData, NFTInfo, Nft, NftView};
 
+// 存储相关
+
 #[derive(Debug, Default)]
 pub struct NftStorage {
     pub info: NFTInfo,
@@ -19,7 +21,7 @@ pub struct NftStorage {
 pub type NftStorageState = (NFTInfo, Vec<Nft>);
 
 impl Stable<NftStorageState, NftStorageState> for NftStorage {
-    fn save(&mut self) -> NftStorageState {
+    fn store(&mut self) -> NftStorageState {
         let info = std::mem::take(&mut self.info);
         let nfts = std::mem::take(&mut self.nfts);
         (info, nfts)
