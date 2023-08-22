@@ -15,9 +15,6 @@ pub mod common;
 #[cfg(feature = "stable")]
 pub mod stable;
 
-#[cfg(feature = "permissions")]
-pub mod permissions;
-
 #[cfg(feature = "maintainable")]
 pub mod maintainable;
 

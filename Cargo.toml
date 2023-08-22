@@ -61,8 +61,8 @@ common_result = ["candid"] # 结果类型
 # 持久化
 stable = ["candid"]
 stable_initial = ["stable"]                       # 初始化
+stable_permissions = ["stable", "candid"]         # 权限
 stable_logs = ["stable", "times", "common_pages"] # 日志记录
-# permissions = ["stable", "candid"]       # 权限
 # maintainable = ["stable"]                # 维护
 # uploads = ["stable"]                     # 分片上传
 # nft = ["identity", "stable"]             # NFT
@@ -92,8 +92,8 @@ all = [
     "common_result",
     "stable",
     "stable_initial",
+    "stable_permissions",
     "stable_logs",
-    # "permissions",
     # "maintainable",
     # "uploads",
     # "nft",

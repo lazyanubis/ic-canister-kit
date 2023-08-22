@@ -14,11 +14,6 @@ pub use crate::common::types::*;
 #[cfg(feature = "stable")]
 pub use crate::stable::types::*;
 
-
-
-#[cfg(feature = "permissions")]
-pub use crate::permissions::{Permission, Permissions};
-
 #[cfg(feature = "maintainable")]
 pub use crate::maintainable::Maintainable;
 

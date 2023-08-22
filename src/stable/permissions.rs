@@ -1,20 +1,23 @@
 use std::collections::{HashMap, HashSet};
 
-use super::identity::UserId;
-use super::stable::Stable;
+use crate::identity::UserId;
+
+use super::Stable;
+
+/// 权限管理
 
 // 单个权限对象
 #[derive(Debug, Default)]
 pub struct Permission {
-    pub permission: String,
-    pub users: HashSet<UserId>,
+    pub permission: String,     // 权限名称
+    pub users: HashSet<UserId>, // 拥有该权限的用户
 }
 
 // 单个权限对象持久化
 pub type PermissionState = (String, Vec<UserId>);
 
 impl Stable<PermissionState, PermissionState> for Permission {
-    fn save(&mut self) -> PermissionState {
+    fn store(&mut self) -> PermissionState {
         let permission = std::mem::take(&mut self.permission);
         let users = std::mem::take(&mut self.users).into_iter().collect();
         (permission, users)
@@ -38,23 +41,23 @@ impl From<PermissionState> for Permission {
 // 多个权限对象
 #[derive(Debug, Default)]
 pub struct Permissions {
-    pub permissions: Vec<Permission>,
-    pub permissions_map: HashMap<String, usize>,
+    pub permissions: Vec<Permission>,            // 所有权限记录
+    pub permissions_map: HashMap<String, usize>, // 快速查询
 }
 
 // 多个权限对象持久化
-pub type PermissionsState = Vec<PermissionState>;
+pub type PermissionsState = (Vec<PermissionState>,);
 
 impl Stable<PermissionsState, PermissionsState> for Permissions {
-    fn save(&mut self) -> PermissionsState {
-        (&mut self.permissions)
+    fn store(&mut self) -> PermissionsState {
+        ((&mut self.permissions)
             .into_iter()
-            .map(|s| s.save())
-            .collect()
+            .map(|s| s.store())
+            .collect::<Vec<PermissionState>>(),)
     }
 
     fn restore(&mut self, state: PermissionsState) {
-        let permissions = state.into_iter().map(|s| s.into()).collect();
+        let permissions = state.0.into_iter().map(|s| s.into()).collect();
         let _ = std::mem::replace(&mut self.permissions, permissions);
         self.permissions_map = {
             let mut map = HashMap::with_capacity(self.permissions.len());
@@ -67,6 +70,7 @@ impl Stable<PermissionsState, PermissionsState> for Permissions {
 }
 
 impl Permissions {
+    // 初始化某权限数据
     fn assure_permission(&mut self, permission: &String) {
         if !self.permissions_map.contains_key(permission) {
             // 不存在该权限则初始化
@@ -79,6 +83,7 @@ impl Permissions {
                 .insert(permission.to_string(), self.permissions.len() - 1);
         }
     }
+    // 插入权限
     pub fn insert(&mut self, permission: &str, user_id: UserId) {
         let permission = permission.to_string();
         self.assure_permission(&permission); // 确保有这个权限名称
@@ -89,6 +94,7 @@ impl Permissions {
             permission.users.insert(user_id);
         }
     }
+    // 移除权限
     pub fn remove(&mut self, permission: &str, user_id: &UserId) {
         let index = self.permissions_map.get(permission);
         if index.is_none() {
@@ -99,6 +105,7 @@ impl Permissions {
         permission.users.remove(&user_id); // 移除
     }
 
+    // 判断是否有某权限
     pub fn has_permission(&self, permission: &str, user_id: UserId) -> bool {
         let index = self.permissions_map.get(permission);
         if index.is_none() {
@@ -109,6 +116,7 @@ impl Permissions {
         permission.users.contains(&user_id)
     }
 
+    // 获取某权限的所有用户
     pub fn users<'a>(&'a self, permission: &str) -> Option<&'a HashSet<UserId>> {
         let index = self.permissions_map.get(permission);
         if index.is_none() {
