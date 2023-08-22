@@ -1,3 +1,6 @@
+/// 生成随机数
+
+// 得到随机数
 pub async fn random() -> [u8; 32] {
     let random = ic_cdk::api::management_canister::main::raw_rand()
         .await
@@ -12,6 +15,8 @@ pub async fn random() -> [u8; 32] {
 }
 
 // ============= 节省生成随机数的时间 =============
+
+// 如果每次只需要使用指定数量的随机数, 通过下面的方式节省随机数
 
 pub struct RandomProduce {
     random: [u8; 32],

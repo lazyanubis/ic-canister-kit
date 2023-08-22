@@ -5,10 +5,9 @@ pub use crate::identity::{
 
 pub use crate::canister::types::*;
 
-pub use crate::common::types::*;
+pub use crate::number::types::*;
 
-#[cfg(feature = "random")]
-pub use crate::random::RandomProduce;
+pub use crate::common::types::*;
 
 #[cfg(feature = "ledger")]
 pub use crate::ledger::{Balance, Price, TransferFee, TransferUser};

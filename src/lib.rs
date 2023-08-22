@@ -3,13 +3,10 @@ pub mod identity;
 
 pub mod canister;
 
+pub mod number;
+
 pub mod common;
 
-#[cfg(feature = "random")]
-pub mod random;
-
-#[cfg(feature = "mix")]
-pub mod mix;
 
 #[cfg(feature = "ledger")]
 pub mod ledger;
