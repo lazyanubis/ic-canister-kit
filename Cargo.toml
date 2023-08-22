@@ -52,11 +52,12 @@ token_icrc1 = ["identity", "serde"]  # ICRC1 标准
 
 # 通用工具
 common_times = ["ic-cdk"] # 时间相关
-# logs = ["times"]                         # 日志记录
+# 持久化
+stable = ["candid"]
+# common_logs = ["common_times"] # 日志记录
 # pages = []                               # 分页查询
 # results = []                             # 结果类型
 # tasks = ["ic-cdk-timers"]                # 定时任务
-# stable = ["ic-cdk"]                      # 持久化
 # initial = ["stable"]                     # 初始化
 # permissions = ["stable", "candid"]       # 权限
 # maintainable = ["stable"]                # 维护
@@ -83,7 +84,8 @@ all = [
     "token_ledger",
     "token_icrc1",
     "common_times",
-    # "logs",
+    "stable",
+    # "common_logs",
     # "pages",
     # "results",
     # "tasks",
@@ -101,7 +103,7 @@ all = [
 ]
 
 [dependencies]
-candid = { version = "0.9.3", optional = true }        # ic-cdk required
+candid = { version = "0.9.3", optional = true }
 ic-cdk = { version = "0.10.0", optional = true }
 ic-cdk-timers = { version = "0.4.0", optional = true } # 定时器
 

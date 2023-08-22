@@ -9,6 +9,9 @@ pub mod token;
 
 pub mod common;
 
+#[cfg(feature = "stable")]
+pub mod stable;
+
 #[cfg(feature = "logs")]
 pub mod logs;
 
@@ -20,9 +23,6 @@ pub mod results;
 
 #[cfg(feature = "tasks")]
 pub mod tasks;
-
-#[cfg(feature = "stable")]
-pub mod stable;
 
 #[cfg(feature = "initial")]
 pub mod initial;
