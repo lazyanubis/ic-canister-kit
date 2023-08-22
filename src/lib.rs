@@ -15,9 +15,6 @@ pub mod common;
 #[cfg(feature = "stable")]
 pub mod stable;
 
-#[cfg(feature = "initial")]
-pub mod initial;
-
 #[cfg(feature = "permissions")]
 pub mod permissions;
 

@@ -60,8 +60,8 @@ common_result = ["candid"] # 结果类型
 
 # 持久化
 stable = ["candid"]
+stable_initial = ["stable"]                       # 初始化
 stable_logs = ["stable", "times", "common_pages"] # 日志记录
-# initial = ["stable"]                     # 初始化
 # permissions = ["stable", "candid"]       # 权限
 # maintainable = ["stable"]                # 维护
 # uploads = ["stable"]                     # 分片上传
@@ -91,9 +91,8 @@ all = [
     "common_pages",
     "common_result",
     "stable",
+    "stable_initial",
     "stable_logs",
-    # "stable",
-    # "initial",
     # "permissions",
     # "maintainable",
     # "uploads",

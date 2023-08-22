@@ -1,5 +1,8 @@
 use std::{borrow::BorrowMut, cell::RefMut};
 
+#[cfg(feature = "stable_initial")]
+pub mod initial;
+
 #[cfg(feature = "stable_logs")]
 pub mod logs;
 
