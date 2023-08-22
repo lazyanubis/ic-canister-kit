@@ -58,6 +58,9 @@ times_schedule = ["times", "ic-cdk-timers"] # 时间相关
 common_pages = []          # 分页查询
 common_result = ["candid"] # 结果类型
 
+# http
+http = ["candid", "serde", "serde_json"] # http 相关
+
 # 持久化
 stable = ["candid"]
 stable_initial = ["stable"]                       # 初始化
@@ -70,7 +73,6 @@ stable_uploads = ["stable"]                       # 分片上传
 # nft_ticket = ["nft"]                     # NFT 是否具有门票功能
 # nft_limit = ["nft"]                      # NFT 是否限制指定时间的功能
 # nft_traits = ["nft"]                     # NFT 的属性记录
-# http = ["candid", "serde", "serde_json"] # http 相关
 
 all = [
     "identity",
@@ -90,6 +92,7 @@ all = [
     "times_schedule",
     "common_pages",
     "common_result",
+    "http",
     "stable",
     "stable_initial",
     "stable_maintainable",
@@ -101,7 +104,6 @@ all = [
     # "nft_ticket",
     # "nft_limit",
     # "nft_traits",
-    # "http",
 ]
 
 [dependencies]

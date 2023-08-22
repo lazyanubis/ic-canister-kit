@@ -11,12 +11,11 @@ pub use crate::token::types::*;
 
 pub use crate::common::types::*;
 
+#[cfg(feature = "http")]
+pub use crate::http::{CustomHttpRequest, CustomHttpResponse, HttpResponse, TransformArgs};
+
 #[cfg(feature = "stable")]
 pub use crate::stable::types::*;
 
-
 #[cfg(feature = "nft")]
 pub use crate::nft::types::*;
-
-#[cfg(feature = "http")]
-pub use crate::http::{CustomHttpRequest, CustomHttpResponse, HttpResponse, TransformArgs};

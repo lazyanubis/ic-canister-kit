@@ -12,15 +12,13 @@ pub mod times;
 
 pub mod common;
 
+#[cfg(feature = "http")]
+pub mod http;
+
 #[cfg(feature = "stable")]
 pub mod stable;
 
-
-
 #[cfg(feature = "nft")]
 pub mod nft;
-
-#[cfg(feature = "http")]
-pub mod http;
 
 pub mod types;
