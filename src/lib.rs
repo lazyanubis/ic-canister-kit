@@ -5,11 +5,9 @@ pub mod canister;
 
 pub mod number;
 
+pub mod token;
+
 pub mod common;
-
-
-#[cfg(feature = "ledger")]
-pub mod ledger;
 
 #[cfg(feature = "logs")]
 pub mod logs;

@@ -19,8 +19,10 @@ codegen-units = 1
 
 [features]
 default = ["all"]
+
 # 和身份相关的
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
+
 # 和罐子相关的
 canister_cycles = ["candid", "serde"] # 罐子余额
 canister_status = ["identity"] # 罐子状态
@@ -39,12 +41,16 @@ canister_managed = [
     "canister_codes",
     "canister_deploy",
 ] # 管理罐子
+
 # 和数字相关的
 number_random = ["ic-cdk"]                       # 随机数
 number_mix = ["number_random", "sha2", "base32"] # 混合数字
-# 和时间相关的
+
+# 代币相关
+token_ledger = ["identity", "serde"] # LEDGER 标准
+
+# 通用工具
 common_times = ["ic-cdk"] # 时间相关
-# ledger = ["identity", "serde"]           # 账本钱包
 # logs = ["times"]                         # 日志记录
 # pages = []                               # 分页查询
 # results = []                             # 结果类型
@@ -73,8 +79,8 @@ all = [
     "canister_managed",
     "number_random",
     "number_mix",
+    "token_ledger",
     "common_times",
-    # "ledger",
     # "logs",
     # "pages",
     # "results",

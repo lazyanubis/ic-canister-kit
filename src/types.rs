@@ -7,10 +7,9 @@ pub use crate::canister::types::*;
 
 pub use crate::number::types::*;
 
-pub use crate::common::types::*;
+pub use crate::token::types::*;
 
-#[cfg(feature = "ledger")]
-pub use crate::ledger::{Balance, Price, TransferFee, TransferUser};
+pub use crate::common::types::*;
 
 #[cfg(feature = "logs")]
 pub use crate::logs::{Log, LogLevel};
