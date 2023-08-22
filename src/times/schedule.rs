@@ -1,6 +1,6 @@
-use std::time::Duration;
+use super::Timestamp;
 
-use super::times::Timestamp;
+// TODO 下面代码未经实践
 
 // ================== 心跳任务 ==================
 
@@ -28,7 +28,7 @@ impl HeartbeatConfig {
             return None;
         }
 
-        let now = super::times::now();
+        let now = super::now();
 
         // 2. 判断时间
         if now < self.last + self.sleep {
@@ -75,7 +75,8 @@ impl ScheduleConfig {
         }
 
         // 2. 启动任务
-        let timer_id = ic_cdk_timers::set_timer_interval(Duration::from_nanos(self.interval), task);
+        let timer_id =
+            ic_cdk_timers::set_timer_interval(std::time::Duration::from_nanos(self.interval), task);
         Some(timer_id)
     }
 }

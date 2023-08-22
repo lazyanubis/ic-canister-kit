@@ -50,15 +50,17 @@ number_mix = ["number_random", "sha2", "base32"] # 混合数字
 token_ledger = ["identity", "serde"] # Ledger 标准
 token_icrc1 = ["identity", "serde"]  # ICRC1 标准
 
+# 时间相关
+times = ["ic-cdk"]                          # 时间相关
+times_schedule = ["times", "ic-cdk-timers"] # 时间相关
+
 # 通用工具
-common_times = ["ic-cdk"]  # 时间相关
 common_pages = []          # 分页查询
 common_result = ["candid"] # 结果类型
 
 # 持久化
 stable = ["candid"]
-stable_logs = ["stable", "common_times", "common_pages"] # 日志记录
-# tasks = ["ic-cdk-timers"]                # 定时任务
+stable_logs = ["stable", "times", "common_pages"] # 日志记录
 # initial = ["stable"]                     # 初始化
 # permissions = ["stable", "candid"]       # 权限
 # maintainable = ["stable"]                # 维护
@@ -84,13 +86,12 @@ all = [
     "number_mix",
     "token_ledger",
     "token_icrc1",
-    "common_times",
+    "times",
+    "times_schedule",
     "common_pages",
     "common_result",
     "stable",
     "stable_logs",
-    # "results",
-    # "tasks",
     # "stable",
     # "initial",
     # "permissions",

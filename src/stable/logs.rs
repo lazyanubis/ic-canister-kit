@@ -1,8 +1,8 @@
 use candid::{CandidType, Deserialize};
 
 use crate::common::pages::{page_find_with_reserve, Page, PageData};
-use crate::common::times::Timestamp;
 use crate::identity::CallerId;
+use crate::times::Timestamp;
 
 use super::Stable;
 
@@ -51,7 +51,7 @@ impl StableLogs {
     // 插入
     pub fn push(&mut self, level: LogLevel, caller: CallerId, content: String) {
         self.logs.push(Log {
-            time: crate::common::times::now(),
+            time: crate::times::now(),
             level,
             caller,
             content,
