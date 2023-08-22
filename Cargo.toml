@@ -64,7 +64,7 @@ stable_initial = ["stable"]                       # 初始化
 stable_maintainable = ["stable"]                  # 维护
 stable_permissions = ["stable", "candid"]         # 权限
 stable_logs = ["stable", "times", "common_pages"] # 日志记录
-# uploads = ["stable"]                     # 分片上传
+stable_uploads = ["stable"]                       # 分片上传
 # nft = ["identity", "stable"]             # NFT
 # nft_ext = ["nft"]                        # NFT EXT 标准
 # nft_ticket = ["nft"]                     # NFT 是否具有门票功能
@@ -95,7 +95,7 @@ all = [
     "stable_maintainable",
     "stable_permissions",
     "stable_logs",
-    # "uploads",
+    "stable_uploads",
     # "nft",
     # "nft_ext",
     # "nft_ticket",

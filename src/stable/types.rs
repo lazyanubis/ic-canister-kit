@@ -11,3 +11,6 @@ pub use super::permissions::{Permission, PermissionState, Permissions, Permissio
 
 #[cfg(feature = "stable_logs")]
 pub use super::logs::{Log, LogLevel, StableLogs, StableLogsState};
+
+#[cfg(feature = "stable_uploads")]
+pub use super::uploads::{UploadCache, UploadCacheState};

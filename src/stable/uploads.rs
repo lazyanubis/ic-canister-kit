@@ -1,4 +1,6 @@
-use super::stable::Stable;
+use super::Stable;
+
+// 上传数据缓存
 
 const MAX: u32 = 1024 * 1024 * 2;
 
@@ -10,7 +12,7 @@ pub struct UploadCache {
 pub type UploadCacheState = (Vec<u8>,);
 
 impl Stable<UploadCacheState, UploadCacheState> for UploadCache {
-    fn save(&mut self) -> UploadCacheState {
+    fn store(&mut self) -> UploadCacheState {
         let cache = std::mem::take(&mut self.cache);
         (cache,)
     }

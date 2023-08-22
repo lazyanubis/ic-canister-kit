@@ -16,8 +16,6 @@ pub mod common;
 pub mod stable;
 
 
-#[cfg(feature = "uploads")]
-pub mod uploads;
 
 #[cfg(feature = "nft")]
 pub mod nft;

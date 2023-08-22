@@ -15,9 +15,6 @@ pub use crate::common::types::*;
 pub use crate::stable::types::*;
 
 
-#[cfg(feature = "uploads")]
-pub use crate::uploads::UploadCache;
-
 #[cfg(feature = "nft")]
 pub use crate::nft::types::*;
 

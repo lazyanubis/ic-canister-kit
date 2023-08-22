@@ -12,6 +12,9 @@ pub mod permissions;
 #[cfg(feature = "stable_logs")]
 pub mod logs;
 
+#[cfg(feature = "stable_uploads")]
+pub mod uploads;
+
 pub mod types;
 
 // 持久化相关接口
