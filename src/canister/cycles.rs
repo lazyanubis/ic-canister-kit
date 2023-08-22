@@ -15,8 +15,8 @@ pub fn wallet_balance() -> candid::Nat {
     ic_canister_kit::canister::cycles::wallet_balance()
 }
 
-#[ic_cdk::query(name = "wallet_receive")]
-#[candid::candid_method(query, rename = "wallet_receive")]
+#[ic_cdk::update(name = "wallet_receive")]
+#[candid::candid_method(update, rename = "wallet_receive")]
 pub fn wallet_receive() -> ic_canister_kit::canister::cycles::WalletReceiveResult {
     ic_canister_kit::canister::cycles::wallet_receive()
 }

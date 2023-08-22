@@ -1,5 +1,17 @@
 // 和 principal 和 identity 相关
 
+/*
+
+引入包后, 直接使用如下方法即可增加查看当前用户的接口
+
+#[ic_cdk::query(name = "whoami")]
+#[candid::candid_method(query, rename = "whoami")]
+async fn whoami() -> ic_canister_kit::types::UserId {
+    ic_canister_kit::identity::caller()
+}
+
+*/
+
 // 罐子 ID
 pub type CanisterId = candid::Principal; // 类型别名
 pub type CanisterIdHex = String; // 16 进制文本
