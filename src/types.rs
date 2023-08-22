@@ -14,8 +14,6 @@ pub use crate::common::types::*;
 #[cfg(feature = "stable")]
 pub use crate::stable::types::*;
 
-#[cfg(feature = "maintainable")]
-pub use crate::maintainable::Maintainable;
 
 #[cfg(feature = "uploads")]
 pub use crate::uploads::UploadCache;
