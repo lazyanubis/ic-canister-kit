@@ -96,7 +96,7 @@ where
             .and_then(|index| self.data.get_mut(*index))
             .and_then(|item| Some(&mut item.1))
     }
-    pub fn iter(&self) -> Vec<(&K, &V)> {
+    pub fn vec(&self) -> Vec<(&K, &V)> {
         self.map
             .iter()
             .map(|(k, index)| (k, &self.data[*index].1))
