@@ -12,7 +12,10 @@ pub use crate::token::types::*;
 pub use crate::common::types::*;
 
 #[cfg(feature = "http")]
-pub use crate::http::{CustomHttpRequest, CustomHttpResponse, HttpResponse, TransformArgs};
+pub use crate::http::{
+    CustomHttpRequest, CustomHttpResponse, HttpRequestStreamingCallback, HttpResponse,
+    StreamingCallbackHttpResponse, StreamingCallbackToken, StreamingStrategy, TransformArgs,
+};
 
 #[cfg(feature = "stable")]
 pub use crate::stable::types::*;
