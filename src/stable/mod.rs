@@ -15,6 +15,9 @@ pub mod logs;
 #[cfg(feature = "stable_uploads")]
 pub mod uploads;
 
+#[cfg(feature = "stable_hashmap")]
+pub mod hashmap;
+
 pub mod types;
 
 // 持久化相关接口
