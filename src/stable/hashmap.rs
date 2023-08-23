@@ -1,6 +1,7 @@
 use std::{borrow::Borrow, collections::HashMap, fmt::Debug, hash::Hash};
 
 // 封装 HashMap, 节省内存空间
+// ! 并不能节省空间, 还是不要用了
 
 #[derive(Debug, Default, Clone)]
 pub struct CustomHashMap<K, V>
