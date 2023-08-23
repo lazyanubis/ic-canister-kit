@@ -14,3 +14,6 @@ pub use super::logs::{Log, LogLevel, StableLogs, StableLogsState};
 
 #[cfg(feature = "stable_uploads")]
 pub use super::uploads::{UploadCache, UploadCacheState};
+
+#[cfg(feature = "stable_hashmap")]
+pub use super::hashmap::{CustomHashMap, CustomHashMapState};

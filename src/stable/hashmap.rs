@@ -1,11 +1,12 @@
-use std::{borrow::Borrow, collections::HashMap, hash::Hash};
+use std::{borrow::Borrow, collections::HashMap, fmt::Debug, hash::Hash};
 
 // 封装 HashMap, 节省内存空间
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct CustomHashMap<K, V>
 where
-    K: Clone + Hash + Eq,
+    K: Hash + Eq + Clone + Debug,
+    V: Debug,
 {
     data: Vec<(K, V)>,
     map: HashMap<K, usize>,
@@ -15,7 +16,8 @@ pub type CustomHashMapState<K, V> = (Vec<(K, V)>,);
 
 impl<K, V> CustomHashMap<K, V>
 where
-    K: Clone + Hash + Eq,
+    K: Hash + Eq + Clone + Debug,
+    V: Debug,
 {
     pub fn store(&mut self) -> CustomHashMapState<K, V> {
         let data = std::mem::take(&mut self.data);
@@ -32,6 +34,9 @@ where
             .collect();
     }
 
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
     pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<&V>
     where
         K: Borrow<Q>,
@@ -51,6 +56,13 @@ where
         let index = self.map.get(k);
         if let Some(index) = index {
             let item = self.data.remove(*index);
+            // ! 删除了序号为 index 的, 那么记录里面大于 index 的就都应该减 1
+            self.map = self
+                .data
+                .iter()
+                .enumerate()
+                .map(|(index, item)| (item.0.clone(), index))
+                .collect();
             return Some(item.1);
         }
         None
@@ -82,5 +94,11 @@ where
             .get(k)
             .and_then(|index| self.data.get_mut(*index))
             .and_then(|item| Some(&mut item.1))
+    }
+    pub fn iter(&self) -> Vec<(&K, &V)> {
+        self.map
+            .iter()
+            .map(|(k, index)| (k, &self.data[*index].1))
+            .collect()
     }
 }
