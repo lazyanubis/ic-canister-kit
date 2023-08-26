@@ -7,6 +7,7 @@ readme = "README.md"
 include = ["src", "Cargo.toml", "LICENSE", "README.md"]
 description = "An ic canister package"
 authors = ["Anubis Awooo"]
+repository = "https://github.com/AnubisAwooo/ic-canister-kit"
 
 # [lib]
 # path = "src/lib.rs"
