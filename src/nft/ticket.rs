@@ -35,13 +35,15 @@ impl Stable<NftTicketState, NftTicketState> for NftTicket {
     }
 }
 
+//  所有人不可见  ownable  所有者可见  opened  匿名可见
+// ----------------> ----------------> -------------->
 #[derive(CandidType, Deserialize, Debug)]
 pub enum NftTicketStatus {
-    NoBody(Duration),                // 当前所有人都看不到, 里面是距离会议开始时间
+    NoBody(Duration),                // 所有人不可见, 数字是 ownable - now
     InvalidToken,                    // 无效的 id
-    Forbidden(Duration),             // 无权查看 里面是距离会议结束时间
-    Owner(Duration, NFTOwnable),     // 当前所有者能看到, 里面是距离结束时间
-    Anonymous(Duration, NFTOwnable), // 会议结束后所有人都可以看, 里面会议已经结束多长时间了
+    Forbidden(Duration),             // 无权查看 数字是 opened - now
+    Owner(Duration, NFTOwnable),     // 所有者能可见 数字是 opened - now
+    Anonymous(Duration, NFTOwnable), // 匿名可见 数字是 now - opened
 }
 
 impl NftTicket {
@@ -59,11 +61,11 @@ impl NftTicket {
         if now < self.activity_start {
             return NftTicketStatus::NoBody(self.activity_start - now); // 还没到开放的时间
         } else if now < self.activity_end {
-            // ! 需要检查权限
+            // ! 需要检查权限, 权限通过后, 放入数据
             return NftTicketStatus::Owner(self.activity_end - now, NFTOwnable::None);
         } else {
-            return NftTicketStatus::Anonymous(now - self.activity_end, NFTOwnable::None);
             // 无需检查权限
+            return NftTicketStatus::Anonymous(now - self.activity_end, NFTOwnable::None);
         }
     }
     pub fn set_activity_start(&mut self, start: Timestamp) {
