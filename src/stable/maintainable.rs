@@ -1,46 +1,80 @@
-use crate::times::Timestamp;
+use std::fmt::Display;
 
-use super::Stable;
+use crate::times::{now, Timestamp};
 
 /// 维护状态
 
-#[derive(candid::CandidType, candid::Deserialize, Debug, PartialEq, Clone)]
+#[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
 pub struct MaintainingReason {
-    created: Timestamp,
-    message: String,
+    pub created: Timestamp,
+    pub message: String,
 }
 
-#[derive(Debug, Default)]
-pub struct Maintainable {
-    maintaining: Option<MaintainingReason>,
-}
-
-pub type MaintainableState = (Option<MaintainingReason>,);
-
-impl Stable<MaintainableState, MaintainableState> for Maintainable {
-    fn store(&mut self) -> MaintainableState {
-        let maintaining = std::mem::take(&mut self.maintaining);
-        (maintaining,)
-    }
-
-    fn restore(&mut self, state: MaintainableState) {
-        let _ = std::mem::replace(&mut self.maintaining, state.0);
+impl MaintainingReason {
+    pub fn new(message: String) -> Self {
+        MaintainingReason {
+            created: now(),
+            message,
+        }
     }
 }
 
-impl Maintainable {
+pub trait Maintainable {
+    // 查询
+    fn maintaining_must_be_running(&self);
+    fn maintaining_must_be_maintaining(&self);
+    fn maintaining_is_maintaining(&self) -> bool;
+    fn maintaining_is_running(&self) -> bool {
+        !self.maintaining_is_maintaining()
+    }
+    fn maintaining_query(&self) -> Option<MaintainingReason>;
+    // 修改
+    fn maintaining_update_maintaining(&mut self, reason: MaintainingReason);
+    fn maintaining_update_running(&mut self);
+    fn maintaining_replace(&mut self, reason: Option<MaintainingReason>) {
+        if let Some(reason) = reason {
+            self.maintaining_update_maintaining(reason)
+        } else {
+            self.maintaining_update_running()
+        }
+    }
+}
+
+#[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Default)]
+pub struct Maintaining(Option<MaintainingReason>);
+
+impl Maintainable for Maintaining {
+    // 查询
     // 非维护中才能继续
-    pub fn must_be_running(&self) {
-        if let Some(reason) = &self.maintaining {
-            panic!("System is maintaining: {}", reason.message.clone());
+    fn maintaining_must_be_running(&self) {
+        if let Some(reason) = &self.0 {
+            panic!("System is maintaining: {}", reason.message);
+        }
+    }
+    fn maintaining_must_be_maintaining(&self) {
+        if let None = &self.0 {
+            panic!("System is running. Not maintaining.");
         }
     }
     // 当前状态是否维护中
-    pub fn is_maintaining(&self) -> bool {
-        self.maintaining.is_some()
+    fn maintaining_is_maintaining(&self) -> bool {
+        self.0.is_some()
     }
-    // 设置尾注状态
-    pub fn set_maintaining(&mut self, maintaining: Option<MaintainingReason>) {
-        self.maintaining = maintaining;
+    fn maintaining_query(&self) -> Option<MaintainingReason> {
+        self.0.clone()
+    }
+    // 修改
+    // 设置维护状态
+    fn maintaining_update_maintaining(&mut self, reason: MaintainingReason) {
+        self.0 = Some(reason);
+    }
+    fn maintaining_update_running(&mut self) {
+        self.0 = None
+    }
+}
+
+impl Display for MaintainingReason {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!("{:?}", self))
     }
 }

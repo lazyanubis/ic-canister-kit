@@ -4,8 +4,7 @@
 
 引入包后, 直接使用如下方法即可增加查看当前用户的接口
 
-#[ic_cdk::query(name = "whoami")]
-#[candid::candid_method(query, rename = "whoami")]
+#[ic_cdk::query]
 async fn whoami() -> ic_canister_kit::types::UserId {
     ic_canister_kit::identity::caller()
 }

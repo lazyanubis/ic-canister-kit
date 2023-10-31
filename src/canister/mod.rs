@@ -70,3 +70,8 @@ fn unwrap_call_result_with_error<R: std::fmt::Debug>(
 
     Result::Ok(call_result.unwrap().0)
 }
+
+// 错误信息
+pub fn call_error_to_string(call_error: &CallError) -> String {
+    format!("error code: {:?} message: {}", call_error.0, call_error.1)
+}

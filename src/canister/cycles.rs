@@ -9,14 +9,12 @@ use super::{types::CallError, unwrap_call_result};
 
 引入包后, 直接使用如下方法即可增加查询和接收 cycles 的接口
 
-#[ic_cdk::query(name = "wallet_balance")]
-#[candid::candid_method(query, rename = "wallet_balance")]
+#[ic_cdk::query]
 pub fn wallet_balance() -> candid::Nat {
     ic_canister_kit::canister::cycles::wallet_balance()
 }
 
-#[ic_cdk::update(name = "wallet_receive")]
-#[candid::candid_method(update, rename = "wallet_receive")]
+#[ic_cdk::update]
 pub fn wallet_receive() -> ic_canister_kit::canister::cycles::WalletReceiveResult {
     ic_canister_kit::canister::cycles::wallet_receive()
 }
@@ -37,7 +35,10 @@ pub fn wallet_balance() -> candid::Nat {
 
 /// 接受转入 cycles
 // #[inline]
-pub fn wallet_receive() -> WalletReceiveResult {
+pub fn wallet_receive<F>(callback: F) -> WalletReceiveResult
+where
+    F: Fn(u128),
+{
     // 获取调用者转入的可接受的 cycles 数量
     let available = ic_cdk::api::call::msg_cycles_available128(); // Cycles.available();
 
@@ -50,6 +51,8 @@ pub fn wallet_receive() -> WalletReceiveResult {
 
     // ! 判断是否接受成功，不成功就要报错
     assert!(accepted == available);
+
+    callback(accepted); // 回调
 
     // 返回接受的 cycles 数量
     WalletReceiveResult {

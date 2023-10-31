@@ -9,6 +9,9 @@ pub use crate::number::types::*;
 
 pub use crate::token::types::*;
 
+#[cfg(feature = "times")]
+pub use crate::times::types::*;
+
 pub use crate::common::types::*;
 
 #[cfg(feature = "http")]

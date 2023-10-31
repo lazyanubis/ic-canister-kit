@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::{
     identity::wrap_account_identifier,
-    stable::Stable,
     types::{NFTOwnable, UserId},
 };
 
@@ -10,34 +9,11 @@ use super::types::{MediaData, NFTInfo, Nft, NftView};
 
 // 存储相关
 
-#[derive(Debug, Default)]
+#[derive(candid::CandidType, serde::Deserialize, Debug, Default, Clone)]
 pub struct NftStorage {
     pub info: NFTInfo,
     pub nfts: Vec<Nft>,
     pub nfts_map: HashMap<String, usize>,
-}
-
-// 对象持久化
-pub type NftStorageState = (NFTInfo, Vec<Nft>);
-
-impl Stable<NftStorageState, NftStorageState> for NftStorage {
-    fn store(&mut self) -> NftStorageState {
-        let info = std::mem::take(&mut self.info);
-        let nfts = std::mem::take(&mut self.nfts);
-        (info, nfts)
-    }
-
-    fn restore(&mut self, state: NftStorageState) {
-        let _ = std::mem::replace(&mut self.info, state.0);
-        let _ = std::mem::replace(&mut self.nfts, state.1);
-        self.nfts_map = {
-            let mut map = HashMap::with_capacity(self.nfts.len());
-            for (i, v) in self.nfts.iter().enumerate() {
-                map.insert(v.name.clone(), i);
-            }
-            map
-        };
-    }
 }
 
 impl NftStorage {

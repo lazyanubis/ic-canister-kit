@@ -10,8 +10,7 @@ use super::{unwrap_call_result, CallError};
 
 引入包后, 直接使用如下方法即可增加查询罐子状态的接口
 
-#[ic_cdk::update(name = "canister_status")]
-#[candid::candid_method(update, rename = "canister_status")]
+#[ic_cdk::update]
 async fn canister_status() -> ic_canister_kit::canister::status::CanisterStatusResult {
     ic_canister_kit::canister::status::canister_status(ic_canister_kit::identity::self_canister_id()).await
 }

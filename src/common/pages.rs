@@ -102,6 +102,55 @@ pub fn page_find_with_reserve<T: Clone>(list: &Vec<T>, page: &Page, max: u32) ->
     }
 }
 
+/// 倒序过滤分页查询
+pub fn page_find_with_reserve_and_filter<T: Clone, F>(
+    list: &Vec<T>,
+    page: &Page,
+    max: u32,
+    filter: F, // 过滤条件
+) -> PageData<T>
+where
+    F: Fn(&T) -> bool,
+{
+    page_check(&page, max);
+
+    if list.len() == 0 {
+        return page.none();
+    }
+
+    // 取出所有的索引
+    let mut index_list: Vec<usize> = (0..list.len())
+        .into_iter()
+        .filter(|i| filter(&list[*i]))
+        .collect();
+    index_list.reverse(); // 索引进行倒序
+
+    let mut data = Vec::new();
+
+    // 索引偏移序号
+    let start = ((page.page - 1) * page.size) as usize;
+    let end = ((page.page) * page.size) as usize;
+
+    if end < index_list.len() {
+        data = (&index_list[start..end])
+            .iter()
+            .map(|i| list[*i].clone()) // 取出实际的内容
+            .collect();
+    } else if start < index_list.len() {
+        data = (&index_list[start..])
+            .iter()
+            .map(|i| list[*i].clone()) // 取出实际的内容
+            .collect();
+    }
+
+    PageData {
+        page: page.page,
+        size: page.size,
+        total: index_list.len() as u32,
+        data,
+    }
+}
+
 /// 按条件分页查询
 pub fn page_find_with_sort<T, F, C, S, R>(
     list: &Vec<T>,

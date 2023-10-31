@@ -3,19 +3,19 @@ use serde::Deserialize;
 
 use crate::identity::{AccountIdentifier, AccountIdentifierHex, UserId, UserIdHex};
 
-pub use super::storage::{NftStorage, NftStorageState};
+pub use super::storage::NftStorage;
 
 #[cfg(feature = "nft_ext")]
 pub use super::ext::types::*;
 
 #[cfg(feature = "nft_ticket")]
-pub use super::ticket::{ForbiddenDuration, NftTicket, NftTicketState, NftTicketStatus};
+pub use super::ticket::{ForbiddenDuration, NftTicket, NftTicketStatus};
 
 #[cfg(feature = "nft_limit")]
 pub use super::limit::{LimitDuration, NftLimit, NftLimitState};
 
 #[cfg(feature = "nft_traits")]
-pub use super::traits::{NftTraits, NftTraitsState};
+pub use super::traits::NftTraits;
 
 #[derive(CandidType, Deserialize, Default, Debug, Clone)]
 pub struct InnerData {
@@ -35,7 +35,7 @@ pub enum MediaData {
     Outer(OuterData),
 }
 
-#[derive(CandidType, Deserialize, Debug, Default)]
+#[derive(CandidType, Deserialize, Debug, Default, Clone)]
 pub struct NFTInfo {
     pub name: String,                   // NFT 的名称
     pub symbol: String,                 // NFT 的符号
@@ -54,7 +54,7 @@ pub enum NFTOwnable {
 }
 
 // NFT 的结构体
-#[derive(CandidType, Deserialize, Debug)]
+#[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Nft {
     pub index: usize, // nft 的 id，这个数字才是真正的 nft
     pub name: String, // 也许 NFT 有名称

@@ -1,36 +1,19 @@
-use super::Stable;
-
 // 上传数据缓存
 
 const MAX: u32 = 1024 * 1024 * 2;
 
-#[derive(Debug, Default)]
-pub struct UploadCache {
-    cache: Vec<u8>,
-}
-
-pub type UploadCacheState = (Vec<u8>,);
-
-impl Stable<UploadCacheState, UploadCacheState> for UploadCache {
-    fn store(&mut self) -> UploadCacheState {
-        let cache = std::mem::take(&mut self.cache);
-        (cache,)
-    }
-
-    fn restore(&mut self, state: UploadCacheState) {
-        let _ = std::mem::replace(&mut self.cache, state.0);
-    }
-}
+#[derive(candid::CandidType, serde::Deserialize, Debug)]
+pub struct UploadCache(Vec<u8>);
 
 impl UploadCache {
     pub fn extend(&mut self, data: &[u8]) {
-        self.cache.extend_from_slice(data);
+        self.0.extend_from_slice(data);
     }
     pub fn clear(&mut self) {
-        std::mem::take(&mut self.cache);
+        std::mem::take(&mut self.0);
     }
     pub fn fetch(&mut self) -> Vec<u8> {
-        let cache = std::mem::take(&mut self.cache);
+        let cache = std::mem::take(&mut self.0);
         cache
     }
     pub fn fetch_slice(&self, start: usize, end: usize) -> Vec<u8> {
@@ -40,10 +23,10 @@ impl UploadCache {
         if end < start + MAX as usize {
             panic!("The max range is {}", MAX);
         }
-        if self.cache.len() <= end {
+        if self.0.len() <= end {
             panic!("The length of cache is less than end");
         }
 
-        self.cache[start..end].to_vec()
+        self.0[start..end].to_vec()
     }
 }

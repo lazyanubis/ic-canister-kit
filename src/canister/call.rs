@@ -11,5 +11,6 @@ pub async fn call_canister<
     method: &str,
     args: T,
 ) -> Result<R, CallError> {
-    ic_cdk::call(canister_id.clone(), &method, args).await
+    ic_cdk::println!("call canister: {} -> {}", canister_id.to_text(), method);
+    ic_cdk::call(canister_id, &method, args).await
 }

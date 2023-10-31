@@ -1,19 +1,42 @@
-pub use super::Stable;
+use crate::{identity::CanisterId, times::Timestamp};
 
 #[cfg(feature = "stable_initial")]
 pub use super::initial::Initial;
 
+#[cfg(feature = "stable_upgrade")]
+pub use super::upgrade::Upgrade;
+
 #[cfg(feature = "stable_maintainable")]
-pub use super::maintainable::{Maintainable, MaintainableState, MaintainingReason};
+pub use super::maintainable::{Maintainable, Maintaining, MaintainingReason};
 
-#[cfg(feature = "stable_permissions")]
-pub use super::permissions::{Permission, PermissionState, Permissions, PermissionsState};
+#[cfg(feature = "stable_permissable")]
+pub use super::permissable::{
+    Permissable, Permission, PermissionEntry, PermissionReplacedArg, PermissionUpdatedArg,
+    PermissionUsers, Permissions,
+};
 
-#[cfg(feature = "stable_logs")]
-pub use super::logs::{Log, LogLevel, StableLogs, StableLogsState};
+#[cfg(feature = "stable_recordable")]
+pub use super::recordable::{MigratedRecords, Record, RecordLevel, Recordable, Records};
 
 #[cfg(feature = "stable_uploads")]
-pub use super::uploads::{UploadCache, UploadCacheState};
+pub use super::uploads::UploadCache;
 
 #[cfg(feature = "stable_hashmap")]
 pub use super::hashmap::{CustomHashMap, CustomHashMapState};
+
+#[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
+pub struct CanisterInitialArg {
+    pub permission_host: Option<CanisterId>,
+    pub record_collector: Option<CanisterId>,
+    pub schedule: Option<Timestamp>,
+}
+
+impl CanisterInitialArg {
+    pub fn none() -> Self {
+        CanisterInitialArg {
+            permission_host: None,
+            record_collector: None,
+            schedule: None,
+        }
+    }
+}

@@ -1,5 +1,5 @@
-#[cfg(feature = "times_schedule")]
-pub mod schedule;
+#[cfg(feature = "times_schedulable")]
+pub mod schedulable;
 
 pub mod types;
 
