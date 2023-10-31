@@ -37,12 +37,14 @@ pub struct Record {
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
 pub struct MigratedRecords {
     pub topics: HashSet<String>,
+    pub next_id: u64,
     pub data: Vec<Record>,
     pub updated: Vec<(u64, Timestamp, String)>,
 }
 
 pub trait Recordable {
     // 查询
+    fn record_next_id(&self) -> u64;
     fn record_topics(&self) -> HashSet<String>;
     fn record_find_all(&self, topic: &Option<String>) -> Vec<Record>;
     fn record_find_by_page(
@@ -86,6 +88,7 @@ pub trait Recordable {
     fn record_migrate(&mut self, max: u32) -> MigratedRecords {
         MigratedRecords {
             topics: self.record_topics(),
+            next_id: self.record_next_id(),
             data: self.record_migrate_data(max),
             updated: self.record_migrate_updated(),
         }
@@ -97,7 +100,7 @@ pub trait Recordable {
 pub struct Records {
     collector: Option<CanisterId>, // 日志收集者
     pub topics: HashSet<String>,   // 所有主题
-    next_id: u64,                  // 下一个未使用的 id
+    pub next_id: u64,              // 下一个未使用的 id
     pub data: Vec<Record>,
     pub updated: Vec<(u64, Timestamp, String)>, // 如果更新失败了, 需要记录给日志收集者处理
 }
@@ -117,6 +120,9 @@ impl Records {
 impl Recordable for Records {
     // 查询
 
+    fn record_next_id(&self) -> u64 {
+        self.next_id
+    }
     fn record_topics(&self) -> HashSet<String> {
         self.topics.clone()
     }
