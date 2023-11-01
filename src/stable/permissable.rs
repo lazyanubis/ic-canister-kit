@@ -105,7 +105,7 @@ impl Display for Permissions {
 
 pub trait Permissable {
     // 查询
-    fn permission_has(&self, permission: &Permission, user_id: &UserId) -> bool;
+    fn permission_has(&self, user_id: &UserId, permission: &Permission) -> bool;
     fn permission_owned(&self, user_id: &UserId) -> HashMap<Permission, bool>;
     fn permission_users(&self) -> HashSet<UserId>;
     fn permission_entry<'p>(&'p self, permission: Permission) -> PermissionEntry<'p>; // 获取某权限的所有用户
@@ -136,7 +136,7 @@ fn assure_permission<'a, 'b>(
 impl Permissable for Permissions {
     // 查询
     // 判断是否有某权限
-    fn permission_has(&self, permission: &Permission, user_id: &UserId) -> bool {
+    fn permission_has(&self, user_id: &UserId, permission: &Permission) -> bool {
         if let Some(users) = self.data.get(permission) {
             return permission.has_permission(users, user_id); // 存在则比较
         }
