@@ -19,7 +19,7 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-default = ["all"]
+default = ["without_nft"]
 
 # 和身份相关的
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
@@ -120,6 +120,36 @@ all = [
     "nft_limit",
     "nft_traits",
     # "candid_type",
+]
+
+without_nft = [
+    "identity",
+    "canister_cycles",
+    "canister_status",
+    "canister_create",
+    "canister_settings",
+    "canister_codes",
+    "canister_deploy",
+    "canister_call",
+    "canister_managed",
+    "number_random",
+    "number_mix",
+    "token_ledger",
+    "token_icrc1",
+    "times",
+    "times_schedulable",
+    "common_pages",
+    "common_result",
+    "http",
+    "stable",
+    "stable_initial",
+    "stable_upgrade",
+    "stable_maintainable",
+    "stable_permissable",
+    "stable_recordable",
+    "stable_uploads",
+    "stable_hashmap",
+    "candid_type",
 ]
 
 [dependencies]
