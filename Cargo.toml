@@ -149,7 +149,6 @@ without_nft = [
     "stable_recordable",
     "stable_uploads",
     "stable_hashmap",
-    "candid_type",
 ]
 
 [dependencies]
