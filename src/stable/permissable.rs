@@ -151,7 +151,7 @@ impl Permissable for Permissions {
     fn permission_owned(&self, user_id: &UserId) -> HashMap<Permission, bool> {
         self.data
             .keys()
-            .map(|permission| (permission.clone(), self.permission_has(permission, user_id)))
+            .map(|permission| (permission.clone(), self.permission_has(user_id, permission)))
             .collect()
     }
 
