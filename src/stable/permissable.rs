@@ -117,7 +117,10 @@ pub trait Permissable {
     // 修改
     fn permission_replace_assure(&mut self, permissions: HashSet<Permission>);
     fn permission_update(&mut self, args: Vec<PermissionUpdatedArg<Permission>>);
-    fn permission_replace(&mut self, args: Vec<PermissionReplacedArg<Permission>>);
+    fn permission_replace(
+        &mut self,
+        args: Vec<PermissionReplacedArg<Permission>>,
+    ) -> Vec<PermissionReplacedArg<Permission>>;
     fn permission_host_replace(&mut self, host: Option<CanisterId>);
 }
 
@@ -315,9 +318,18 @@ impl Permissable for Permissions {
         }
     }
     // 替换权限
-    fn permission_replace(&mut self, args: Vec<PermissionReplacedArg<Permission>>) {
-        self.data = args.iter().map(|s| (s.0.clone(), s.1.clone())).collect();
+    fn permission_replace(
+        &mut self,
+        args: Vec<PermissionReplacedArg<Permission>>,
+    ) -> Vec<PermissionReplacedArg<Permission>> {
+        let old = std::mem::replace(
+            &mut self.data,
+            args.iter().map(|s| (s.0.clone(), s.1.clone())).collect(),
+        );
         self.permission_notice_replaced(args);
+        old.into_iter()
+            .map(|(permission, users)| PermissionReplacedArg(permission, users))
+            .collect()
     }
 
     fn permission_host_replace(&mut self, host: Option<CanisterId>) {
