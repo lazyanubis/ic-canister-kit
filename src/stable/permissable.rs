@@ -677,3 +677,98 @@ impl Display for PermissionReplacedArg<String> {
         ))
     }
 }
+
+impl Display for PermissionUpdatedArg<Permission> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UpdateUserPermission(user_id, permissions) => f.write_str(&format!(
+                "update user: {} permissions: {}",
+                user_id.to_text(),
+                format_option_with_func(permissions, |permissions| format!(
+                    "[{}]",
+                    permissions
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+            )),
+            Self::UpdateRolePermission(role, permissions) => f.write_str(&format!(
+                "update role: {} permissions: {}",
+                role,
+                format_option_with_func(permissions, |permissions| format!(
+                    "[{}]",
+                    permissions
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+            )),
+            Self::UpdateUserRole(user_id, roles) => f.write_str(&format!(
+                "update user: {} roles: {}",
+                user_id.to_text(),
+                format_option_with_func(roles, |roles| format!(
+                    "[{}]",
+                    roles
+                        .iter()
+                        .map(|r| r.clone())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+            )),
+        }
+    }
+}
+
+impl Display for PermissionReplacedArg<Permission> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!(
+            "replace with permissions: [{}] user_permissions: [{}] role_permissions: [{}] user_roles: [{}]",
+            self.permissions
+                .iter()
+                .map(|p| p.to_string())
+                .collect::<Vec<_>>()
+                .join(","),
+            self.user_permissions
+                .iter()
+                .map(|(user_id, permissions)| format!(
+                    "({}, [{}])",
+                    user_id.to_text(),
+                    permissions
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+                .collect::<Vec<_>>()
+                .join(","),
+            self.role_permissions
+                .iter()
+                .map(|(role, permissions)| format!(
+                    "({}, [{}])",
+                    role,
+                    permissions
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+                .collect::<Vec<_>>()
+                .join(","),
+            self.user_roles
+                .iter()
+                .map(|(user_id, roles)| format!(
+                    "({}, [{}])",
+                    user_id.to_text(),
+                    roles
+                        .iter()
+                        .map(|p| p.clone())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+                .collect::<Vec<_>>()
+                .join(","),
+        ))
+    }
+}
