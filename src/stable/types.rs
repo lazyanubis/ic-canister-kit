@@ -11,12 +11,13 @@ pub use super::maintainable::{Maintainable, Maintaining, MaintainingReason};
 
 #[cfg(feature = "stable_permissable")]
 pub use super::permissable::{
-    Permissable, Permission, PermissionEntry, PermissionReplacedArg, PermissionUpdatedArg,
-    PermissionUsers, Permissions,
+    Permissable, Permission, PermissionReplacedArg, PermissionUpdatedArg, Permissions,
 };
 
 #[cfg(feature = "stable_recordable")]
-pub use super::recordable::{MigratedRecords, Record, RecordLevel, Recordable, Records};
+pub use super::recordable::{
+    MigratedRecords, Record, RecordLevel, RecordSearch, Recordable, Records,
+};
 
 #[cfg(feature = "stable_uploads")]
 pub use super::uploads::UploadCache;

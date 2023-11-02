@@ -18,6 +18,17 @@ pub struct PageData<T> {
     pub data: Vec<T>, // 查到的分页数据
 }
 
+impl<T: Clone> From<PageData<&T>> for PageData<T> {
+    fn from(value: PageData<&T>) -> Self {
+        PageData {
+            page: value.page,
+            size: value.size,
+            total: value.total,
+            data: value.data.into_iter().map(|t| t.clone()).collect(),
+        }
+    }
+}
+
 // 空结果
 impl Page {
     pub fn none<T>(&self) -> PageData<T> {
@@ -65,7 +76,7 @@ pub fn page_find<T: Clone>(list: &Vec<T>, page: &Page, max: u32) -> PageData<T> 
 }
 
 /// 倒序分页查询
-pub fn page_find_with_reserve<T: Clone>(list: &Vec<T>, page: &Page, max: u32) -> PageData<T> {
+pub fn page_find_with_reserve<'a, T>(list: &'a Vec<T>, page: &Page, max: u32) -> PageData<&'a T> {
     page_check(&page, max);
 
     if list.len() == 0 {
@@ -85,12 +96,12 @@ pub fn page_find_with_reserve<T: Clone>(list: &Vec<T>, page: &Page, max: u32) ->
     if end < index_list.len() {
         data = (&index_list[start..end])
             .iter()
-            .map(|i| list[*i].clone()) // 取出实际的内容
+            .map(|i| &list[*i]) // 取出实际的内容
             .collect();
     } else if start < index_list.len() {
         data = (&index_list[start..])
             .iter()
-            .map(|i| list[*i].clone()) // 取出实际的内容
+            .map(|i| &list[*i]) // 取出实际的内容
             .collect();
     }
 
@@ -103,12 +114,12 @@ pub fn page_find_with_reserve<T: Clone>(list: &Vec<T>, page: &Page, max: u32) ->
 }
 
 /// 倒序过滤分页查询
-pub fn page_find_with_reserve_and_filter<T: Clone, F>(
-    list: &Vec<T>,
+pub fn page_find_with_reserve_and_filter<'a, T, F>(
+    list: &'a Vec<T>,
     page: &Page,
     max: u32,
     filter: F, // 过滤条件
-) -> PageData<T>
+) -> PageData<&'a T>
 where
     F: Fn(&T) -> bool,
 {
@@ -134,12 +145,12 @@ where
     if end < index_list.len() {
         data = (&index_list[start..end])
             .iter()
-            .map(|i| list[*i].clone()) // 取出实际的内容
+            .map(|i| &list[*i]) // 取出实际的内容
             .collect();
     } else if start < index_list.len() {
         data = (&index_list[start..])
             .iter()
-            .map(|i| list[*i].clone()) // 取出实际的内容
+            .map(|i| &list[*i]) // 取出实际的内容
             .collect();
     }
 
