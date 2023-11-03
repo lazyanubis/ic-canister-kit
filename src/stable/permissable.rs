@@ -77,7 +77,7 @@ pub trait Permissable {
     fn permission_has(&self, user_id: &UserId, permission: &Permission) -> bool;
     fn permission_owned(&self, user_id: &UserId) -> HashMap<&Permission, bool>;
     fn permission_roles_all(&self) -> &HashMap<String, HashSet<Permission>>;
-    fn permission_roles(&self, user_id: &UserId) -> Option<&HashSet<String>>;
+    fn permission_roles_by_user(&self, user_id: &UserId) -> Option<&HashSet<String>>;
     // 修改
     fn permission_host_update(&mut self, host: Option<CanisterId>, notice: bool);
     fn permission_reset(&mut self, permissions: HashSet<Permission>);
@@ -247,7 +247,7 @@ impl Permissable for Permissions {
     fn permission_roles_all(&self) -> &HashMap<String, HashSet<Permission>> {
         &self.role_permissions
     }
-    fn permission_roles(&self, user_id: &UserId) -> Option<&HashSet<String>> {
+    fn permission_roles_by_user(&self, user_id: &UserId) -> Option<&HashSet<String>> {
         self.user_roles.get(user_id)
     }
 
