@@ -112,7 +112,6 @@ impl Permissions {
             });
         }
     }
-
     // 如果需要通知更新
     fn permission_notice_updated(&self, args: Vec<PermissionUpdatedArg<Permission>>) {
         let caller = caller();
@@ -180,6 +179,21 @@ impl Permissions {
                         .unwrap();
                     });
                 });
+            }
+        }
+    }
+}
+
+// 检查一定存在权限或角色
+fn assure_exist<T: Clone + Eq + Hash + Display, F: Fn(&T) -> bool>(
+    list: &Option<HashSet<T>>,
+    f: F,
+    tips: &str,
+) {
+    if let Some(list) = list {
+        for t in list {
+            if !f(t) {
+                panic!("{} {} is invalid.", tips, t)
             }
         }
     }
@@ -280,8 +294,11 @@ impl Permissable for Permissions {
         for arg in args.iter() {
             match arg {
                 PermissionUpdatedArg::UpdateUserPermission(user_id, permissions) => {
+                    // 先检查权限是否都存在
+                    assure_exist(permissions, |p| self.permissions.contains(p), "Permission");
+
                     let exist = self.user_permissions.get(user_id);
-                    if let Some(permissions) = permissions {
+                    if let Some(permissions) = &permissions {
                         if let Some(exist) = exist {
                             if exist == permissions {
                                 continue;
@@ -301,6 +318,9 @@ impl Permissable for Permissions {
                     changed = true;
                 }
                 PermissionUpdatedArg::UpdateRolePermission(role, permissions) => {
+                    // 先检查权限是否都存在
+                    assure_exist(permissions, |p| self.permissions.contains(p), "Permission");
+
                     let exist = self.role_permissions.get(role);
                     if let Some(permissions) = permissions {
                         if let Some(exist) = exist {
@@ -334,18 +354,9 @@ impl Permissable for Permissions {
                     changed = true;
                 }
                 PermissionUpdatedArg::UpdateUserRole(user_id, roles) => {
-                    // 先检查权限对不对
-                    let roles = if let Some(roles) = roles {
-                        Some(
-                            roles
-                                .iter()
-                                .filter(|role| self.role_permissions.contains_key(*role))
-                                .map(|r| r.clone())
-                                .collect::<HashSet<String>>(),
-                        )
-                    } else {
-                        None
-                    };
+                    // 先检查角色是否都存在
+                    assure_exist(roles, |r| self.role_permissions.contains_key(r), "Role");
+
                     let exist = self.user_roles.get(user_id);
                     if let Some(roles) = &roles {
                         if let Some(exist) = exist {
