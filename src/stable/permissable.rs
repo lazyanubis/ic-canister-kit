@@ -76,6 +76,7 @@ pub trait Permissable {
     fn permission_users(&self) -> HashSet<UserId>;
     fn permission_has(&self, user_id: &UserId, permission: &Permission) -> bool;
     fn permission_owned(&self, user_id: &UserId) -> HashMap<&Permission, bool>;
+    fn permission_assigned(&self, user_id: &UserId) -> Option<&HashSet<Permission>>;
     fn permission_roles_all(&self) -> &HashMap<String, HashSet<Permission>>;
     fn permission_roles_by_user(&self, user_id: &UserId) -> Option<&HashSet<String>>;
     // 修改
@@ -243,6 +244,9 @@ impl Permissable for Permissions {
             .iter()
             .map(|permission| (permission, self.permission_has(user_id, permission)))
             .collect()
+    }
+    fn permission_assigned(&self, user_id: &UserId) -> Option<&HashSet<Permission>> {
+        self.user_permissions.get(user_id)
     }
     fn permission_roles_all(&self) -> &HashMap<String, HashSet<Permission>> {
         &self.role_permissions
