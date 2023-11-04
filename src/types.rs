@@ -25,3 +25,6 @@ pub use crate::stable::types::*;
 
 #[cfg(feature = "nft")]
 pub use crate::nft::types::*;
+
+#[cfg(feature = "candid_type")]
+pub use crate::candid::types::*;

@@ -21,4 +21,7 @@ pub mod stable;
 #[cfg(feature = "nft")]
 pub mod nft;
 
+#[cfg(feature = "candid_type")]
+pub mod candid;
+
 pub mod types;
