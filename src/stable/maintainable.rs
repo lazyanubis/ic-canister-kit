@@ -1,12 +1,12 @@
 use std::fmt::Display;
 
-use crate::times::{now, Timestamp};
+use crate::times::{now, TimestampNanos};
 
 /// 维护状态
 
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
 pub struct MaintainingReason {
-    pub created: Timestamp,
+    pub created: TimestampNanos,
     pub message: String,
 }
 

@@ -1,4 +1,4 @@
-use crate::{identity::CanisterId, times::Timestamp};
+use crate::{identity::CanisterId, times::TimestampNanos};
 
 #[cfg(feature = "stable_initial")]
 pub use super::initial::Initial;
@@ -29,7 +29,7 @@ pub use super::hashmap::{CustomHashMap, CustomHashMapState};
 pub struct CanisterInitialArg {
     pub permission_host: Option<CanisterId>,
     pub record_collector: Option<CanisterId>,
-    pub schedule: Option<Timestamp>,
+    pub schedule: Option<TimestampNanos>,
 }
 
 impl CanisterInitialArg {

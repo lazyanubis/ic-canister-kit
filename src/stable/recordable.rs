@@ -7,7 +7,7 @@ use crate::common::pages::{
 };
 use crate::identity::{caller, CallerId, CanisterId};
 use crate::times::schedulable::async_execute;
-use crate::times::Timestamp;
+use crate::times::TimestampNanos;
 
 /// 日志记录
 
@@ -24,20 +24,20 @@ pub enum RecordLevel {
 // 每条日志记录
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
 pub struct Record {
-    pub id: u64,            // 日志 id
-    pub created: Timestamp, // 时间戳 纳秒
-    pub level: RecordLevel, // 日志级别
-    pub caller: CallerId,   // 调用人
-    pub topic: String,      // 日志主题
-    pub content: String,    // 日志内容
-    pub done: Timestamp,    // 完成时间
-    pub result: String,     // 执行结果
+    pub id: u64,                 // 日志 id
+    pub created: TimestampNanos, // 时间戳 纳秒
+    pub level: RecordLevel,      // 日志级别
+    pub caller: CallerId,        // 调用人
+    pub topic: String,           // 日志主题
+    pub content: String,         // 日志内容
+    pub done: TimestampNanos,    // 完成时间
+    pub result: String,          // 执行结果
 }
 
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
 pub struct RecordSearch {
     pub id: Option<(Option<u64>, Option<u64>)>, // id 过滤
-    pub created: Option<(Option<Timestamp>, Option<Timestamp>)>, // 创建时间过滤
+    pub created: Option<(Option<TimestampNanos>, Option<TimestampNanos>)>, // 创建时间过滤
     pub level: Option<HashSet<RecordLevel>>,    // 日志级别过滤
     pub caller: Option<HashSet<CallerId>>,      // 调用人过滤
     pub topic: Option<HashSet<String>>,         // 日志主题过滤
@@ -101,7 +101,7 @@ pub struct MigratedRecords {
     pub topics: HashSet<String>,
     pub next_id: u64,
     pub records: Vec<Record>,
-    pub updated: Vec<(u64, Timestamp, String)>,
+    pub updated: Vec<(u64, TimestampNanos, String)>,
 }
 
 pub trait Recordable {
@@ -152,7 +152,7 @@ pub struct Records {
     pub topics: HashSet<String>,   // 所有主题
     pub next_id: u64,              // 下一个未使用的 id
     pub records: Vec<Record>,
-    pub updated: Vec<(u64, Timestamp, String)>, // 如果更新失败了, 需要记录给日志收集者处理
+    pub updated: Vec<(u64, TimestampNanos, String)>, // 如果更新失败了, 需要记录给日志收集者处理
 }
 
 impl Records {

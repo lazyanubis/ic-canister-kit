@@ -1,4 +1,4 @@
-use super::Timestamp;
+use super::TimestampNanos;
 
 #[inline]
 pub fn async_execute(task: impl FnOnce() + 'static) -> ic_cdk_timers::TimerId {
@@ -49,7 +49,7 @@ pub fn async_execute(task: impl FnOnce() + 'static) -> ic_cdk_timers::TimerId {
 pub use ic_cdk_timers::TimerId;
 
 pub fn schedule_start(
-    schedule: Option<Timestamp>,
+    schedule: Option<TimestampNanos>,
     task: impl FnMut() + 'static,
 ) -> Option<TimerId> {
     schedule.and_then(|interval| {
@@ -68,21 +68,21 @@ pub fn schedule_stop(timer_id: Option<TimerId>) {
 
 pub trait Schedulable {
     // 查询
-    fn schedule_find(&self) -> Option<Timestamp>;
+    fn schedule_find(&self) -> Option<TimestampNanos>;
     // 修改
-    fn schedule_replace(&mut self, schedule: Option<Timestamp>);
+    fn schedule_replace(&mut self, schedule: Option<TimestampNanos>);
 }
 
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Default)]
-pub struct Schedule(Option<Timestamp>);
+pub struct Schedule(Option<TimestampNanos>);
 
 impl Schedulable for Schedule {
     // 查询
-    fn schedule_find(&self) -> Option<Timestamp> {
+    fn schedule_find(&self) -> Option<TimestampNanos> {
         self.0
     }
     // 修改
-    fn schedule_replace(&mut self, schedule: Option<Timestamp>) {
+    fn schedule_replace(&mut self, schedule: Option<TimestampNanos>) {
         self.0 = schedule
     }
 }
