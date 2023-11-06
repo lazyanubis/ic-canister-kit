@@ -822,6 +822,14 @@ pub fn parse_candid(candid: &str) -> Result<WrappedCandidType, String> {
     CandidBuilder::parse(candid)
 }
 
+pub fn parse_methods(candid: &str) -> HashMap<String, String> {
+    let candid = CandidBuilder::parse(candid);
+    if let Err(err) = candid {
+        panic!("{}", &err);
+    }
+    candid.unwrap().to_methods()
+}
+
 // ================
 
 #[allow(unused)]
@@ -942,7 +950,7 @@ fn test_parse_candid() {
       whoami : () -> (principal) query;
     }"##;
 
-    let wrapped1 = parse_candid(candid1).unwrap();
+    let wrapped1 = CandidBuilder::parse(candid1).unwrap();
 
     // println!("wrapped1: {:#?}", wrapped1);
 
@@ -1153,7 +1161,7 @@ fn test_parse_candid() {
       whoami : () -> (principal) query;
     }"##;
 
-    let wrapped2 = parse_candid(candid2).unwrap();
+    let wrapped2 = CandidBuilder::parse(candid2).unwrap();
 
     // println!("wrapped2: {:#?}", wrapped2);
 
@@ -2925,7 +2933,7 @@ fn test_parse_candid() {
    }
    "##;
 
-    let wrapped3 = parse_candid(candid3).unwrap();
+    let wrapped3 = CandidBuilder::parse(candid3).unwrap();
 
     // println!("wrapped3: {:#?}", wrapped3);
 

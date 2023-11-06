@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 // 自定义的包装 Candid 类型
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum WrappedCandidType {
@@ -193,6 +195,16 @@ impl WrappedCandidType {
             ),
             Self::Rec(subtype, id) => format!("μrec_{}.{}", id, subtype.to_text()),
             Self::Reference(id) => format!("rec_{}", id),
+        }
+    }
+
+    pub fn to_methods(&self) -> HashMap<String, String> {
+        match self {
+            Self::Service { methods, .. } => methods
+                .iter()
+                .map(|(method, candid)| (method.to_string(), candid.to_text()))
+                .collect(),
+            _ => panic!("must be service"),
         }
     }
 }
