@@ -193,7 +193,6 @@ impl Recordable for Records {
                 .records
                 .iter()
                 .filter(|record| search.test(record))
-                // .map(|record| *record)
                 .collect();
             return records;
         }

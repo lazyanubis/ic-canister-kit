@@ -19,6 +19,11 @@ pub use super::recordable::{
     MigratedRecords, Record, RecordLevel, RecordSearch, Recordable, Records,
 };
 
+#[cfg(feature = "stable_notifiable")]
+pub use super::notifiable::{
+    Notifiable, Notification, NotificationAction, NotificationSearch, Notifications,
+};
+
 #[cfg(feature = "stable_uploads")]
 pub use super::uploads::UploadCache;
 

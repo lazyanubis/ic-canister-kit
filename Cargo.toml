@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "0.3.11"
+version = "0.3.12"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -74,6 +74,7 @@ stable_recordable = [
     "common_pages",
     "canister_call",
 ] # 日志记录
+stable_notifiable = ["stable", "times"] # 通知信息
 stable_uploads = ["stable"] # 分片上传
 stable_hashmap = ["stable"] # HashMap
 
@@ -112,6 +113,7 @@ all = [
     "stable_maintainable",
     "stable_permissable",
     "stable_recordable",
+    "stable_notifiable",
     "stable_uploads",
     "stable_hashmap",
     "nft",
@@ -147,6 +149,7 @@ without_nft = [
     "stable_maintainable",
     "stable_permissable",
     "stable_recordable",
+    "stable_notifiable",
     "stable_uploads",
     "stable_hashmap",
     "candid_type",

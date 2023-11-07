@@ -15,6 +15,9 @@ pub mod permissable;
 #[cfg(feature = "stable_recordable")]
 pub mod recordable;
 
+#[cfg(feature = "stable_notifiable")]
+pub mod notifiable;
+
 #[cfg(feature = "stable_uploads")]
 pub mod uploads;
 
