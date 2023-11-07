@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, fmt::Display};
 
 use crate::{
     common::pages::{page_find_with_reserve, page_find_with_reserve_and_filter, Page, PageData},
@@ -189,5 +189,20 @@ impl Notifiable for Notifications {
             i -= 1;
         }
         None
+    }
+}
+
+impl Display for Notification {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!(
+            "{{ id: {}, created: {}, caller: {}, action: {:?}, title: {}, content: {}, read: {} }}",
+            self.id,
+            self.created,
+            self.caller.to_text(),
+            self.action,
+            self.title,
+            self.content,
+            self.read,
+        ))
     }
 }
