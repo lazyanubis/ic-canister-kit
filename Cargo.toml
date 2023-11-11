@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "0.3.13"
+version = "0.3.14"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -36,6 +36,7 @@ canister_deploy = [
     "canister_codes",
 ] # 罐子部署
 canister_call = ["identity"] # 罐子调用
+canister_candid = ["canister_call"] # 罐子Candid
 canister_managed = [
     "canister_cycles",
     "canister_status",
@@ -97,6 +98,7 @@ all = [
     "canister_codes",
     "canister_deploy",
     "canister_call",
+    "canister_candid",
     "canister_managed",
     "number_random",
     "number_mix",
@@ -133,6 +135,7 @@ without_nft = [
     "canister_codes",
     "canister_deploy",
     "canister_call",
+    "canister_candid",
     "canister_managed",
     "number_random",
     "number_mix",

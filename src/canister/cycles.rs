@@ -24,7 +24,7 @@ pub fn wallet_receive() -> ic_canister_kit::canister::cycles::WalletReceiveResul
 /// 接受转入 cycles 的结果类型
 #[derive(candid::CandidType, candid::Deserialize, Debug)]
 pub struct WalletReceiveResult {
-    accepted: u64,
+    pub accepted: u64,
 }
 
 /// 通用的查询罐子剩余 cycles 的接口
