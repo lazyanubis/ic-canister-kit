@@ -20,7 +20,7 @@ pub type ExtAllowanceResult = MotokoResult<ExtBalance, ExtCommonError>;
 // 授权参数
 #[derive(CandidType, Deserialize)]
 pub struct ExtApproveArgs {
-    pub subaccount: Option<ExtSubAccount>, // 注意，这里指的是所有者的子账户，也就是调用者的子账户
+    pub subaccount: Option<ExtSubaccount>, // 注意，这里指的是所有者的子账户，也就是调用者的子账户
     pub token: ExtTokenIdentifier,
     pub allowance: ExtBalance,
     pub spender: UserId,

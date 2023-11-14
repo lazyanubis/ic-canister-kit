@@ -1,7 +1,7 @@
 #[cfg(feature = "token_ledger")]
 pub use super::ledger::{
     LedgerAccountIdentifier, LedgerBinaryAccountBalanceArgs, LedgerBlockIndex, LedgerDecimals,
-    LedgerName, LedgerSubAccount, LedgerSymbol, LedgerTimestamp, LedgerTokens, LedgerTransferArgs,
+    LedgerName, LedgerSubaccount, LedgerSymbol, LedgerTimestamp, LedgerTokens, LedgerTransferArgs,
     LedgerTransferError, LedgerTransferFee, LedgerTransferFeeArg, LedgerTransferResult,
 };
 

@@ -20,7 +20,7 @@ pub type ExtTokenIdentifier = String; // 合约标识符，实际是: 0x0Atid + 
 pub type ExtBalance = candid::Nat; // 余额 是自然数
 pub type ExtAccountIdentifier = Vec<u8>; // 账户识别 一般是 account id，如果用户使用的是 principal 也要和 subaccount 一起转换成对应的 account id
 pub type ExtAccountIdentifierHex = String; // 账户识别 一般是 account id，如果用户使用的是 principal 也要和 subaccount 一起转换成对应的 account id
-pub type ExtSubAccount = Vec<u8>; // 子账户
+pub type ExtSubaccount = Vec<u8>; // 子账户
 
 #[derive(candid::CandidType, candid::Deserialize, serde::Serialize, Debug, Clone)]
 pub enum ExtUser {
@@ -69,7 +69,7 @@ impl ExtUser {
     }
     pub fn parse_account_identifier_hex(
         user_id: &UserId,
-        subaccount: &Option<ExtSubAccount>,
+        subaccount: &Option<ExtSubaccount>,
     ) -> ExtAccountIdentifierHex {
         let result = ExtUser::parse_account_identifier_bytes(user_id, &subaccount);
 
@@ -77,7 +77,7 @@ impl ExtUser {
     }
     pub fn parse_account_identifier(
         user_id: &UserId,
-        subaccount: &Option<ExtSubAccount>,
+        subaccount: &Option<ExtSubaccount>,
     ) -> ExtAccountIdentifier {
         ExtUser::parse_account_identifier_bytes(user_id, &subaccount)
     }
@@ -88,7 +88,7 @@ impl ExtUser {
 
     pub fn parse_account_identifier_bytes(
         user_id: &UserId,
-        subaccount: &Option<ExtSubAccount>,
+        subaccount: &Option<ExtSubaccount>,
     ) -> Vec<u8> {
         let subaccount: Vec<u8> = subaccount.clone().unwrap_or_else(|| [0; 32].to_vec()); // 默认子账户 应该全是 0
 
@@ -141,7 +141,7 @@ impl ExtUser {
         r
     }
 
-    pub fn nat_to_subaccount(n: candid::Nat) -> ExtSubAccount {
+    pub fn nat_to_subaccount(n: candid::Nat) -> ExtSubaccount {
         let mut n = n.0.to_bytes_be();
         loop {
             if n.len() >= 32 {

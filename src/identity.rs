@@ -122,7 +122,7 @@ pub fn parse_account_identifier_by_vec(
     subaccount: &Option<Vec<u8>>,
 ) -> AccountIdentifier {
     if let Some(vec) = subaccount {
-        assert!(vec.len() == 32, "Invalid SubAccount");
+        assert!(vec.len() == 32, "Invalid Subaccount");
     }
     let subaccount = if let Some(vec) = subaccount {
         Some(to_array(vec))

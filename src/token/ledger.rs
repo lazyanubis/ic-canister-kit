@@ -173,7 +173,7 @@ pub type LedgerAccountIdentifier = Vec<u8>;
 // 使用子账户机制, 让一个用户 principal 控制大量的账本账户
 // Ledger uses subaccounts to compute the source address, which enables one
 // principal to control multiple ledger accounts.
-pub type LedgerSubAccount = Vec<u8>;
+pub type LedgerSubaccount = Vec<u8>;
 // 转账参数
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct LedgerTransferArgs {
@@ -181,7 +181,7 @@ pub struct LedgerTransferArgs {
     // 如果没有, 则默认全 0 的子账户
     // The subaccount from which the caller wants to transfer funds.
     // If null, the ledger uses the default (all zeros) subaccount to compute the source address.
-    pub from_subaccount: Option<LedgerSubAccount>,
+    pub from_subaccount: Option<LedgerSubaccount>,
     // 想要转给目标地址的数量
     pub amount: LedgerTokens,
     // 目标地址, 长度为 32 的byte数组, 转账成功, 目标地址的余额会增加 amount 的数量

@@ -31,7 +31,7 @@ pub struct ExtTransferArgs {
     pub amount: ExtBalance,                // 数量 NFT转账必须是 1
     pub memo: Vec<u8>,                     // 转账附带的 memo
     pub notify: bool,                      // 是否要通知对应的 canister
-    pub subaccount: Option<ExtSubAccount>, // 注意，这里指的是调用者的子账户
+    pub subaccount: Option<ExtSubaccount>, // 注意，这里指的是调用者的子账户
 }
 
 #[derive(CandidType, Deserialize)]
@@ -52,7 +52,7 @@ pub struct StableTransferArgs {
     pub amount: ExtBalance,                // 数量 NFT转账必须是 1
     pub memo: Vec<u8>,                     // 转账附带的 memo
     pub notify: bool,                      // 是否要通知对应的 canister
-    pub subaccount: Option<ExtSubAccount>, // 注意，这里指的是调用者的子账户
+    pub subaccount: Option<ExtSubaccount>, // 注意，这里指的是调用者的子账户
 }
 
 // 转账返回的结果
