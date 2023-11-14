@@ -29,22 +29,23 @@ pub mod types;
 // 持久化相关接口
 
 // 升级后恢复
-pub fn restore_after_upgrade<R>(state: &RefCell<R>)
+pub fn restore_after_upgrade<R>(state: &RefCell<R>) -> u64
 where
     R: candid::CandidType + for<'d> candid::Deserialize<'d>,
 {
     let mut state = state.borrow_mut();
-    let (stable_state,): (R,) = ic_cdk::storage::stable_restore().unwrap();
+    let (stable_state, record_id): (R, u64) = ic_cdk::storage::stable_restore().unwrap();
     *state = stable_state;
+    record_id
 }
 
 // 升级前保存
-pub fn store_before_upgrade<S>(state: &RefCell<S>)
+pub fn store_before_upgrade<S>(state: &RefCell<S>, record_id: u64)
 where
     S: candid::CandidType + Default,
 {
     let stable_state: S = std::mem::take(&mut *state.borrow_mut());
-    ic_cdk::storage::stable_save((stable_state,)).unwrap();
+    ic_cdk::storage::stable_save((stable_state, record_id)).unwrap();
 }
 
 /*
