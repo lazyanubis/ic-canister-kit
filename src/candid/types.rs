@@ -202,7 +202,16 @@ impl WrappedCandidType {
         match self {
             Self::Service { methods, .. } => methods
                 .iter()
-                .map(|(method, candid)| (method.to_string(), candid.to_text()))
+                .map(|(method, candid)| {
+                    (method.to_string(), {
+                        let func = candid.to_text();
+                        if func.starts_with("func ") {
+                            func[5..].to_string()
+                        } else {
+                            func
+                        }
+                    })
+                })
                 .collect(),
             _ => panic!("must be service"),
         }
