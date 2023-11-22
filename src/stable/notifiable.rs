@@ -8,10 +8,19 @@ use crate::{
 
 #[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
 pub enum NotificationAction {
-    Silence,                                  // 仅仅记录, 不通知
-    CanisterCall(CanisterId, String, String), // 罐子接口回调 参数必须是文本, method: (text) -> ()
-    Email(String),                            // 邮箱通知, 里面是邮箱地址
-    Post { channel: String, url: String },    // http post通知, 里面是类型和请求接口
+    Silence, // 仅仅记录, 不通知
+    CanisterCall {
+        canister: CanisterId,
+        method: String,
+        event: String,
+    }, // 罐子接口回调 参数必须是文本, method: (text) -> ()
+    Email {
+        email: String,
+    }, // 邮箱通知, 里面是邮箱地址
+    Post {
+        channel: String,
+        url: String,
+    }, // http post通知, 里面是类型和请求接口
 }
 
 #[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
