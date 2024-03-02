@@ -8,6 +8,7 @@
     "nanos",
     "nocapture",
     "nonfungible",
+    "rustdoc",
     "Schedulable",
     "subaccount",
     "subaccounts",
