@@ -52,6 +52,7 @@ where
 
 // 充值余额
 // ! 任何人都可以调用
+// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-deposit_cycles
 pub async fn deposit_cycles(
     canister_id: CanisterId,
     cycles: u128,

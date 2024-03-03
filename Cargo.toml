@@ -26,7 +26,6 @@ identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 
 # 和罐子相关的
 canister = ["identity", "serde"]                         # 罐子相关
-canister_create = ["identity"]                           # 罐子创建
 canister_settings = ["identity"]                         # 罐子设置
 canister_codes = ["identity"]                            # 罐子代码
 canister_deploy = ["canister_create", "canister_codes"]  # 罐子部署
@@ -82,7 +81,6 @@ candid_type = []
 all = [
     "identity",
     "canister",
-    "canister_create",
     "canister_settings",
     "canister_codes",
     "canister_deploy",
@@ -118,7 +116,6 @@ all = [
 without_nft = [
     "identity",
     "canister",
-    "canister_create",
     "canister_settings",
     "canister_codes",
     "canister_deploy",

@@ -2,8 +2,7 @@ pub mod cycles;
 
 pub mod status;
 
-// #[cfg(feature = "canister_create")]
-// pub mod create;
+pub mod life;
 
 // #[cfg(feature = "canister_settings")]
 // pub mod settings;
