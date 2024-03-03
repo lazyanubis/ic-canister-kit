@@ -25,7 +25,7 @@ default = ["without_nft"]
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 
 # 和罐子相关的
-canister_cycles = ["candid", "serde"] # 罐子余额
+canister = ["identity", "serde"] # 罐子相关
 canister_status = ["identity"] # 罐子状态
 canister_create = ["identity"] # 罐子创建
 canister_settings = ["identity"] # 罐子设置
@@ -38,7 +38,6 @@ canister_deploy = [
 canister_call = ["identity"] # 罐子调用
 canister_candid = ["canister_call"] # 罐子Candid
 canister_managed = [
-    "canister_cycles",
     "canister_status",
     "canister_codes",
     "canister_deploy",
@@ -91,7 +90,7 @@ candid_type = []
 
 all = [
     "identity",
-    "canister_cycles",
+    "canister",
     "canister_status",
     "canister_create",
     "canister_settings",
@@ -128,7 +127,7 @@ all = [
 
 without_nft = [
     "identity",
-    "canister_cycles",
+    "canister",
     "canister_status",
     "canister_create",
     "canister_settings",
