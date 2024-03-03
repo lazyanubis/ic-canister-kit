@@ -1,5 +1,4 @@
-//! 工具包
-
+#![doc = include_str!("../README.md")]
 // #![deny(unreachable_pub)] // ! lib 需要检查此项
 #![deny(unsafe_code)] // 拒绝 unsafe 代码
 // #![deny(missing_docs)] // ! 必须写文档

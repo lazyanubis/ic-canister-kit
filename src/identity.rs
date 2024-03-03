@@ -38,12 +38,29 @@ pub type AccountIdentifierHex = String; // 16 进制文本
 pub enum FromVecError {
     WrongLength, // length must be 32
 }
+impl std::fmt::Display for FromVecError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::WrongLength => write!(f, "The bytes length of account must be 32"),
+        }
+    }
+}
+impl std::error::Error for FromVecError {}
 
 #[derive(Debug)]
 pub enum FromHexError {
     HexError(hex::FromHexError),
     WrongLength, // length must be 32
 }
+impl std::fmt::Display for FromHexError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::HexError(e) => write!(f, "HexError: {e}"), // 这里的 e 是 FromHexError 的类型
+            Self::WrongLength => write!(f, "The bytes length of account must be 32"),
+        }
+    }
+}
+impl std::error::Error for FromHexError {}
 
 impl From<FromVecError> for FromHexError {
     fn from(value: FromVecError) -> Self {
