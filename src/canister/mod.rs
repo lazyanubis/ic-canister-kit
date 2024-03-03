@@ -1,80 +1,108 @@
-use crate::identity::CanisterId;
-
-use self::types::CallError;
-
-#[cfg(feature = "canister_cycles")]
 pub mod cycles;
 
-#[cfg(feature = "canister_status")]
 pub mod status;
 
-#[cfg(feature = "canister_create")]
-pub mod create;
+// #[cfg(feature = "canister_create")]
+// pub mod create;
 
-#[cfg(feature = "canister_settings")]
-pub mod settings;
+// #[cfg(feature = "canister_settings")]
+// pub mod settings;
 
-#[cfg(feature = "canister_codes")]
-pub mod codes;
+// #[cfg(feature = "canister_codes")]
+// pub mod codes;
 
-#[cfg(feature = "canister_deploy")]
-pub mod deploy;
+// #[cfg(feature = "canister_deploy")]
+// pub mod deploy;
 
-#[cfg(feature = "canister_call")]
-pub mod call;
+// #[cfg(feature = "canister_call")]
+// pub mod call;
 
-#[cfg(feature = "canister_candid")]
-pub mod candid;
+// #[cfg(feature = "canister_candid")]
+// pub mod candid;
 
-#[cfg(feature = "canister_managed")]
-pub mod managed;
+// #[cfg(feature = "canister_managed")]
+// pub mod managed;
 
 pub mod types;
 
+// ========================= 基本方法 =========================
+
+pub use ic_cdk::api::stable::WASM_PAGE_SIZE_IN_BYTES as WASM_PAGE_SIZE;
+
+#[inline]
+pub fn self_canister_cycles() -> u128 {
+    #[cfg(target_arch = "wasm32")]
+    {
+        ic_cdk::api::canister_balance128()
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        0
+    }
+}
+
+#[inline]
+pub fn self_canister_stable_memory_size() -> u128 {
+    #[cfg(target_arch = "wasm32")]
+    {
+        (ic_cdk::api::stable::stable64_size() as u128) * WASM_PAGE_SIZE as u128
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        0
+    }
+}
+
+#[inline]
+pub fn self_canister_heap_memory_size() -> u128 {
+    #[cfg(target_arch = "wasm32")]
+    {
+        (core::arch::wasm32::memory_size(0) as u128) * WASM_PAGE_SIZE as u128
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        0
+    }
+}
+
+#[inline]
+pub fn self_canister_current_memory_size() -> u128 {
+    self_canister_stable_memory_size() + self_canister_heap_memory_size()
+}
+
 // ========================= 错误处理 =========================
 
-// 解开方法调用结果
-fn unwrap_call_result<R: std::fmt::Debug>(
-    canister_id: &CanisterId,
-    method: &str,
-    call_result: Result<(R,), CallError>,
-) -> R {
-    if call_result.is_err() {
-        let err = call_result.unwrap_err();
-        panic!(
-            "canister: {} call: {} failed: {:?} {}",
-            canister_id.to_text(),
-            method,
-            err.0,
-            err.1
-        );
-    }
+// use self::types::CanisterCallError;
 
-    call_result.unwrap().0
+// 调用结果
+#[allow(unused)]
+#[inline]
+fn fetch_and_wrap_call_result<R>(
+    canister_id: crate::identity::CanisterId,
+    method: &str,
+    call_result: Result<(R,), (ic_cdk::api::call::RejectionCode, String)>,
+) -> types::CanisterCallResult<R> {
+    call_result
+        .map(|(r,)| r)
+        .map_err(|(rejection_code, message)| types::CanisterCallError {
+            canister_id,
+            method: method.to_string(),
+            rejection_code,
+            message,
+        })
 }
 
-// 解开方法调用结果
-#[allow(dead_code)]
-fn unwrap_call_result_with_error<R: std::fmt::Debug>(
-    canister_id: &CanisterId,
+#[allow(unused)]
+#[inline]
+fn wrap_call_result(
+    canister_id: crate::identity::CanisterId,
     method: &str,
-    call_result: Result<(R,), CallError>,
-) -> Result<R, String> {
-    if call_result.is_err() {
-        let err = call_result.unwrap_err();
-        return Result::Err(format!(
-            "canister: {} call: {} failed: {:?} {}",
-            canister_id.to_text(),
-            method,
-            err.0,
-            err.1
-        ));
-    }
-
-    Result::Ok(call_result.unwrap().0)
-}
-
-// 错误信息
-pub fn call_error_to_string(call_error: &CallError) -> String {
-    format!("error code: {:?} message: {}", call_error.0, call_error.1)
+    call_result: Result<(), (ic_cdk::api::call::RejectionCode, String)>,
+) -> types::CanisterCallResult<()> {
+    call_result.map_err(|(rejection_code, message)| types::CanisterCallError {
+        canister_id,
+        method: method.to_string(),
+        rejection_code,
+        message,
+    })
 }

@@ -1,9 +1,12 @@
 #[cfg(feature = "identity")]
 pub use crate::identity::{
-    AccountIdentifier, AccountIdentifierHex, CallerId, CanisterId, Subaccount, UserId,
+    AccountIdentifier, AccountIdentifierHex, CallerId, CallerIdText, CanisterId, CanisterIdText,
+    CollectionId, CollectionIdText, FromHexError, FromVecError, Subaccount, SubaccountHex, UserId,
+    UserIdText,
 };
 
-// pub use crate::canister::types::*;
+#[cfg(feature = "canister")]
+pub use crate::canister::types::*;
 
 // pub use crate::number::types::*;
 

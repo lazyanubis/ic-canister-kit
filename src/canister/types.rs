@@ -25,9 +25,6 @@ pub type CanisterCallResult<T> = Result<T, CanisterCallError>;
 
 // ===================== 常用模块 =====================
 
-// #[cfg(feature = "canister_status")]
-// pub use super::status::{CanisterInfoResult, CanisterStatusResult};
-
 // #[cfg(feature = "canister_call")]
 // pub use super::deploy::{CanisterInfo, CanisterInfoShow};
 

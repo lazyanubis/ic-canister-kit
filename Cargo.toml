@@ -25,23 +25,14 @@ default = ["without_nft"]
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 
 # 和罐子相关的
-canister = ["identity", "serde"] # 罐子相关
-canister_status = ["identity"] # 罐子状态
-canister_create = ["identity"] # 罐子创建
-canister_settings = ["identity"] # 罐子设置
-canister_codes = ["identity"] # 罐子代码
-canister_deploy = [
-    "canister_status",
-    "canister_create",
-    "canister_codes",
-] # 罐子部署
-canister_call = ["identity"] # 罐子调用
-canister_candid = ["canister_call"] # 罐子Candid
-canister_managed = [
-    "canister_status",
-    "canister_codes",
-    "canister_deploy",
-] # 管理罐子
+canister = ["identity", "serde"]                         # 罐子相关
+canister_create = ["identity"]                           # 罐子创建
+canister_settings = ["identity"]                         # 罐子设置
+canister_codes = ["identity"]                            # 罐子代码
+canister_deploy = ["canister_create", "canister_codes"]  # 罐子部署
+canister_call = ["identity"]                             # 罐子调用
+canister_candid = ["canister_call"]                      # 罐子Candid
+canister_managed = ["canister_codes", "canister_deploy"] # 管理罐子
 
 # 和数字相关的
 number_random = ["ic-cdk"]                       # 随机数
@@ -91,7 +82,6 @@ candid_type = []
 all = [
     "identity",
     "canister",
-    "canister_status",
     "canister_create",
     "canister_settings",
     "canister_codes",
@@ -128,7 +118,6 @@ all = [
 without_nft = [
     "identity",
     "canister",
-    "canister_status",
     "canister_create",
     "canister_settings",
     "canister_codes",

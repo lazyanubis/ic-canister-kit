@@ -48,8 +48,10 @@ where
     candid::Nat::from(accepted)
 }
 
+// ========================= 充值 cycles =========================
+
 // 充值余额
-// ! 必须是 Controller 才能充值
+// ! 任何人都可以调用
 pub async fn deposit_cycles(
     canister_id: CanisterId,
     cycles: u128,
@@ -59,15 +61,10 @@ pub async fn deposit_cycles(
         cycles,
     )
     .await;
-    call_result.map_err(
-        |(rejection_code, message)| super::types::CanisterCallError {
-            canister_id,
-            method: "deposit_cycles".into(),
-            rejection_code,
-            message,
-        },
-    )
+    super::wrap_call_result(canister_id, "ic#deposit_cycles", call_result)
 }
+
+// ========================= 自定义接口调用 =========================
 
 // 查询罐子余额
 // ! 必须实现 wallet_balance : () -> (nat) query 接口
@@ -76,16 +73,7 @@ pub async fn call_wallet_balance(
 ) -> super::types::CanisterCallResult<candid::Nat> {
     let call_result =
         ic_cdk::api::call::call::<(), (candid::Nat,)>(canister_id, "wallet_balance", ()).await;
-    call_result
-        .map(|(balance,)| balance)
-        .map_err(
-            |(rejection_code, message)| super::types::CanisterCallError {
-                canister_id,
-                method: "deposit_cycles".into(),
-                rejection_code,
-                message,
-            },
-        )
+    super::fetch_and_wrap_call_result(canister_id, "deposit_cycles", call_result)
 }
 
 // 充值罐子余额
@@ -101,14 +89,5 @@ pub async fn call_wallet_receive(
         cycles,
     )
     .await;
-    call_result
-        .map(|(balance,)| balance)
-        .map_err(
-            |(rejection_code, message)| super::types::CanisterCallError {
-                canister_id,
-                method: "wallet_receive".into(),
-                rejection_code,
-                message,
-            },
-        )
+    super::fetch_and_wrap_call_result(canister_id, "wallet_receive", call_result)
 }

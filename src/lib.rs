@@ -11,7 +11,8 @@
 #[cfg(feature = "identity")]
 pub mod identity;
 
-// pub mod canister;
+#[cfg(feature = "canister")]
+pub mod canister;
 
 // pub mod number;
 
