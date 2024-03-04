@@ -1,4 +1,5 @@
 // ================== 罐子调用产生的错误信息 ==================
+
 // 罐子调用会产生的错误
 #[derive(Debug)]
 pub struct CanisterCallError {
@@ -25,8 +26,7 @@ pub type CanisterCallResult<T> = Result<T, CanisterCallError>;
 
 // ===================== 常用模块 =====================
 
-// #[cfg(feature = "canister_call")]
-// pub use super::deploy::{CanisterInfo, CanisterInfoShow};
+pub use super::codes::{CanisterCodeWasm, CanisterInitArg};
 
 // #[cfg(feature = "canister_managed")]
 // pub use super::managed::{

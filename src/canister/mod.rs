@@ -8,8 +8,7 @@ pub mod codes;
 
 pub mod deploy;
 
-// #[cfg(feature = "canister_settings")]
-// pub mod settings;
+pub mod settings;
 
 // #[cfg(feature = "canister_call")]
 // pub mod call;
