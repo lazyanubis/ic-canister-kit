@@ -12,7 +12,7 @@ pub mod settings;
 
 pub mod call;
 
-pub mod candid;
+pub mod common;
 
 pub mod types;
 

@@ -1,16 +1,18 @@
 /// 生成随机数
 
 // 得到随机数
+#[inline]
 pub async fn random() -> [u8; 32] {
+    #[allow(clippy::unwrap_used)]
     let random = ic_cdk::api::management_canister::main::raw_rand()
         .await
         .unwrap()
         .0;
 
     let mut data = [0; 32];
-    for i in 0..32 {
-        data[i] = random[i];
-    }
+
+    data[..32].copy_from_slice(&random[..32]);
+
     data
 }
 
@@ -30,8 +32,8 @@ impl RandomProduce {
             current: 32,
         }
     }
-    pub async fn next(&mut self, number: u8) -> Vec<u8> {
-        let mut data = Vec::new();
+    pub async fn next(&mut self, number: usize) -> Vec<u8> {
+        let mut data = Vec::with_capacity(number);
         let mut remain = number;
 
         // 如果大于 32，就直接随机一个
@@ -40,27 +42,32 @@ impl RandomProduce {
             remain -= 32;
         }
 
-        let available = 32 - self.current;
+        let available = 32 - self.current as usize;
         if remain <= available {
-            for i in 0..remain {
-                data.push(self.random[(self.current + i) as usize]);
-            }
-            self.current += remain;
+            let current = self.current as usize;
+            data.extend_from_slice(&self.random[current..current + remain]);
+            self.current += remain as u8;
         } else {
-            for i in 0..available {
-                data.push(self.random[(self.current + i) as usize]);
-            }
+            // 剩下的全加入
+            let current = self.current as usize;
+            data.extend_from_slice(&self.random[current..current + available]);
             remain -= available;
 
+            // 随机新的一组
             self.random = random().await;
             self.current = 0;
 
-            for i in 0..remain {
-                data.push(self.random[(self.current + i) as usize]);
-            }
-            self.current += remain;
+            // 取出剩下的个数
+            data.extend_from_slice(&self.random[0..remain]);
+            self.current += remain as u8;
         }
 
         data
+    }
+}
+
+impl Default for RandomProduce {
+    fn default() -> Self {
+        Self::new()
     }
 }

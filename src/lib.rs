@@ -8,13 +8,14 @@
 #![deny(clippy::expect_used)] // 不许用 expect
 #![deny(clippy::panic)] // 不许用 panic
 
+#[cfg(feature = "number")]
+pub mod number;
+
 #[cfg(feature = "identity")]
 pub mod identity;
 
 #[cfg(feature = "canister")]
 pub mod canister;
-
-// pub mod number;
 
 // pub mod token;
 

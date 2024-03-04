@@ -1,5 +1,4 @@
 /// 调用罐子
-
 pub async fn call_canister<
     T: candid::utils::ArgumentEncoder + Send,
     R: for<'a> candid::utils::ArgumentDecoder<'a>,

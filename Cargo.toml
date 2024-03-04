@@ -19,17 +19,16 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-default = ["without_nft"]
+default = ["number", "identity", "canister"]
+
+# 和数字相关的
+number = ["ic-cdk", "sha2", "base32"] # 数字相关
 
 # 和身份相关的
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 
 # 和罐子相关的
 canister = ["identity", "serde"] # 罐子相关
-
-# 和数字相关的
-number_random = ["ic-cdk"]                       # 随机数
-number_mix = ["number_random", "sha2", "base32"] # 混合数字
 
 # 代币相关
 token_ledger = ["identity", "serde"] # Ledger 标准
@@ -68,10 +67,9 @@ nft_traits = ["nft"] # NFT 的属性记录
 candid_type = []
 
 all = [
+    "number",
     "identity",
     "canister",
-    "number_random",
-    "number_mix",
     "token_ledger",
     "token_icrc1",
     "times",
@@ -96,29 +94,6 @@ all = [
     "candid_type",
 ]
 
-without_nft = [
-    "identity",
-    "canister",
-    "number_random",
-    "number_mix",
-    "token_ledger",
-    "token_icrc1",
-    "times",
-    "times_schedulable",
-    "common_pages",
-    "common_result",
-    "http",
-    "stable",
-    "stable_initial",
-    "stable_upgrade",
-    "stable_maintainable",
-    "stable_permissable",
-    "stable_recordable",
-    "stable_notifiable",
-    "stable_uploads",
-    "stable_hashmap",
-    "candid_type",
-]
 
 [dependencies]
 candid = { version = "0.10", optional = true }

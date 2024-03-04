@@ -1,5 +1,4 @@
 /// 查询罐子的 candid
-
 pub async fn canister_did(
     canister_id: crate::identity::CanisterId,
 ) -> super::types::CanisterCallResult<String> {
