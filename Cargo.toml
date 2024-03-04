@@ -26,7 +26,6 @@ identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 
 # 和罐子相关的
 canister = ["identity", "serde"] # 罐子相关
-canister_candid = []             # 罐子Candid
 canister_managed = []            # 管理罐子
 
 # 和数字相关的
@@ -72,7 +71,6 @@ candid_type = []
 all = [
     "identity",
     "canister",
-    "canister_candid",
     "canister_managed",
     "number_random",
     "number_mix",
@@ -103,7 +101,6 @@ all = [
 without_nft = [
     "identity",
     "canister",
-    "canister_candid",
     "canister_managed",
     "number_random",
     "number_mix",

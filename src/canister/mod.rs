@@ -12,8 +12,7 @@ pub mod settings;
 
 pub mod call;
 
-// #[cfg(feature = "canister_candid")]
-// pub mod candid;
+pub mod candid;
 
 // #[cfg(feature = "canister_managed")]
 // pub mod managed;
