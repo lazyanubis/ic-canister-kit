@@ -43,6 +43,8 @@ pub async fn stop_canister(canister_id: CanisterId) -> super::types::CanisterCal
     super::wrap_call_result(canister_id, "ic#stop_canister", call_result)
 }
 
+// ========================= 删除罐子 =========================
+
 // 删除罐子
 // ! Only the controllers of the canister
 // ! already be stopped

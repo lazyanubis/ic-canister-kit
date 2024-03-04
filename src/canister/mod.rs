@@ -4,11 +4,10 @@ pub mod status;
 
 pub mod life;
 
+pub mod codes;
+
 // #[cfg(feature = "canister_settings")]
 // pub mod settings;
-
-// #[cfg(feature = "canister_codes")]
-// pub mod codes;
 
 // #[cfg(feature = "canister_deploy")]
 // pub mod deploy;
