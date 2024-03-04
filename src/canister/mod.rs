@@ -14,9 +14,6 @@ pub mod call;
 
 pub mod candid;
 
-// #[cfg(feature = "canister_managed")]
-// pub mod managed;
-
 pub mod types;
 
 // ========================= 基本方法 =========================

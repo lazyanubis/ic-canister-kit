@@ -27,9 +27,3 @@ pub type CanisterCallResult<T> = Result<T, CanisterCallError>;
 // ===================== 常用模块 =====================
 
 pub use super::codes::{CanisterCodeWasm, CanisterInitArg};
-
-// #[cfg(feature = "canister_managed")]
-// pub use super::managed::{
-//     ManagedCanisterChecking, ManagedCanisterConfig, ManagedCanisterInitial,
-//     ManagedCanisterMaintained, ManagedCanisterRefreshResult, ManagedCanisterStates,
-// };
