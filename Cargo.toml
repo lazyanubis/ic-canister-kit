@@ -25,10 +25,9 @@ default = ["without_nft"]
 identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 
 # 和罐子相关的
-canister = ["identity", "serde"]    # 罐子相关
-canister_call = ["identity"]        # 罐子调用
-canister_candid = ["canister_call"] # 罐子Candid
-canister_managed = []               # 管理罐子
+canister = ["identity", "serde"] # 罐子相关
+canister_candid = []             # 罐子Candid
+canister_managed = []            # 管理罐子
 
 # 和数字相关的
 number_random = ["ic-cdk"]                       # 随机数
@@ -51,19 +50,14 @@ http = ["candid", "serde", "serde_json"] # http 相关
 
 # 持久化
 stable = ["candid"]
-stable_initial = ["stable"] # 初始化
-stable_upgrade = ["stable"] # 升级
-stable_maintainable = ["stable"] # 维护
-stable_permissable = ["stable", "canister_call", "times_schedulable"] # 权限
-stable_recordable = [
-    "stable",
-    "times_schedulable",
-    "common_pages",
-    "canister_call",
-] # 日志记录
-stable_notifiable = ["stable", "times"] # 通知信息
-stable_uploads = ["stable"] # 分片上传
-stable_hashmap = ["stable"] # HashMap
+stable_initial = ["stable"]                                         # 初始化
+stable_upgrade = ["stable"]                                         # 升级
+stable_maintainable = ["stable"]                                    # 维护
+stable_permissable = ["stable", "times_schedulable"]                # 权限
+stable_recordable = ["stable", "times_schedulable", "common_pages"] # 日志记录
+stable_notifiable = ["stable", "times"]                             # 通知信息
+stable_uploads = ["stable"]                                         # 分片上传
+stable_hashmap = ["stable"]                                         # HashMap
 
 # NFT相关
 nft = ["identity"]   # NFT
@@ -78,7 +72,6 @@ candid_type = []
 all = [
     "identity",
     "canister",
-    "canister_call",
     "canister_candid",
     "canister_managed",
     "number_random",
@@ -110,7 +103,6 @@ all = [
 without_nft = [
     "identity",
     "canister",
-    "canister_call",
     "canister_candid",
     "canister_managed",
     "number_random",

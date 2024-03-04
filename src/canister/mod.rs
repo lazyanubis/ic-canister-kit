@@ -10,8 +10,7 @@ pub mod deploy;
 
 pub mod settings;
 
-// #[cfg(feature = "canister_call")]
-// pub mod call;
+pub mod call;
 
 // #[cfg(feature = "canister_candid")]
 // pub mod candid;
