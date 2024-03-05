@@ -1,3 +1,5 @@
+use super::fetch_tuple0;
+
 /// 查询罐子的 candid
 pub async fn canister_did(
     canister_id: crate::identity::CanisterId,
@@ -8,5 +10,5 @@ pub async fn canister_did(
         (),
     )
     .await;
-    call_result.map(|(did,)| did)
+    call_result.map(fetch_tuple0)
 }

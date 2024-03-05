@@ -68,7 +68,7 @@ pub fn self_canister_current_memory_size() -> u128 {
 // 调用结果
 #[allow(unused)]
 #[inline]
-fn fetch_and_wrap_call_result<R>(
+pub(crate) fn fetch_and_wrap_call_result<R>(
     canister_id: crate::identity::CanisterId,
     method: &str,
     call_result: Result<(R,), (ic_cdk::api::call::RejectionCode, String)>,

@@ -19,7 +19,7 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-default = ["number", "identity", "canister", "token"]
+default = ["identity", "canister", "number", "token"]
 
 # 和数字相关的
 number = ["ic-cdk", "sha2", "base32"] # 数字相关
@@ -31,7 +31,7 @@ identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
 canister = ["identity", "serde"] # 罐子相关
 
 # 代币相关
-token = ["identity", "canister"] # 代币标准
+token = ["identity", "canister", "ic-ledger-types"] # 代币标准
 
 # 时间相关
 times = ["ic-cdk"]                             # 时间相关
@@ -66,9 +66,9 @@ nft_traits = ["nft"] # NFT 的属性记录
 candid_type = []
 
 all = [
-    "number",
     "identity",
     "canister",
+    "number",
     "token",
     "times",
     "times_schedulable",
@@ -96,7 +96,7 @@ all = [
 [dependencies]
 candid = { version = "0.10", optional = true }
 ic-cdk = { version = "0.13", optional = true }
-# ic-ledger-types = { version = "0.10", optional = true } # token 类型
+ic-ledger-types = { version = "0.10", optional = true } # token 类型
 ic-cdk-timers = { version = "0.7", optional = true }    # 定时器
 
 sha2 = { version = "0.10", optional = true }     # hash

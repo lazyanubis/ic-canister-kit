@@ -1,3 +1,3 @@
-pub use super::random::RandomProduce;
+pub use super::random::RandomGenerator;
 
 pub use super::mix::MixNumberDecodeError;

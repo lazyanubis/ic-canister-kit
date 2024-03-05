@@ -2,7 +2,7 @@ use candid::{CandidType, Deserialize};
 
 use crate::{
     canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
-    identity::CanisterId,
+    identity::{AccountIdentifier, CanisterId, Subaccount},
 };
 
 /// icp 类的账本罐子接口
@@ -178,12 +178,16 @@ pub struct LedgerTimestamp {
 // 账户 ID 是长度为 32 的byte数组
 // 前 4 位是大端法编码的后面 28 位数字的 CRC32 校验码
 // The first 4 bytes is big-endian encoding of a CRC32 checksum of the last 28 bytes.
-pub type LedgerAccountIdentifier = Vec<u8>;
+// pub type LedgerAccountIdentifier = Vec<u8>;
+pub type LedgerAccountIdentifier = AccountIdentifier; // ! 修改为安全的参数
+
 // 子账户是任意长度为 32 的byte数组
 // 使用子账户机制, 让一个用户 principal 控制大量的账本账户
 // Ledger uses subaccounts to compute the source address, which enables one
 // principal to control multiple ledger accounts.
-pub type LedgerSubaccount = Vec<u8>;
+// pub type LedgerSubaccount = Vec<u8>;
+pub type LedgerSubaccount = Subaccount; // ! 修改为安全的参数
+
 // 转账参数
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct LedgerTransferArgs {

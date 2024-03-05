@@ -5,9 +5,13 @@ use crate::{
     identity::CanisterId,
 };
 
-use super::types::{Icrc1Account, Icrc1Subaccount};
+use super::{
+    icrc1::Icrc1Memo,
+    types::{Icrc1Account, Icrc1Subaccount},
+};
 
 /// ICRC2 标准接口
+/// https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-2
 
 // ICRC2 标准
 // icrc2_allowance : (AllowanceArgs) -> (Allowance) query;
@@ -76,7 +80,7 @@ pub struct Icrc2ApproveArgs {
     pub spender: Icrc1Account, // 被授权的账户
     pub amount: candid::Nat,   // 被授权的额度
     pub fee: Option<candid::Nat>,
-    pub memo: Option<Vec<u8>>,
+    pub memo: Option<Icrc1Memo>,
     pub created_at_time: Option<u64>,
 
     pub expected_allowance: Option<candid::Nat>, // 期望转移的数量
@@ -154,7 +158,7 @@ pub struct Icrc2TransferFromArgs {
     to: Icrc1Account,
     amount: candid::Nat,
     fee: Option<candid::Nat>,
-    memo: Option<Vec<u8>>,
+    memo: Option<Icrc1Memo>,
     created_at_time: Option<u64>,
 }
 // 转账可能出现的错误

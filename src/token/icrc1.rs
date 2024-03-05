@@ -2,10 +2,11 @@ use candid::{CandidType, Deserialize};
 
 use crate::{
     canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
-    identity::{CanisterId, UserId},
+    identity::{CanisterId, Subaccount, UserId},
 };
 
 /// ICRC1 标准接口
+/// https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1
 
 // ICRC1 标准
 // icrc1_supported_standards : () -> (vec StandardRecord) query;
@@ -31,7 +32,7 @@ use crate::{
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Icrc1SupportedStandard {
     name: String, // ICRC-1
-    url: String,  // https://github.com/dfinity/ICRC-1
+    url: String,  // https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1
 }
 pub type Icrc1SupportedStandards = Vec<Icrc1SupportedStandard>;
 #[allow(unused)]
@@ -96,7 +97,8 @@ pub async fn icrc1_total_supply(canister_id: CanisterId) -> CanisterCallResult<I
 // icrc1_balance_of : (Account) -> (nat) query;
 // type Account = record { owner : principal; subaccount : opt vec nat8 };
 
-pub type Icrc1Subaccount = Vec<u8>;
+// pub type Icrc1Subaccount = Vec<u8>;
+pub type Icrc1Subaccount = Subaccount; // ! 修改为安全的参数
 
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Icrc1Account {
@@ -155,6 +157,8 @@ pub async fn icrc1_fee(canister_id: CanisterId) -> CanisterCallResult<Icrc1Fee> 
 //     InsufficientFunds : record { balance : nat };
 // };
 
+pub type Icrc1Memo = Vec<u8>;
+
 // 转账参数
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Icrc1TransferArgs {
@@ -167,7 +171,7 @@ pub struct Icrc1TransferArgs {
     // 交易费
     pub fee: Option<candid::Nat>,
     // 交易标识码
-    pub memo: Option<Vec<u8>>,
+    pub memo: Option<Icrc1Memo>,
     // 请求的时间节点
     pub created_at_time: Option<u64>,
 }
