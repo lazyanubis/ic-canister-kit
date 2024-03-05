@@ -19,7 +19,7 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-default = ["identity", "canister", "number", "token"]
+default = ["identity", "canister", "number", "token", "times"]
 
 # 和数字相关的
 number = ["ic-cdk", "sha2", "base32"] # 数字相关
@@ -34,8 +34,7 @@ canister = ["identity", "serde"] # 罐子相关
 token = ["identity", "canister", "ic-ledger-types"] # 代币标准
 
 # 时间相关
-times = ["ic-cdk"]                             # 时间相关
-times_schedulable = ["times", "ic-cdk-timers"] # 时间相关
+times = ["ic-cdk"] # 时间相关
 
 # 通用工具
 common_pages = []          # 分页查询
@@ -46,14 +45,14 @@ http = ["candid", "serde", "serde_json"] # http 相关
 
 # 持久化
 stable = ["candid"]
-stable_initial = ["stable"]                                         # 初始化
-stable_upgrade = ["stable"]                                         # 升级
-stable_maintainable = ["stable"]                                    # 维护
-stable_permissable = ["stable", "times_schedulable"]                # 权限
-stable_recordable = ["stable", "times_schedulable", "common_pages"] # 日志记录
-stable_notifiable = ["stable", "times"]                             # 通知信息
-stable_uploads = ["stable"]                                         # 分片上传
-stable_hashmap = ["stable"]                                         # HashMap
+stable_initial = ["stable"]                    # 初始化
+stable_upgrade = ["stable"]                    # 升级
+stable_maintainable = ["stable"]               # 维护
+stable_permissable = ["stable"]                # 权限
+stable_recordable = ["stable", "common_pages"] # 日志记录
+stable_notifiable = ["stable", "times"]        # 通知信息
+stable_uploads = ["stable"]                    # 分片上传
+stable_hashmap = ["stable"]                    # HashMap
 
 # NFT相关
 nft = ["identity"]   # NFT
@@ -71,7 +70,6 @@ all = [
     "number",
     "token",
     "times",
-    "times_schedulable",
     "common_pages",
     "common_result",
     "http",

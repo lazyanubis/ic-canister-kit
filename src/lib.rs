@@ -20,8 +20,8 @@ pub mod canister;
 #[cfg(feature = "token")]
 pub mod token;
 
-// #[cfg(feature = "times")]
-// pub mod times;
+#[cfg(feature = "times")]
+pub mod times;
 
 // pub mod common;
 

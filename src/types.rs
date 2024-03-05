@@ -8,12 +8,14 @@ pub use crate::identity::{
 #[cfg(feature = "canister")]
 pub use crate::canister::types::*;
 
-// pub use crate::number::types::*;
+#[cfg(feature = "number")]
+pub use crate::number::types::*;
 
-// pub use crate::token::types::*;
+#[cfg(feature = "token")]
+pub use crate::token::types::*;
 
-// #[cfg(feature = "times")]
-// pub use crate::times::types::*;
+#[cfg(feature = "times")]
+pub use crate::times::{DurationNanos, TimestampNanos};
 
 // pub use crate::common::types::*;
 
