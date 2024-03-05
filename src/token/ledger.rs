@@ -1,8 +1,9 @@
 use candid::{CandidType, Deserialize};
 
-use crate::identity::CanisterId;
-
-use super::CallError;
+use crate::{
+    canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
+    identity::CanisterId,
+};
 
 /// icp 类的账本罐子接口
 
@@ -20,7 +21,7 @@ use super::CallError;
 
 // =================== 账本方法 ===================
 
-// https://icscan.io/canister/ryjl3-tyaaa-aaaaa-aaaba-cai
+// https://dashboard.internetcomputer.org/canister/ryjl3-tyaaa-aaaaa-aaaba-cai
 
 //  ============== 查询名称 ==============
 // name : () -> (Name) query;
@@ -30,15 +31,16 @@ use super::CallError;
 pub struct LedgerName {
     name: String,
 }
+
 #[allow(unused)]
-pub async fn name(canister_id: CanisterId) -> LedgerName {
-    let _call_result: Result<(LedgerName,), CallError> =
-        ic_cdk::call(canister_id, "name", ()).await;
-    _call_result.unwrap().0
+pub async fn ledger_name(canister_id: CanisterId) -> CanisterCallResult<LedgerName> {
+    call_canister::<_, (LedgerName,)>(canister_id, "name", ())
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
-pub async fn name_by(canister_id: CanisterId) -> String {
-    name(canister_id).await.name
+pub async fn ledger_name_by(canister_id: CanisterId) -> CanisterCallResult<String> {
+    ledger_name(canister_id).await.map(|n| n.name)
 }
 
 //  ============== 查询符号 ==============
@@ -50,14 +52,14 @@ pub struct LedgerSymbol {
     symbol: String,
 }
 #[allow(unused)]
-pub async fn symbol(canister_id: CanisterId) -> LedgerSymbol {
-    let _call_result: Result<(LedgerSymbol,), CallError> =
-        ic_cdk::call(canister_id, "symbol", ()).await;
-    _call_result.unwrap().0
+pub async fn ledger_symbol(canister_id: CanisterId) -> CanisterCallResult<LedgerSymbol> {
+    call_canister::<_, (LedgerSymbol,)>(canister_id, "symbol", ())
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
-pub async fn symbol_by(canister_id: CanisterId) -> String {
-    symbol(canister_id).await.symbol
+pub async fn ledger_symbol_by(canister_id: CanisterId) -> CanisterCallResult<String> {
+    ledger_symbol(canister_id).await.map(|s| s.symbol)
 }
 
 //  ============== 查询精度 ==============
@@ -69,14 +71,14 @@ pub struct LedgerDecimals {
     decimals: u32,
 }
 #[allow(unused)]
-pub async fn decimals(canister_id: CanisterId) -> LedgerDecimals {
-    let _call_result: Result<(LedgerDecimals,), CallError> =
-        ic_cdk::call(canister_id, "decimals", ()).await;
-    _call_result.unwrap().0
+pub async fn ledger_decimals(canister_id: CanisterId) -> CanisterCallResult<LedgerDecimals> {
+    call_canister::<_, (LedgerDecimals,)>(canister_id, "decimals", ())
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
-pub async fn decimals_by(canister_id: CanisterId) -> u32 {
-    decimals(canister_id).await.decimals
+pub async fn ledger_decimals_by(canister_id: CanisterId) -> CanisterCallResult<u32> {
+    ledger_decimals(canister_id).await.map(|d| d.decimals)
 }
 
 //  ============== 查询余额 ==============
@@ -93,20 +95,22 @@ pub struct LedgerTokens {
     pub e8s: u64, // ICP 接口指定 8 位精度的数值
 }
 #[allow(unused)]
-pub async fn account_balance(
+pub async fn ledger_account_balance(
     canister_id: CanisterId,
     args: LedgerBinaryAccountBalanceArgs,
-) -> LedgerTokens {
-    let _call_result: Result<(LedgerTokens,), CallError> =
-        ic_cdk::call(canister_id, "account_balance", (args,)).await;
-
-    _call_result.unwrap().0
+) -> CanisterCallResult<LedgerTokens> {
+    call_canister::<_, (LedgerTokens,)>(canister_id, "account_balance", (args,))
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
-pub async fn account_balance_by(canister_id: CanisterId, account: LedgerAccountIdentifier) -> u64 {
-    account_balance(canister_id, LedgerBinaryAccountBalanceArgs { account })
+pub async fn ledger_account_balance_by(
+    canister_id: CanisterId,
+    account: LedgerAccountIdentifier,
+) -> CanisterCallResult<u64> {
+    ledger_account_balance(canister_id, LedgerBinaryAccountBalanceArgs { account })
         .await
-        .e8s
+        .map(|b| b.e8s)
 }
 
 //  ============== 查询转账费用 ==============
@@ -121,22 +125,28 @@ pub struct LedgerTransferFee {
     pub transfer_fee: LedgerTokens,
 }
 #[allow(unused)]
-pub async fn transfer_fee(
+pub async fn ledger_transfer_fee(
     canister_id: CanisterId,
-    args: LedgerTransferFeeArg,
-) -> LedgerTransferFee {
-    let _call_result: Result<(LedgerTransferFee,), CallError> =
-        ic_cdk::call(canister_id, "transfer_fee", (args,)).await;
-
-    _call_result.unwrap().0
+    // args: LedgerTransferFeeArg,
+) -> CanisterCallResult<LedgerTransferFee> {
+    call_canister::<_, (LedgerTransferFee,)>(
+        canister_id,
+        "transfer_fee",
+        // (args,),
+        (LedgerTransferFeeArg {},),
+    )
+    .await
+    .map(fetch_tuple0)
 }
 /// 查询转账费用, 简化参数
 #[allow(unused)]
-pub async fn transfer_fee_by(canister_id: CanisterId) -> u64 {
-    transfer_fee(canister_id, LedgerTransferFeeArg {})
-        .await
-        .transfer_fee
-        .e8s
+pub async fn ledger_transfer_fee_by(canister_id: CanisterId) -> CanisterCallResult<u64> {
+    ledger_transfer_fee(
+        canister_id,
+        // LedgerTransferFeeArg {}
+    )
+    .await
+    .map(|f| f.transfer_fee.e8s)
 }
 
 //  ============== 转账 ==============
@@ -182,11 +192,11 @@ pub struct LedgerTransferArgs {
     // The subaccount from which the caller wants to transfer funds.
     // If null, the ledger uses the default (all zeros) subaccount to compute the source address.
     pub from_subaccount: Option<LedgerSubaccount>,
-    // 想要转给目标地址的数量
-    pub amount: LedgerTokens,
     // 目标地址, 长度为 32 的byte数组, 转账成功, 目标地址的余额会增加 amount 的数量
     // The destination account. If the transfer is successful, the balance of this address increases by `amount`.
     pub to: LedgerAccountIdentifier,
+    // 想要转给目标地址的数量
+    pub amount: LedgerTokens,
     // 调用者必须支付的交易费, 必须是 10000 e8s
     // The amount that the caller pays for the transaction. Must be 10000 e8s.
     pub fee: LedgerTokens,
@@ -226,25 +236,28 @@ pub enum LedgerTransferError {
 pub type LedgerTransferResult = Result<LedgerBlockIndex, LedgerTransferError>;
 
 #[allow(unused)]
-pub async fn transfer(canister_id: CanisterId, args: LedgerTransferArgs) -> LedgerTransferResult {
-    let _call_result: Result<(LedgerTransferResult,), CallError> =
-        ic_cdk::call(canister_id, "transfer", (args,)).await;
-    _call_result.unwrap().0
+pub async fn ledger_transfer(
+    canister_id: CanisterId,
+    args: LedgerTransferArgs,
+) -> CanisterCallResult<LedgerTransferResult> {
+    call_canister::<_, (LedgerTransferResult,)>(canister_id, "transfer", (args,))
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
-pub async fn transfer_by(
+pub async fn ledger_transfer_by(
     canister_id: CanisterId,
-    amount: u64,
     to: LedgerAccountIdentifier,
+    amount: u64,
     fee: u64,
     memo: u64,
-) -> LedgerTransferResult {
-    transfer(
+) -> CanisterCallResult<LedgerTransferResult> {
+    ledger_transfer(
         canister_id,
         LedgerTransferArgs {
             from_subaccount: None,
-            amount: LedgerTokens { e8s: amount },
             to,
+            amount: LedgerTokens { e8s: amount },
             fee: LedgerTokens { e8s: fee },
             memo,
             created_at_time: None,

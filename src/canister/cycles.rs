@@ -73,7 +73,7 @@ pub async fn call_wallet_balance(
     canister_id: CanisterId,
 ) -> super::types::CanisterCallResult<candid::Nat> {
     let call_result =
-        ic_cdk::api::call::call::<(), (candid::Nat,)>(canister_id, "wallet_balance", ()).await;
+        ic_cdk::api::call::call::<_, (candid::Nat,)>(canister_id, "wallet_balance", ()).await;
     super::fetch_and_wrap_call_result(canister_id, "deposit_cycles", call_result)
 }
 
@@ -83,7 +83,7 @@ pub async fn call_wallet_receive(
     canister_id: CanisterId,
     cycles: u64,
 ) -> super::types::CanisterCallResult<candid::Nat> {
-    let call_result = ic_cdk::api::call::call_with_payment::<(), (candid::Nat,)>(
+    let call_result = ic_cdk::api::call::call_with_payment::<_, (candid::Nat,)>(
         canister_id,
         "wallet_receive",
         (),

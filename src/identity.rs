@@ -84,7 +84,7 @@ pub fn self_canister_id() -> CanisterId {
 
 // ! 列表变数组, 长度必须是 32
 #[inline]
-fn to_account(vec: &Vec<u8>) -> Result<[u8; 32], FromVecError> {
+fn to_account(vec: &[u8]) -> Result<[u8; 32], FromVecError> {
     if vec.len() != 32 {
         return Err(FromVecError::WrongLength);
     }
@@ -95,7 +95,7 @@ fn to_account(vec: &Vec<u8>) -> Result<[u8; 32], FromVecError> {
 
 // 转变为有效的账户
 #[inline]
-pub fn to_account_identifier(account: &Vec<u8>) -> Result<AccountIdentifier, FromVecError> {
+pub fn to_account_identifier(account: &[u8]) -> Result<AccountIdentifier, FromVecError> {
     to_account(account)
 }
 
@@ -120,7 +120,7 @@ pub fn parse_account_identifier(
     user_id: &UserId,
     subaccount: &Option<Subaccount>,
 ) -> AccountIdentifier {
-    let subaccount: [u8; 32] = (*subaccount).unwrap_or([0; 32]); // 默认子账户 应该全是 0
+    let subaccount: Subaccount = (*subaccount).unwrap_or_default(); // 默认子账户 应该全是 0
 
     use sha2::Digest;
     let mut hasher = sha2::Sha224::new(); // 生成 28 个 byte 的 hash 值
@@ -163,7 +163,10 @@ pub fn parse_account_identifier_by_vec(
     user_id: &UserId,
     subaccount: &Option<Vec<u8>>,
 ) -> Result<AccountIdentifier, FromVecError> {
-    let subaccount = subaccount.as_ref().map(to_account).transpose()?;
+    let subaccount = subaccount
+        .as_ref()
+        .map(|a| to_account(a.as_ref()))
+        .transpose()?;
     Ok(parse_account_identifier(user_id, &subaccount))
 }
 

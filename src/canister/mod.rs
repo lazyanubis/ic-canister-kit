@@ -74,7 +74,7 @@ fn fetch_and_wrap_call_result<R>(
     call_result: Result<(R,), (ic_cdk::api::call::RejectionCode, String)>,
 ) -> types::CanisterCallResult<R> {
     call_result
-        .map(|(r,)| r)
+        .map(fetch_tuple0)
         .map_err(|(rejection_code, message)| types::CanisterCallError {
             canister_id,
             method: method.to_string(),
@@ -96,4 +96,10 @@ fn wrap_call_result(
         rejection_code,
         message,
     })
+}
+
+#[allow(unused)]
+#[inline]
+pub fn fetch_tuple0<T>(args: (T,)) -> T {
+    args.0
 }

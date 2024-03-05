@@ -1,8 +1,9 @@
 use candid::{CandidType, Deserialize};
 
-use crate::identity::{CanisterId, UserId};
-
-use super::CallError;
+use crate::{
+    canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
+    identity::{CanisterId, UserId},
+};
 
 /// ICRC1 标准接口
 
@@ -21,110 +22,115 @@ use super::CallError;
 
 // =================== 账本方法 ===================
 
-// https://icscan.io/canister/ryjl3-tyaaa-aaaaa-aaaba-cai
+// https://dashboard.internetcomputer.org/canister/ryjl3-tyaaa-aaaaa-aaaba-cai
 
 //  ============== 查询支持的标准 ==============
 // icrc1_supported_standards : () -> (vec StandardRecord) query;
 // type StandardRecord = record { url : text; name : text };
 
 #[derive(CandidType, Deserialize, Debug, Clone)]
-pub struct ICRC1SupportedStandard {
+pub struct Icrc1SupportedStandard {
     name: String, // ICRC-1
     url: String,  // https://github.com/dfinity/ICRC-1
 }
-pub type ICRC1SupportedStandards = Vec<ICRC1SupportedStandard>;
+pub type Icrc1SupportedStandards = Vec<Icrc1SupportedStandard>;
 #[allow(unused)]
-pub async fn icrc1_supported_standards(canister_id: CanisterId) -> ICRC1SupportedStandards {
-    let _call_result: Result<(ICRC1SupportedStandards,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_supported_standards", ()).await;
-    _call_result.unwrap().0
+pub async fn icrc1_supported_standards(
+    canister_id: CanisterId,
+) -> CanisterCallResult<Icrc1SupportedStandards> {
+    call_canister::<_, (Icrc1SupportedStandards,)>(canister_id, "icrc1_supported_standards", ())
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
-pub async fn icrc1_supported_standards_by(canister_id: CanisterId) -> Vec<String> {
+pub async fn icrc1_supported_standards_by(
+    canister_id: CanisterId,
+) -> CanisterCallResult<Vec<String>> {
     icrc1_supported_standards(canister_id)
         .await
-        .iter()
-        .map(|s| s.name.clone())
-        .collect()
+        .map(|r| r.into_iter().map(|i| i.name).collect())
 }
 
 //  ============== 查询名称 ==============
 // icrc1_name : () -> (text) query;
 
 #[allow(unused)]
-pub async fn icrc1_name(canister_id: CanisterId) -> String {
-    let _call_result: Result<(String,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_name", ()).await;
-    _call_result.unwrap().0
+pub async fn icrc1_name(canister_id: CanisterId) -> CanisterCallResult<String> {
+    call_canister::<_, (String,)>(canister_id, "icrc1_name", ())
+        .await
+        .map(fetch_tuple0)
 }
 
 //  ============== 查询符号 ==============
 // icrc1_symbol : () -> (text) query;
 
 #[allow(unused)]
-pub async fn icrc1_symbol(canister_id: CanisterId) -> String {
-    let _call_result: Result<(String,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_symbol", ()).await;
-    _call_result.unwrap().0
+pub async fn icrc1_symbol(canister_id: CanisterId) -> CanisterCallResult<String> {
+    call_canister::<_, (String,)>(canister_id, "icrc1_symbol", ())
+        .await
+        .map(fetch_tuple0)
 }
 
 //  ============== 查询精度 ==============
 // icrc1_decimals : () -> (nat8) query;
 
 #[allow(unused)]
-pub async fn icrc1_decimals(canister_id: CanisterId) -> u8 {
-    let _call_result: Result<(u8,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_decimals", ()).await;
-    _call_result.unwrap().0
+pub async fn icrc1_decimals(canister_id: CanisterId) -> CanisterCallResult<u8> {
+    call_canister::<_, (u8,)>(canister_id, "icrc1_decimals", ())
+        .await
+        .map(fetch_tuple0)
 }
 
 //  ============== 查询总供应量 ==============
 // icrc1_decimals : () -> (nat8) query;
 
-pub type ICRC1TotalSupply = candid::Nat;
+pub type Icrc1TotalSupply = candid::Nat;
 #[allow(unused)]
-pub async fn icrc1_total_supply(canister_id: CanisterId) -> ICRC1TotalSupply {
-    let _call_result: Result<(ICRC1TotalSupply,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_total_supply", ()).await;
-    _call_result.unwrap().0
+pub async fn icrc1_total_supply(canister_id: CanisterId) -> CanisterCallResult<Icrc1TotalSupply> {
+    call_canister::<_, (Icrc1TotalSupply,)>(canister_id, "icrc1_total_supply", ())
+        .await
+        .map(fetch_tuple0)
 }
 
 //  ============== 查询余额 ==============
 // icrc1_balance_of : (Account) -> (nat) query;
 // type Account = record { owner : principal; subaccount : opt vec nat8 };
 
-pub type ICRC1Subaccount = Vec<u8>;
+pub type Icrc1Subaccount = Vec<u8>;
 
 #[derive(CandidType, Deserialize, Debug, Clone)]
-pub struct ICRC1Account {
+pub struct Icrc1Account {
     owner: UserId,
-    subaccount: Option<ICRC1Subaccount>,
+    subaccount: Option<Icrc1Subaccount>,
 }
-pub type ICRC1Balance = candid::Nat;
+pub type Icrc1Balance = candid::Nat;
 #[allow(unused)]
-pub async fn icrc1_balance_of(canister_id: CanisterId, account: ICRC1Account) -> ICRC1Balance {
-    let _call_result: Result<(ICRC1Balance,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_balance_of", ()).await;
-    _call_result.unwrap().0
+pub async fn icrc1_balance_of(
+    canister_id: CanisterId,
+    account: Icrc1Account,
+) -> CanisterCallResult<Icrc1Balance> {
+    call_canister::<_, (Icrc1Balance,)>(canister_id, "icrc1_balance_of", (account,))
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
 pub async fn icrc1_balance_of_by(
     canister_id: CanisterId,
     owner: UserId,
-    subaccount: Option<ICRC1Subaccount>,
-) -> ICRC1Balance {
-    icrc1_balance_of(canister_id, ICRC1Account { owner, subaccount }).await
+    subaccount: Option<Icrc1Subaccount>,
+) -> CanisterCallResult<Icrc1Balance> {
+    icrc1_balance_of(canister_id, Icrc1Account { owner, subaccount }).await
 }
 
 //  ============== 查询交易费用 ==============
 // icrc1_fee : () -> (nat) query;
 
-pub type ICRC1Fee = candid::Nat;
+pub type Icrc1Fee = candid::Nat;
 #[allow(unused)]
-pub async fn icrc1_fee(canister_id: CanisterId) -> ICRC1Fee {
-    let _call_result: Result<(ICRC1Fee,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_fee", ()).await;
-    _call_result.unwrap().0
+pub async fn icrc1_fee(canister_id: CanisterId) -> CanisterCallResult<Icrc1Fee> {
+    call_canister::<_, (Icrc1Fee,)>(canister_id, "icrc1_fee", ())
+        .await
+        .map(fetch_tuple0)
 }
 
 //  ============== 转账 ==============
@@ -151,13 +157,13 @@ pub async fn icrc1_fee(canister_id: CanisterId) -> ICRC1Fee {
 
 // 转账参数
 #[derive(CandidType, Deserialize, Debug, Clone)]
-pub struct ICRC1TransferArgs {
+pub struct Icrc1TransferArgs {
     // 调用者指定的使用的子账户地址
-    pub from_subaccount: Option<ICRC1Subaccount>,
+    pub from_subaccount: Option<Icrc1Subaccount>,
+    // 目标地址
+    pub to: Icrc1Account,
     // 想要转给目标地址的数量
     pub amount: candid::Nat,
-    // 目标地址
-    pub to: ICRC1Account,
     // 交易费
     pub fee: Option<candid::Nat>,
     // 交易标识码
@@ -167,7 +173,7 @@ pub struct ICRC1TransferArgs {
 }
 // 转账可能出现的错误
 #[derive(CandidType, Deserialize, Debug, Clone)]
-pub enum ICRC1TransferError {
+pub enum Icrc1TransferError {
     GenericError {
         error_code: candid::Nat,
         message: String,
@@ -191,29 +197,29 @@ pub enum ICRC1TransferError {
     },
 }
 // 转账结果
-pub type ICRC1TransferResult = Result<candid::Nat, ICRC1TransferError>;
+pub type Icrc1TransferResult = Result<candid::Nat, Icrc1TransferError>;
 #[allow(unused)]
 pub async fn icrc1_transfer(
     canister_id: CanisterId,
-    args: ICRC1TransferArgs,
-) -> ICRC1TransferResult {
-    let _call_result: Result<(ICRC1TransferResult,), CallError> =
-        ic_cdk::call(canister_id, "icrc1_transfer", (args,)).await;
-    _call_result.unwrap().0
+    args: Icrc1TransferArgs,
+) -> CanisterCallResult<Icrc1TransferResult> {
+    call_canister::<_, (Icrc1TransferResult,)>(canister_id, "icrc1_transfer", (args,))
+        .await
+        .map(fetch_tuple0)
 }
 #[allow(unused)]
 pub async fn icrc1_transfer_by(
     canister_id: CanisterId,
     amount: candid::Nat,
     owner: UserId,
-    subaccount: Option<ICRC1Subaccount>,
-) -> ICRC1TransferResult {
+    subaccount: Option<Icrc1Subaccount>,
+) -> CanisterCallResult<Icrc1TransferResult> {
     icrc1_transfer(
         canister_id,
-        ICRC1TransferArgs {
+        Icrc1TransferArgs {
             from_subaccount: None,
+            to: Icrc1Account { owner, subaccount },
             amount,
-            to: ICRC1Account { owner, subaccount },
             fee: None,
             memo: None,
             created_at_time: None,

@@ -17,7 +17,8 @@ pub mod identity;
 #[cfg(feature = "canister")]
 pub mod canister;
 
-// pub mod token;
+#[cfg(feature = "token")]
+pub mod token;
 
 // #[cfg(feature = "times")]
 // pub mod times;
