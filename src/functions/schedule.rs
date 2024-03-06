@@ -10,7 +10,7 @@ where
     ic_cdk_timers::set_timer(std::time::Duration::ZERO, task)
 }
 
-// ================== 定时任务 ==================
+// ================== 功能 ==================
 
 pub use ic_cdk_timers::TimerId;
 
