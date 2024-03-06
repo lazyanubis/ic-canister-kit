@@ -1,7 +1,9 @@
 /// 时间相关
 
+#[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Copy)]
 pub struct TimestampNanos(u64); // 时间戳 纳秒
 
+#[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Copy)]
 pub struct DurationNanos(u64); // 时间跨度 纳秒
 
 impl From<u64> for TimestampNanos {

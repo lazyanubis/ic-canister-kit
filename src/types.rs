@@ -39,6 +39,9 @@ pub use crate::bitcoin::{
     Utxo, UtxoFilter,
 };
 
+#[cfg(feature = "functions")]
+pub use crate::functions::types::*;
+
 // #[cfg(feature = "stable")]
 // pub use crate::stable::types::*;
 

@@ -35,6 +35,9 @@ pub mod ecdsa;
 #[cfg(feature = "bitcoin")]
 pub mod bitcoin;
 
+#[cfg(feature = "functions")]
+pub mod functions;
+
 // #[cfg(feature = "stable")]
 // pub mod stable;
 

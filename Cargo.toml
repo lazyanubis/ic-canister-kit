@@ -29,6 +29,7 @@ default = [
     "http",
     "ecdsa",
     "bitcoin",
+    "functions",
 ]
 common = ["candid"] # 通用工具
 times = ["ic-cdk"] # 时间相关
@@ -39,6 +40,7 @@ token = ["canister", "ic-ledger-types"] # 代币标准
 http = ["canister", "serde", "serde_json"] # http 相关
 ecdsa = ["canister"] # ecdsa 相关
 bitcoin = ["canister"] # bitcoin 相关
+functions = ["times", "ic-cdk-timers"] # functions 相关
 
 # 持久化
 stable = ["candid"]
@@ -69,6 +71,9 @@ all = [
     "number",
     "token",
     "http",
+    "ecdsa",
+    "bitcoin",
+    "functions",
     "stable",
     "stable_initial",
     "stable_upgrade",
