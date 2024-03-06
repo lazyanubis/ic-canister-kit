@@ -1,5 +1,3 @@
-#[cfg(feature = "common_pages")]
-pub use super::pages::{Page, PageData};
+pub use super::pages::{PageData, QueryPage, QueryPageError};
 
-#[cfg(feature = "common_result")]
 pub use super::result::MotokoResult;

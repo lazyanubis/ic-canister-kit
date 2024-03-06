@@ -12,16 +12,16 @@ impl<T, E> From<Result<T, E>> for MotokoResult<T, E> {
     fn from(value: Result<T, E>) -> Self {
         match value {
             Ok(ok) => MotokoResult::Ok(ok),
-            Err(e) => MotokoResult::Err(e),
+            Err(err) => MotokoResult::Err(err),
         }
     }
 }
 
-impl<T, E> Into<Result<T, E>> for MotokoResult<T, E> {
-    fn into(self) -> Result<T, E> {
-        match self {
+impl<T, E> From<MotokoResult<T, E>> for Result<T, E> {
+    fn from(value: MotokoResult<T, E>) -> Self {
+        match value {
             MotokoResult::Ok(ok) => Ok(ok),
-            MotokoResult::Err(e) => Err(e),
+            MotokoResult::Err(err) => Err(err),
         }
     }
 }

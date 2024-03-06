@@ -1,3 +1,9 @@
+#[cfg(feature = "common")]
+pub use crate::common::types::*;
+
+#[cfg(feature = "times")]
+pub use crate::times::{DurationNanos, TimestampNanos};
+
 #[cfg(feature = "identity")]
 pub use crate::identity::{
     AccountIdentifier, AccountIdentifierHex, CallerId, CallerIdText, CanisterId, CanisterIdText,
@@ -13,11 +19,6 @@ pub use crate::number::types::*;
 
 #[cfg(feature = "token")]
 pub use crate::token::types::*;
-
-#[cfg(feature = "times")]
-pub use crate::times::{DurationNanos, TimestampNanos};
-
-// pub use crate::common::types::*;
 
 // #[cfg(feature = "http")]
 // pub use crate::http::{

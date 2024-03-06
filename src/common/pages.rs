@@ -4,17 +4,38 @@ use std::cmp::Ordering;
 
 // 分页对象
 #[derive(candid::CandidType, candid::Deserialize, Debug)]
-pub struct Page {
-    pub page: u32, // 当前页码 1 开始计数
+pub struct QueryPage {
+    pub page: u64, // 当前页码 1 开始计数
     pub size: u32, // 每页大小
 }
+
+#[derive(Debug)]
+pub enum QueryPageError {
+    WrongPage,                         // page can not be 0
+    WrongSize { size: u32, max: u32 }, // size can not be 0 and has max value
+}
+impl std::fmt::Display for QueryPageError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            QueryPageError::WrongPage => write!(f, "page can not be 0"),
+            QueryPageError::WrongSize { size, max } => {
+                if *size == 0 {
+                    write!(f, "size can not be 0")
+                } else {
+                    write!(f, "max({max}) < size({size})")
+                }
+            }
+        }
+    }
+}
+impl std::error::Error for QueryPageError {}
 
 // 分页查询结果
 #[derive(candid::CandidType, candid::Deserialize, Debug)]
 pub struct PageData<T> {
-    pub page: u32,    // 请求的页码
+    pub page: u64,    // 请求的页码
     pub size: u32,    // 请求的页面大小
-    pub total: u32,   // 总个数
+    pub total: u64,   // 总个数
     pub data: Vec<T>, // 查到的分页数据
 }
 
@@ -24,14 +45,15 @@ impl<T: Clone> From<PageData<&T>> for PageData<T> {
             page: value.page,
             size: value.size,
             total: value.total,
-            data: value.data.into_iter().map(|t| t.clone()).collect(),
+            data: value.data.into_iter().cloned().collect(),
         }
     }
 }
 
 // 空结果
-impl Page {
-    pub fn none<T>(&self) -> PageData<T> {
+impl QueryPage {
+    #[inline]
+    pub fn empty<T>(&self) -> PageData<T> {
         PageData {
             page: self.page,
             size: self.size,
@@ -39,167 +61,145 @@ impl Page {
             data: Vec::new(),
         }
     }
-}
 
-// 检查分页选项是否有效
-pub fn page_check(page: &Page, max: u32) {
-    if page.page == 0 {
-        panic!("page can not be 0")
-    }
-    if max < page.size {
-        panic!("max page size is {} < {:?}", max, page.size)
-    }
-}
-
-/// 直接分页查询
-pub fn page_find<T: Clone>(list: &Vec<T>, page: &Page, max: u32) -> PageData<T> {
-    page_check(&page, max);
-
-    let mut data = Vec::new();
-
-    // 偏移序号
-    let start = ((page.page - 1) * page.size) as usize;
-    let end = ((page.page) * page.size) as usize;
-
-    if end < list.len() {
-        data = (&list[start..end]).iter().map(|t| t.clone()).collect();
-    } else if start < list.len() {
-        data = (&list[start..]).iter().map(|t| t.clone()).collect();
+    // 检查分页选项是否有效
+    #[inline]
+    pub fn check(&self, max: u32) -> Result<(), QueryPageError> {
+        if self.page == 0 {
+            return Err(QueryPageError::WrongPage);
+        }
+        if self.size == 0 || max < self.size {
+            return Err(QueryPageError::WrongSize {
+                size: self.size,
+                max,
+            });
+        }
+        Ok(())
     }
 
-    PageData {
-        page: page.page,
-        size: page.size,
-        total: list.len() as u32,
-        data,
-    }
-}
-
-/// 倒序分页查询
-pub fn page_find_with_reserve<'a, T>(list: &'a Vec<T>, page: &Page, max: u32) -> PageData<&'a T> {
-    page_check(&page, max);
-
-    if list.len() == 0 {
-        return page.none();
+    #[inline]
+    pub fn from_data<T>(&self, total: u64, data: Vec<T>) -> PageData<T> {
+        PageData {
+            page: self.page,
+            size: self.size,
+            total,
+            data,
+        }
     }
 
-    // 取出所有的索引
-    let mut index_list: Vec<usize> = (0..list.len()).into_iter().collect();
-    index_list.reverse(); // 索引进行倒序
+    #[inline]
+    fn inner_query_by_list<'a, T>(
+        &self,
+        list: &'a [T],
+        max: u32,
+    ) -> Result<Vec<&'a T>, QueryPageError> {
+        self.check(max)?;
 
-    let mut data = Vec::new();
+        if list.is_empty() {
+            return Ok(Vec::new());
+        }
 
-    // 索引偏移序号
-    let start = ((page.page - 1) * page.size) as usize;
-    let end = ((page.page) * page.size) as usize;
+        let mut data = Vec::with_capacity(self.size as usize);
 
-    if end < index_list.len() {
-        data = (&index_list[start..end])
-            .iter()
-            .map(|i| &list[*i]) // 取出实际的内容
+        // 偏移序号
+        let start = ((self.page - 1) * self.size as u64) as usize;
+        let end = ((self.page) * self.size as u64) as usize;
+
+        if end < list.len() {
+            data = list[start..end].iter().collect();
+        } else if start < list.len() {
+            data = list[start..].iter().collect();
+        }
+
+        Ok(data)
+    }
+
+    // 对所有数据进行分页查询
+    #[inline]
+    pub fn query_by_list<'a, T>(
+        &self,
+        list: &'a [T],
+        max: u32,
+    ) -> Result<PageData<&'a T>, QueryPageError> {
+        let total = list.len() as u64;
+
+        let data = self.inner_query_by_list(list, max)?;
+
+        Ok(self.from_data(total, data))
+    }
+
+    // 对所有数据进行倒序分页查询
+    #[inline]
+    pub fn query_desc_by_list<'a, T>(
+        &self,
+        list: &'a [T],
+        max: u32,
+    ) -> Result<PageData<&'a T>, QueryPageError> {
+        // 取出倒序索引
+        let index_list: Vec<usize> = (0..list.len()).rev().collect();
+
+        let total = index_list.len() as u64;
+
+        let data = self.inner_query_by_list(&index_list, max)?;
+
+        let data = data.into_iter().map(|i| &list[*i]).collect::<Vec<_>>();
+
+        Ok(self.from_data(total, data))
+    }
+
+    /// 倒序过滤分页查询
+    #[inline]
+    pub fn query_desc_by_list_and_filter<'a, T, F>(
+        &self,
+        list: &'a [T],
+        max: u32,
+        filter: F, // 过滤条件
+    ) -> Result<PageData<&'a T>, QueryPageError>
+    where
+        F: Fn(&T) -> bool,
+    {
+        // 取出过滤后的倒序索引
+        let index_list: Vec<usize> = (0..list.len())
+            .filter(|i| filter(&list[*i]))
+            .rev()
             .collect();
-    } else if start < index_list.len() {
-        data = (&index_list[start..])
-            .iter()
-            .map(|i| &list[*i]) // 取出实际的内容
-            .collect();
+
+        let total = index_list.len() as u64;
+
+        let data = self.inner_query_by_list(&index_list, max)?;
+
+        let data = data.into_iter().map(|i| &list[*i]).collect::<Vec<_>>();
+
+        Ok(self.from_data(total, data))
     }
 
-    PageData {
-        page: page.page,
-        size: page.size,
-        total: list.len() as u32,
-        data,
-    }
-}
+    /// 按条件分页查询
+    #[inline]
+    pub fn custom_query_by_list<T, R, Filter, Compare, Transform>(
+        &self,
+        list: &[T],
+        max: u32,
+        filter: Filter,       // 过滤条件
+        compare: Compare,     // 排序方法
+        transform: Transform, // 变形方法
+    ) -> Result<PageData<R>, QueryPageError>
+    where
+        Filter: Fn(&T) -> bool,
+        Compare: Fn(&T, &T) -> Ordering,
+        Transform: Fn(&T) -> R,
+    {
+        // 1. 过滤有效的结果
+        let mut list: Vec<&T> = list.iter().filter(|&item| filter(item)).collect();
 
-/// 倒序过滤分页查询
-pub fn page_find_with_reserve_and_filter<'a, T, F>(
-    list: &'a Vec<T>,
-    page: &Page,
-    max: u32,
-    filter: F, // 过滤条件
-) -> PageData<&'a T>
-where
-    F: Fn(&T) -> bool,
-{
-    page_check(&page, max);
+        // 2. 进行排序
+        list.sort_by(|&a, &b| compare(a, b));
 
-    if list.len() == 0 {
-        return page.none();
-    }
+        let total = list.len() as u64;
 
-    // 取出所有的索引
-    let mut index_list: Vec<usize> = (0..list.len())
-        .into_iter()
-        .filter(|i| filter(&list[*i]))
-        .collect();
-    index_list.reverse(); // 索引进行倒序
+        let data = self.inner_query_by_list(&list, max)?;
 
-    let mut data = Vec::new();
+        let data = data.into_iter().map(|t| transform(t)).collect::<Vec<_>>();
 
-    // 索引偏移序号
-    let start = ((page.page - 1) * page.size) as usize;
-    let end = ((page.page) * page.size) as usize;
-
-    if end < index_list.len() {
-        data = (&index_list[start..end])
-            .iter()
-            .map(|i| &list[*i]) // 取出实际的内容
-            .collect();
-    } else if start < index_list.len() {
-        data = (&index_list[start..])
-            .iter()
-            .map(|i| &list[*i]) // 取出实际的内容
-            .collect();
-    }
-
-    PageData {
-        page: page.page,
-        size: page.size,
-        total: index_list.len() as u32,
-        data,
-    }
-}
-
-/// 按条件分页查询
-pub fn page_find_with_sort<T, F, C, S, R>(
-    list: &Vec<T>,
-    page: &Page,
-    max: u32,
-    filter: F,    // 过滤条件
-    compare: C,   // 排序方法
-    transform: S, // 变形方法
-) -> PageData<R>
-where
-    F: Fn(&T) -> bool,
-    C: Fn(&T, &T) -> Ordering,
-    S: Fn(&T) -> R,
-{
-    page_check(&page, max);
-
-    // 1. 过滤有效的结果
-    let mut list: Vec<&T> = list.iter().filter(|item| filter(item)).collect();
-
-    // 2. 进行排序
-    list.sort_by(|a, b| compare(a, b));
-
-    let mut data = Vec::new();
-
-    // 按分页索引
-    let start = ((page.page - 1) * page.size) as usize;
-    let end = ((page.page) * page.size) as usize;
-
-    if end < list.len() {
-        data = (&list[start..end]).iter().map(|t| transform(t)).collect();
-    } else if start < list.len() {
-        data = (&list[start..]).iter().map(|t| transform(t)).collect();
-    }
-
-    PageData {
-        page: page.page,
-        size: page.size,
-        total: list.len() as u32,
-        data,
+        Ok(self.from_data(total, data))
     }
 }

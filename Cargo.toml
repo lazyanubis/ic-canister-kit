@@ -19,40 +19,28 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-default = ["identity", "canister", "number", "token", "times"]
+default = ["common", "times", "identity", "canister", "number", "token"]
+common = ["candid"]                                                      # 通用工具
+times = ["ic-cdk"]                                                       # 时间相关
+identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"]              # 身份相关
+canister = ["identity", "serde"]                                         # 罐子相关
+number = ["canister", "base32"]                                          # 数字相关
+token = ["canister", "ic-ledger-types"]                                  # 代币标准
 
-# 和数字相关的
-number = ["ic-cdk", "sha2", "base32"] # 数字相关
-
-# 和身份相关的
-identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"] # 身份相关
-
-# 和罐子相关的
-canister = ["identity", "serde"] # 罐子相关
-
-# 代币相关
-token = ["identity", "canister", "ic-ledger-types"] # 代币标准
-
-# 时间相关
-times = ["ic-cdk"] # 时间相关
-
-# 通用工具
-common_pages = []          # 分页查询
-common_result = ["candid"] # 结果类型
 
 # http
 http = ["candid", "serde", "serde_json"] # http 相关
 
 # 持久化
 stable = ["candid"]
-stable_initial = ["stable"]                    # 初始化
-stable_upgrade = ["stable"]                    # 升级
-stable_maintainable = ["stable"]               # 维护
-stable_permissable = ["stable"]                # 权限
-stable_recordable = ["stable", "common_pages"] # 日志记录
-stable_notifiable = ["stable", "times"]        # 通知信息
-stable_uploads = ["stable"]                    # 分片上传
-stable_hashmap = ["stable"]                    # HashMap
+stable_initial = ["stable"]             # 初始化
+stable_upgrade = ["stable"]             # 升级
+stable_maintainable = ["stable"]        # 维护
+stable_permissable = ["stable"]         # 权限
+stable_recordable = ["stable"]          # 日志记录
+stable_notifiable = ["stable", "times"] # 通知信息
+stable_uploads = ["stable"]             # 分片上传
+stable_hashmap = ["stable"]             # HashMap
 
 # NFT相关
 nft = ["identity"]   # NFT
@@ -65,13 +53,12 @@ nft_traits = ["nft"] # NFT 的属性记录
 candid_type = []
 
 all = [
+    "common",
+    "times",
     "identity",
     "canister",
     "number",
     "token",
-    "times",
-    "common_pages",
-    "common_result",
     "http",
     "stable",
     "stable_initial",
@@ -105,7 +92,3 @@ base32 = { version = "0.4", optional = true } # base32 加密解密
 
 serde = { version = "1", optional = true, features = ["derive"] } # 序列化/反序列化框架
 serde_json = { version = "1", optional = true }                   # json
-
-# ic-kit = "0.4.8"
-# cap-sdk = "0.2.4"
-# cap-sdk-core = "0.2.3"
