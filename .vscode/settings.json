@@ -4,14 +4,18 @@
     "Atid",
     "hasher",
     "icrc",
+    "Millisatoshi",
     "motoko",
     "nanos",
     "nocapture",
     "nonfungible",
     "rustdoc",
+    "Satoshi",
     "Schedulable",
     "subaccount",
     "subaccounts",
+    "Utxo",
+    "utxos",
     "yumi",
     "μrec"
   ]

@@ -27,6 +27,18 @@ pub use crate::http::{
     StreamingCallbackToken, StreamingStrategy, TransformArgs, TransformContext,
 };
 
+#[cfg(feature = "ecdsa")]
+pub use crate::ecdsa::{
+    EcdsaCurve, EcdsaDerivationPath, EcdsaIdentity, EcdsaKeyId, EcdsaPublicKeyResponse,
+    MessageHash, MessageHashError, SignWithEcdsaResponse,
+};
+
+#[cfg(feature = "bitcoin")]
+pub use crate::bitcoin::{
+    BitcoinAddress, BitcoinNetwork, BlockHash, GetUtxosResponse, MillisatoshiPerByte, Satoshi,
+    Utxo, UtxoFilter,
+};
+
 // #[cfg(feature = "stable")]
 // pub use crate::stable::types::*;
 

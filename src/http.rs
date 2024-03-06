@@ -90,6 +90,7 @@ pub async fn do_http_request(
         })
 }
 
+#[allow(clippy::future_not_send)]
 pub async fn do_http_request_with_closure(
     arg: CanisterHttpRequestArgument,
     cycles: u128,

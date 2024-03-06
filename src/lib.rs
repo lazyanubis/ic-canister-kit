@@ -29,6 +29,12 @@ pub mod token;
 #[cfg(feature = "http")]
 pub mod http;
 
+#[cfg(feature = "ecdsa")]
+pub mod ecdsa;
+
+#[cfg(feature = "bitcoin")]
+pub mod bitcoin;
+
 // #[cfg(feature = "stable")]
 // pub mod stable;
 
