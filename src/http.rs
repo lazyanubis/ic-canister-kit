@@ -89,3 +89,23 @@ pub async fn do_http_request(
             message,
         })
 }
+
+pub async fn do_http_request_with_closure(
+    arg: CanisterHttpRequestArgument,
+    cycles: u128,
+    transform_func: impl FnOnce(HttpResponse) -> HttpResponse + 'static,
+) -> super::types::CanisterCallResult<HttpResponse> {
+    ic_cdk::api::management_canister::http_request::http_request_with_closure(
+        arg,
+        cycles,
+        transform_func,
+    )
+    .await
+    .map(fetch_tuple0)
+    .map_err(|(rejection_code, message)| CanisterCallError {
+        canister_id: CanisterId::anonymous(),
+        method: "ic#http_request".to_string(),
+        rejection_code,
+        message,
+    })
+}

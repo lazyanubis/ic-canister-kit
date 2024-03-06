@@ -22,8 +22,9 @@ pub use crate::token::types::*;
 
 #[cfg(feature = "http")]
 pub use crate::http::{
-    CustomHttpRequest, CustomHttpResponse, HttpRequestStreamingCallback, HttpResponse,
-    StreamingCallbackHttpResponse, StreamingCallbackToken, StreamingStrategy, TransformArgs,
+    CanisterHttpRequestArgument, CustomHttpRequest, CustomHttpResponse, HttpHeader, HttpMethod,
+    HttpRequestStreamingCallback, HttpResponse, StreamingCallbackHttpResponse,
+    StreamingCallbackToken, StreamingStrategy, TransformArgs, TransformContext,
 };
 
 // #[cfg(feature = "stable")]

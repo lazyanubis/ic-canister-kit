@@ -77,7 +77,7 @@ all = [
 
 [dependencies]
 candid = { version = "0.10", optional = true }
-ic-cdk = { version = "0.13", optional = true }
+ic-cdk = { version = "0.13", optional = true, features = ["transform-closure"] }
 ic-ledger-types = { version = "0.10", optional = true } # token 类型
 ic-cdk-timers = { version = "0.7", optional = true }    # 定时器
 
