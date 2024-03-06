@@ -19,17 +19,14 @@ opt-level = 'z'
 codegen-units = 1
 
 [features]
-default = ["common", "times", "identity", "canister", "number", "token"]
-common = ["candid"]                                                      # 通用工具
-times = ["ic-cdk"]                                                       # 时间相关
-identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"]              # 身份相关
-canister = ["identity", "serde"]                                         # 罐子相关
-number = ["canister", "base32"]                                          # 数字相关
-token = ["canister", "ic-ledger-types"]                                  # 代币标准
-
-
-# http
-http = ["candid", "serde", "serde_json"] # http 相关
+default = ["common", "times", "identity", "canister", "number", "token", "http"]
+common = ["candid"]                                                              # 通用工具
+times = ["ic-cdk"]                                                               # 时间相关
+identity = ["candid", "ic-cdk", "sha2", "crc32fast", "hex"]                      # 身份相关
+canister = ["identity", "serde"]                                                 # 罐子相关
+number = ["canister", "base32"]                                                  # 数字相关
+token = ["canister", "ic-ledger-types"]                                          # 代币标准
+http = ["canister", "serde", "serde_json"]                                       # http 相关
 
 # 持久化
 stable = ["candid"]

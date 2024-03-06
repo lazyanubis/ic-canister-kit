@@ -26,8 +26,8 @@ pub mod number;
 #[cfg(feature = "token")]
 pub mod token;
 
-// #[cfg(feature = "http")]
-// pub mod http;
+#[cfg(feature = "http")]
+pub mod http;
 
 // #[cfg(feature = "stable")]
 // pub mod stable;

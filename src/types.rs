@@ -20,11 +20,11 @@ pub use crate::number::types::*;
 #[cfg(feature = "token")]
 pub use crate::token::types::*;
 
-// #[cfg(feature = "http")]
-// pub use crate::http::{
-//     CustomHttpRequest, CustomHttpResponse, HttpRequestStreamingCallback, HttpResponse,
-//     StreamingCallbackHttpResponse, StreamingCallbackToken, StreamingStrategy, TransformArgs,
-// };
+#[cfg(feature = "http")]
+pub use crate::http::{
+    CustomHttpRequest, CustomHttpResponse, HttpRequestStreamingCallback, HttpResponse,
+    StreamingCallbackHttpResponse, StreamingCallbackToken, StreamingStrategy, TransformArgs,
+};
 
 // #[cfg(feature = "stable")]
 // pub use crate::stable::types::*;

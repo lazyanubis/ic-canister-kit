@@ -3,18 +3,20 @@ use std::{borrow::Cow, collections::HashMap};
 use candid::CandidType;
 use serde::Deserialize;
 
-pub use ic_cdk::api::management_canister::http_request::{HttpResponse, TransformArgs};
+pub use ic_cdk::api::management_canister::http_request::{
+    CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
+    TransformContext,
+};
 
-pub fn transform(response: TransformArgs) -> HttpResponse {
-    let mut t = response.response;
-    t.headers = vec![];
-    t
-}
+use crate::{
+    canister::{fetch_tuple0, types::CanisterCallError},
+    identity::CanisterId,
+};
 
-// ====================== http 请求 ======================
+// ========================= HTTP 相关结构体 =========================
 
 // 最长的响应体 大概 2.9375 MB, 留点空间给其他数据
-pub const MAX_RESPONSE_LENGTH: usize = 3145728 - 1024 * 64;
+pub const MAX_RESPONSE_LENGTH: usize = 1024 * 1024 * 3 - 1024 * 64;
 
 // http 请求的结构体
 #[derive(CandidType, Deserialize)]
@@ -60,4 +62,30 @@ pub struct CustomHttpResponse<'a> {
     pub headers: HashMap<&'a str, Cow<'a, str>>,
     pub body: Cow<'a, [u8]>,
     pub streaming_strategy: Option<StreamingStrategy>, // 如果需要使用流式响应
+}
+
+// ====================== http 请求 ======================
+
+// 可以调用罐子自身的 query 方法解析响应体
+pub fn http_transform(response: TransformArgs) -> HttpResponse {
+    let mut t = response.response;
+    t.headers = vec![];
+    t
+}
+
+// ====================== 对外发起 http 请求 ======================
+
+pub async fn do_http_request(
+    arg: CanisterHttpRequestArgument,
+    cycles: u128,
+) -> super::types::CanisterCallResult<HttpResponse> {
+    ic_cdk::api::management_canister::http_request::http_request(arg, cycles)
+        .await
+        .map(fetch_tuple0)
+        .map_err(|(rejection_code, message)| CanisterCallError {
+            canister_id: CanisterId::anonymous(),
+            method: "ic#http_request".to_string(),
+            rejection_code,
+            message,
+        })
 }
