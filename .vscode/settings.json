@@ -9,6 +9,7 @@
     "nanos",
     "nocapture",
     "nonfungible",
+    "pausable",
     "rustdoc",
     "Satoshi",
     "Schedulable",

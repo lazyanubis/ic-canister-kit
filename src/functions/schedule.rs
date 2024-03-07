@@ -20,6 +20,7 @@ pub trait Schedulable {
     // 修改
     fn schedule_replace(&mut self, schedule: Option<TimestampNanos>);
 
+    // 默认方法
     // 启动任务
     fn schedule_start(&self, task: impl FnMut() + 'static) -> Option<TimerId> {
         self.schedule_find().map(|interval| {
