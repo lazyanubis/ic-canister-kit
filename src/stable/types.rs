@@ -1,8 +1,8 @@
-use crate::{identity::CanisterId, times::TimestampNanos};
-
 pub use super::pausable::Pause;
 
 pub use super::schedule::Schedule;
+
+pub use super::permission::Permissions;
 
 // #[cfg(feature = "stable_permissable")]
 // pub use super::permissable::{

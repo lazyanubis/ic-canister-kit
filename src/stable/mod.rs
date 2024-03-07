@@ -4,6 +4,8 @@ pub mod pausable;
 
 pub mod schedule;
 
+pub mod permission;
+
 // #[cfg(feature = "stable_permissable")]
 // pub mod permissable;
 
