@@ -1,52 +1,47 @@
 use std::cell::RefCell;
 
-#[cfg(feature = "stable_initial")]
-pub mod initial;
+pub mod pausable;
 
-#[cfg(feature = "stable_upgrade")]
-pub mod upgrade;
+pub mod schedule;
 
-#[cfg(feature = "stable_maintainable")]
-pub mod maintainable;
+// #[cfg(feature = "stable_permissable")]
+// pub mod permissable;
 
-#[cfg(feature = "stable_permissable")]
-pub mod permissable;
+// #[cfg(feature = "stable_recordable")]
+// pub mod recordable;
 
-#[cfg(feature = "stable_recordable")]
-pub mod recordable;
+// #[cfg(feature = "stable_notifiable")]
+// pub mod notifiable;
 
-#[cfg(feature = "stable_notifiable")]
-pub mod notifiable;
+// #[cfg(feature = "stable_uploads")]
+// pub mod uploads;
 
-#[cfg(feature = "stable_uploads")]
-pub mod uploads;
-
-#[cfg(feature = "stable_hashmap")]
-pub mod hashmap;
+// #[cfg(feature = "stable_hashmap")]
+// pub mod hashmap;
 
 pub mod types;
 
-// 持久化相关接口
+// // 持久化相关接口
 
-// 升级后恢复
-pub fn restore_after_upgrade<R>(state: &RefCell<R>) -> u64
-where
-    R: candid::CandidType + for<'d> candid::Deserialize<'d>,
-{
-    let mut state = state.borrow_mut();
-    let (stable_state, record_id): (R, u64) = ic_cdk::storage::stable_restore().unwrap();
-    *state = stable_state;
-    record_id
-}
+// // 升级后恢复
+// pub fn restore_after_upgrade<R>(state: &RefCell<R>) -> u64
+// where
+//     R: candid::CandidType + for<'d> candid::Deserialize<'d>,
+// {
+//     let mut state = state.borrow_mut();
+//     let (stable_state, record_id): (R, u64) = ic_cdk::storage::stable_restore().unwrap();
+//     *state = stable_state;
+//     record_id
+// }
 
-// 升级前保存
-pub fn store_before_upgrade<S>(state: &RefCell<S>, record_id: u64)
-where
-    S: candid::CandidType + Default,
-{
-    let stable_state: S = std::mem::take(&mut *state.borrow_mut());
-    ic_cdk::storage::stable_save((stable_state, record_id)).unwrap();
-}
+// // 升级前保存
+// pub fn store_before_upgrade<S>(state: &RefCell<S>, record_id: u64)
+// where
+//     S: candid::CandidType + Default,
+// {
+//     let stable_state: S = std::mem::take(&mut *state.borrow_mut());
+//     ic_cdk::storage::stable_save((stable_state, record_id)).unwrap();
+// }
 
 /*
 

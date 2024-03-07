@@ -38,8 +38,8 @@ pub mod bitcoin;
 #[cfg(feature = "functions")]
 pub mod functions;
 
-// #[cfg(feature = "stable")]
-// pub mod stable;
+#[cfg(feature = "stable")]
+pub mod stable;
 
 // #[cfg(feature = "nft")]
 // pub mod nft;

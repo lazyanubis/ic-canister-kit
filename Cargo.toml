@@ -30,6 +30,7 @@ default = [
     "ecdsa",
     "bitcoin",
     "functions",
+    "stable",
 ]
 common = ["candid"] # 通用工具
 times = ["ic-cdk"] # 时间相关
@@ -41,17 +42,7 @@ http = ["canister", "serde", "serde_json"] # http 相关
 ecdsa = ["canister"] # ecdsa 相关
 bitcoin = ["canister"] # bitcoin 相关
 functions = ["times", "ic-cdk-timers"] # functions 相关
-
-# 持久化
-stable = ["candid"]
-stable_initial = ["stable"]             # 初始化
-stable_upgrade = ["stable"]             # 升级
-stable_maintainable = ["stable"]        # 维护
-stable_permissable = ["stable"]         # 权限
-stable_recordable = ["stable"]          # 日志记录
-stable_notifiable = ["stable", "times"] # 通知信息
-stable_uploads = ["stable"]             # 分片上传
-stable_hashmap = ["stable"]             # HashMap
+stable = ["functions", "ic-stable-structures"] # 持久化相关
 
 # NFT相关
 nft = ["identity"]   # NFT
@@ -64,25 +55,7 @@ nft_traits = ["nft"] # NFT 的属性记录
 candid_type = []
 
 all = [
-    "common",
-    "times",
-    "identity",
-    "canister",
-    "number",
-    "token",
-    "http",
-    "ecdsa",
-    "bitcoin",
-    "functions",
-    "stable",
-    "stable_initial",
-    "stable_upgrade",
-    "stable_maintainable",
-    "stable_permissable",
-    "stable_recordable",
-    "stable_notifiable",
-    "stable_uploads",
-    "stable_hashmap",
+    "default",
     "nft",
     "nft_ext",
     "nft_ticket",
@@ -97,6 +70,7 @@ candid = { version = "0.10", optional = true }
 ic-cdk = { version = "0.13", optional = true, features = ["transform-closure"] }
 ic-ledger-types = { version = "0.10", optional = true }                          # token 类型
 ic-cdk-timers = { version = "0.7", optional = true }                             # 定时器
+ic-stable-structures = { version = "0.6", optional = true }                      # 持久化内存
 
 sha2 = { version = "0.10", optional = true }     # hash
 crc32fast = { version = "1.3", optional = true } # 循环校验
