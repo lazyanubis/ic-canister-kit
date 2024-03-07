@@ -6,44 +6,31 @@ pub mod schedule;
 
 pub mod permission;
 
-// #[cfg(feature = "stable_permissable")]
-// pub mod permissable;
-
-// #[cfg(feature = "stable_recordable")]
-// pub mod recordable;
-
-// #[cfg(feature = "stable_notifiable")]
-// pub mod notifiable;
-
-// #[cfg(feature = "stable_uploads")]
-// pub mod uploads;
-
-// #[cfg(feature = "stable_hashmap")]
-// pub mod hashmap;
-
 pub mod types;
 
-// // 持久化相关接口
+// 持久化相关接口
+// ! 如果通过其他方式，比如 ic-stable-structures，使用了持久化内存，则不能够使用下面传统的方式进行升级持久化
 
-// // 升级后恢复
-// pub fn restore_after_upgrade<R>(state: &RefCell<R>) -> u64
-// where
-//     R: candid::CandidType + for<'d> candid::Deserialize<'d>,
-// {
-//     let mut state = state.borrow_mut();
-//     let (stable_state, record_id): (R, u64) = ic_cdk::storage::stable_restore().unwrap();
-//     *state = stable_state;
-//     record_id
-// }
+// 升级后恢复
+pub fn restore_after_upgrade<R>(state: &RefCell<R>)
+where
+    R: candid::CandidType + for<'d> candid::Deserialize<'d>,
+{
+    let mut state = state.borrow_mut();
+    #[allow(clippy::unwrap_used)] // ? checked
+    let (stable_state,): (R,) = ic_cdk::storage::stable_restore().unwrap();
+    *state = stable_state;
+}
 
-// // 升级前保存
-// pub fn store_before_upgrade<S>(state: &RefCell<S>, record_id: u64)
-// where
-//     S: candid::CandidType + Default,
-// {
-//     let stable_state: S = std::mem::take(&mut *state.borrow_mut());
-//     ic_cdk::storage::stable_save((stable_state, record_id)).unwrap();
-// }
+// 升级前保存
+pub fn store_before_upgrade<S>(state: &RefCell<S>)
+where
+    S: candid::CandidType + Default,
+{
+    let stable_state: S = std::mem::take(&mut *state.borrow_mut());
+    #[allow(clippy::unwrap_used)] // ? checked
+    ic_cdk::storage::stable_save((stable_state,)).unwrap();
+}
 
 /*
 
@@ -72,7 +59,7 @@ fn post_upgrade() {
 #[ic_cdk::pre_upgrade]
 fn pre_upgrade() {
     STATE.with(|state| {
-        state.borrow().must_be_maintaining(); // ! 必须是维护状态, 才可以升级
+        state.borrow().pause_must_be_paused(); // ! 必须是维护状态, 才可以升级
         ic_canister_kit::stable::store_before_upgrade(state);
     });
 }

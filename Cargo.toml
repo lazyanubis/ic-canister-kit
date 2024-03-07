@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "0.3.21"
+version = "1.0.0"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -44,25 +44,17 @@ bitcoin = ["canister"] # bitcoin 相关
 functions = ["times", "ic-cdk-timers"] # functions 相关
 stable = ["functions", "ic-stable-structures"] # 持久化相关
 
-# NFT相关
-nft = ["identity"]   # NFT
-nft_ext = ["nft"]    # NFT EXT 标准
-nft_ticket = ["nft"] # NFT 是否具有门票功能
-nft_limit = ["nft"]  # NFT 是否限制指定时间的功能
-nft_traits = ["nft"] # NFT 的属性记录
+# # NFT相关
+# nft = ["identity"]   # NFT
+# nft_ext = ["nft"]    # NFT EXT 标准
+# nft_ticket = ["nft"] # NFT 是否具有门票功能
+# nft_limit = ["nft"]  # NFT 是否限制指定时间的功能
+# nft_traits = ["nft"] # NFT 的属性记录
 
-# candid 类型
-candid_type = []
+# # candid 类型
+# candid_type = []
 
-all = [
-    "default",
-    "nft",
-    "nft_ext",
-    "nft_ticket",
-    "nft_limit",
-    "nft_traits",
-    "candid_type",
-]
+all = ["default"]
 
 
 [dependencies]
