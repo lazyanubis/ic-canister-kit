@@ -18,6 +18,12 @@ use crate::{
 )]
 pub struct RecordId(u64);
 
+impl From<u64> for RecordId {
+    fn from(value: u64) -> Self {
+        Self(value)
+    }
+}
+
 impl RecordId {
     /// 取出内部数据
     pub fn into_inner(&self) -> u64 {

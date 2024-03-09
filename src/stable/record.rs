@@ -200,3 +200,43 @@ impl Recordable<Record, RecordTopic, RecordSearch> for Records {
         }
     }
 }
+
+/// 记录检索
+#[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
+pub struct RecordSearchArg {
+    /// id 过滤
+    pub id: Option<(Option<u64>, Option<u64>)>,
+    /// 创建时间过滤
+    pub created: Option<(Option<u64>, Option<u64>)>,
+    /// 调用人过滤
+    pub caller: Option<HashSet<CallerId>>,
+    /// 主题过滤
+    pub topic: Option<HashSet<String>>,
+    /// 内容过滤
+    pub content: Option<String>,
+}
+
+impl RecordSearchArg {
+    /// 参数转变
+    pub fn into<E, F: Fn(&str) -> Result<RecordTopic, E>>(self, f: F) -> Result<RecordSearch, E> {
+        Ok(RecordSearch {
+            id: self
+                .id
+                .map(|(a, b)| (a.map(|a| a.into()), b.map(|b| b.into()))),
+            created: self
+                .created
+                .map(|(a, b)| (a.map(|a| (a as i128).into()), b.map(|b| (b as i128).into()))),
+            caller: self.caller,
+            topic: self
+                .topic
+                .map(|topic| {
+                    topic
+                        .iter()
+                        .map(|t| f(t))
+                        .collect::<Result<HashSet<_>, _>>()
+                })
+                .transpose()?,
+            content: self.content,
+        })
+    }
+}

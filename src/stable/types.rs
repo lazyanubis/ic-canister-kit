@@ -4,4 +4,4 @@ pub use super::schedule::Schedule;
 
 pub use super::permission::{Permission, Permissions};
 
-pub use super::record::{Record, RecordSearch, RecordTopic, Records};
+pub use super::record::{Record, RecordSearch, RecordSearchArg, RecordTopic, Records};

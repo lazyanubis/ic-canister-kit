@@ -31,7 +31,7 @@ pub fn schedule_start(
 ) -> Option<TimerId> {
     schedule.map(|interval| {
         ic_cdk_timers::set_timer_interval(
-            std::time::Duration::from_nanos(interval.into_inner()),
+            std::time::Duration::from_nanos(interval.into_inner() as u64),
             task,
         )
     })

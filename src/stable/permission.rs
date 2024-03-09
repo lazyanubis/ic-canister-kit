@@ -273,3 +273,45 @@ impl Permissable<Permission> for Permissions {
         Ok(())
     }
 }
+
+impl PermissionUpdatedArg<String> {
+    /// 解析权限，返回 PermissionUpdatedArg
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - 权限解析函数，将字符串解析为 Permission
+    pub fn parse_permission<E, F: Fn(&str) -> Result<Permission, E>>(
+        self,
+        f: F,
+    ) -> Result<PermissionUpdatedArg<Permission>, E> {
+        Ok(match self {
+            PermissionUpdatedArg::UpdateUserPermission(user_id, permissions) => {
+                PermissionUpdatedArg::UpdateUserPermission(
+                    user_id,
+                    permissions
+                        .map(|ps| {
+                            ps.into_iter()
+                                .map(|p| f(&p))
+                                .collect::<Result<HashSet<_>, _>>()
+                        })
+                        .transpose()?,
+                )
+            }
+            PermissionUpdatedArg::UpdateRolePermission(role, permissions) => {
+                PermissionUpdatedArg::UpdateRolePermission(
+                    role,
+                    permissions
+                        .map(|ps| {
+                            ps.into_iter()
+                                .map(|p| f(&p))
+                                .collect::<Result<HashSet<_>, _>>()
+                        })
+                        .transpose()?,
+                )
+            }
+            PermissionUpdatedArg::UpdateUserRole(user_id, roles) => {
+                PermissionUpdatedArg::UpdateUserRole(user_id, roles)
+            }
+        })
+    }
+}

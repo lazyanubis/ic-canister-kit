@@ -6,22 +6,22 @@ use std::fmt::Display;
 #[derive(
     candid::CandidType, candid::Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
 )]
-pub struct TimestampNanos(u64);
+pub struct TimestampNanos(i128);
 
 /// 时间跨度 纳秒
 #[derive(
     candid::CandidType, candid::Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
 )]
-pub struct DurationNanos(u64);
+pub struct DurationNanos(u128);
 
-impl From<u64> for TimestampNanos {
-    fn from(value: u64) -> Self {
+impl From<i128> for TimestampNanos {
+    fn from(value: i128) -> Self {
         TimestampNanos(value)
     }
 }
 
-impl From<u64> for DurationNanos {
-    fn from(value: u64) -> Self {
+impl From<u128> for DurationNanos {
+    fn from(value: u128) -> Self {
         DurationNanos(value)
     }
 }
@@ -40,14 +40,14 @@ impl Display for DurationNanos {
 
 impl TimestampNanos {
     /// 内部数据
-    pub fn into_inner(self) -> u64 {
+    pub fn into_inner(self) -> i128 {
         self.0
     }
 }
 
 impl DurationNanos {
     /// 内部数据
-    pub fn into_inner(self) -> u64 {
+    pub fn into_inner(self) -> u128 {
         self.0
     }
 }
@@ -55,5 +55,5 @@ impl DurationNanos {
 /// 当前时间戳
 #[inline]
 pub fn now() -> TimestampNanos {
-    ic_cdk::api::time().into()
+    (ic_cdk::api::time() as i128).into()
 }

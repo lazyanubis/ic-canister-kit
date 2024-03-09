@@ -4,7 +4,7 @@ use std::{
     hash::Hash,
 };
 
-use crate::identity::UserId;
+use crate::{common::option::display_option_by, identity::UserId};
 
 /// 权限管理
 
@@ -72,4 +72,43 @@ pub trait Permissable<Permission: Eq + Hash> {
         &mut self,
         args: Vec<PermissionUpdatedArg<Permission>>,
     ) -> Result<(), PermissionUpdatedError<Permission>>;
+}
+
+impl Display for PermissionUpdatedArg<String> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::UpdateUserPermission(user_id, permissions) => f.write_str(&format!(
+                "update user: {} permissions: {}",
+                user_id.to_text(),
+                display_option_by(permissions, |permissions| format!(
+                    "[{}]",
+                    permissions
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+            )),
+            Self::UpdateRolePermission(role, permissions) => f.write_str(&format!(
+                "update role: {} permissions: {}",
+                role,
+                display_option_by(permissions, |permissions| format!(
+                    "[{}]",
+                    permissions
+                        .iter()
+                        .map(|p| p.to_string())
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+            )),
+            Self::UpdateUserRole(user_id, roles) => f.write_str(&format!(
+                "update user: {} roles: {}",
+                user_id.to_text(),
+                display_option_by(roles, |roles| format!(
+                    "[{}]",
+                    roles.iter().cloned().collect::<Vec<_>>().join(",")
+                ))
+            )),
+        }
+    }
 }
