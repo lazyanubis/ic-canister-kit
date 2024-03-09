@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /// 时间相关
 
 /// 时间戳 纳秒
@@ -21,6 +23,18 @@ impl From<u64> for TimestampNanos {
 impl From<u64> for DurationNanos {
     fn from(value: u64) -> Self {
         DurationNanos(value)
+    }
+}
+
+impl Display for TimestampNanos {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Display for DurationNanos {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 

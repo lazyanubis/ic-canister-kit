@@ -54,14 +54,9 @@ pub trait Recordable<Record, RecordTopic, Search: Searchable<Record>> {
 
     // 修改
     /// 插入记录
-    fn record_push(
-        &mut self,
-        caller: CallerId,
-        topic: impl Into<RecordTopic>,
-        content: impl Into<String>,
-    ) -> RecordId;
+    fn record_push(&mut self, caller: CallerId, topic: RecordTopic, content: String) -> RecordId;
     /// 更新记录
-    fn record_update(&mut self, record_id: RecordId, done: impl Into<String>);
+    fn record_update(&mut self, record_id: RecordId, done: String);
     /// 迁移
     fn record_migrate(&mut self, max: u32) -> MigratedRecords<Record>;
 
@@ -77,18 +72,5 @@ pub trait Recordable<Record, RecordTopic, Search: Searchable<Record>> {
             return page.query_desc_by_list_and_filter(list, max, |item| search.test(item));
         }
         page.query_desc_by_list(list, max)
-    }
-    /// 插入记录并更新记录
-    fn record_push_by<R, F: FnOnce() -> (R, String)>(
-        &mut self,
-        caller: CallerId,
-        topic: impl Into<RecordTopic>,
-        content: impl Into<String>,
-        f: F,
-    ) -> R {
-        let record_id = self.record_push(caller, topic, content);
-        let (r, d) = f();
-        self.record_update(record_id, d);
-        r
     }
 }

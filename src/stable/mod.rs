@@ -1,5 +1,7 @@
 use std::cell::RefCell;
 
+use crate::functions::types::RecordId;
+
 /// 维护状态
 pub mod pausable;
 
@@ -19,24 +21,26 @@ pub mod types;
 // ! 如果通过其他方式，比如 ic-stable-structures，使用了持久化内存，则不能够使用下面传统的方式进行升级持久化
 
 /// 升级后恢复
-pub fn restore_after_upgrade<R>(state: &RefCell<R>)
+pub fn restore_after_upgrade<R>(state: &RefCell<R>) -> Option<RecordId>
 where
     R: candid::CandidType + for<'d> candid::Deserialize<'d>,
 {
     let mut state = state.borrow_mut();
     #[allow(clippy::unwrap_used)] // ? checked
-    let (stable_state,): (R,) = ic_cdk::storage::stable_restore().unwrap();
+    let (stable_state, record_id): (R, Option<RecordId>) =
+        ic_cdk::storage::stable_restore().unwrap();
     *state = stable_state;
+    record_id
 }
 
 /// 升级前保存
-pub fn store_before_upgrade<S>(state: &RefCell<S>)
+pub fn store_before_upgrade<S>(state: &RefCell<S>, record_id: Option<RecordId>)
 where
     S: candid::CandidType + Default,
 {
     let stable_state: S = std::mem::take(&mut *state.borrow_mut());
     #[allow(clippy::unwrap_used)] // ? checked
-    ic_cdk::storage::stable_save((stable_state,)).unwrap();
+    ic_cdk::storage::stable_save((stable_state, record_id)).unwrap();
 }
 
 /*

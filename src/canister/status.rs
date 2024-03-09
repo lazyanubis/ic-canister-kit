@@ -19,11 +19,11 @@ async fn canister_info(num_requested_changes: Option<u64>) -> ic_cdk::api::manag
 }
 
 */
-
 // ========================= 罐子状态信息 =========================
 
 /// 查询罐子状态
 /// ! Only the controllers of the canister
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-canister_status
 pub async fn canister_status(
     canister_id: CanisterId,
 ) -> super::types::CanisterCallResult<ic_cdk::api::management_canister::main::CanisterStatusResponse>
@@ -37,6 +37,7 @@ pub async fn canister_status(
 
 /// 查询罐子信息
 /// ! 罐子可以调用，用户身份不可以调用
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-canister-info
 pub async fn canister_info(
     canister_id: CanisterId,
     num_requested_changes: Option<u64>,

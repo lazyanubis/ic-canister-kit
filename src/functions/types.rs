@@ -8,4 +8,4 @@ pub use super::schedule::{Schedulable, TimerId};
 
 pub use super::permission::{Permissable, PermissionUpdatedArg, PermissionUpdatedError};
 
-pub use super::record::{RecordId, Recordable, Searchable};
+pub use super::record::{MigratedRecords, RecordId, Recordable, Searchable};

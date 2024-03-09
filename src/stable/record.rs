@@ -12,7 +12,7 @@ use crate::{
 /// 记录主题
 pub type RecordTopic = u8;
 
-/// 每条日志记录
+/// 每条记录
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
 pub struct Record {
     /// 记录 id
@@ -36,8 +36,8 @@ impl Record {
     }
 
     #[inline]
-    fn update(&mut self, done: impl Into<String>) {
-        self.done = Some((crate::times::now(), done.into()));
+    fn update(&mut self, done: String) {
+        self.done = Some((crate::times::now(), done));
     }
 }
 
@@ -50,9 +50,9 @@ pub struct RecordSearch {
     pub created: Option<(Option<TimestampNanos>, Option<TimestampNanos>)>,
     /// 调用人过滤
     pub caller: Option<HashSet<CallerId>>,
-    /// 日志主题过滤
+    /// 主题过滤
     pub topic: Option<HashSet<RecordTopic>>,
-    /// 日志内容过滤
+    /// 内容过滤
     pub content: Option<String>,
 }
 
@@ -104,8 +104,8 @@ impl Searchable<Record> for RecordSearch {
     }
 }
 
-/// 持久化的日志记录对象
-#[derive(candid::CandidType, candid::Deserialize, Debug, Default)]
+/// 持久化的记录对象
+#[derive(candid::CandidType, candid::Deserialize, Debug)]
 pub struct Records {
     /// 最大保存个数
     pub max: u64,
@@ -117,6 +117,17 @@ pub struct Records {
     pub records: Vec<Record>,
 }
 
+impl Default for Records {
+    fn default() -> Self {
+        Self {
+            max: 1024 * 1024, // 假设一条占用 1KB 则最大 1GB 记录
+            removed: Default::default(),
+            next_id: Default::default(),
+            records: Default::default(),
+        }
+    }
+}
+
 impl Recordable<Record, RecordTopic, RecordSearch> for Records {
     // 查询
 
@@ -126,12 +137,7 @@ impl Recordable<Record, RecordTopic, RecordSearch> for Records {
     }
 
     // 修改
-    fn record_push(
-        &mut self,
-        caller: CallerId,
-        topic: impl Into<RecordTopic>,
-        content: impl Into<String>,
-    ) -> RecordId {
+    fn record_push(&mut self, caller: CallerId, topic: RecordTopic, content: String) -> RecordId {
         // 判断最大个数
         if self.max <= self.records.len() as u64 {
             let (_migrated, left) = self.records.split_at(1);
@@ -147,8 +153,8 @@ impl Recordable<Record, RecordTopic, RecordSearch> for Records {
             id,
             created: crate::times::now(),
             caller,
-            topic: topic.into(),
-            content: content.into(),
+            topic,
+            content,
             done: None,
         });
 
@@ -156,7 +162,7 @@ impl Recordable<Record, RecordTopic, RecordSearch> for Records {
     }
 
     /// 更新记录
-    fn record_update(&mut self, record_id: RecordId, done: impl Into<String>) {
+    fn record_update(&mut self, record_id: RecordId, done: String) {
         let list = &mut self.records;
         let mut index = list.len();
         loop {
