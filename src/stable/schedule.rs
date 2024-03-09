@@ -2,6 +2,7 @@ use crate::{functions::types::Schedulable, types::TimestampNanos};
 
 // ================== 简单实现 ==================
 
+/// 周期定时任务
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Default)]
 pub struct Schedule(Option<TimestampNanos>);
 

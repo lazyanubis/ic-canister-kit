@@ -50,9 +50,9 @@ where
 
 // ========================= 充值 cycles =========================
 
-// 充值余额
-// ! 任何人都可以调用
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-deposit_cycles
+/// 充值余额
+/// ! 任何人都可以调用
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-deposit_cycles
 pub async fn deposit_cycles(
     canister_id: CanisterId,
     cycles: u128,
@@ -67,8 +67,8 @@ pub async fn deposit_cycles(
 
 // ========================= 自定义接口调用 =========================
 
-// 查询罐子余额
-// ! 必须实现 wallet_balance : () -> (nat) query 接口
+/// 查询罐子余额
+/// ! 必须实现 wallet_balance : () -> (nat) query 接口
 pub async fn call_wallet_balance(
     canister_id: CanisterId,
 ) -> super::types::CanisterCallResult<candid::Nat> {
@@ -77,8 +77,8 @@ pub async fn call_wallet_balance(
     super::fetch_and_wrap_call_result(canister_id, "deposit_cycles", call_result)
 }
 
-// 充值罐子余额
-// ! 必须实现 wallet_receive : () -> (nat) 接口
+/// 充值罐子余额
+/// ! 必须实现 wallet_receive : () -> (nat) 接口
 pub async fn call_wallet_receive(
     canister_id: CanisterId,
     cycles: u64,

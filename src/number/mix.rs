@@ -21,17 +21,21 @@ pub fn encode_index_code(salt: &[u8], index: u64, random: Option<&[u8]>) -> Vec<
     show
 }
 
-// 编码数字成字符串
+/// 编码数字成字符串
 #[inline]
 pub fn encode_index_code_with_base32(salt: &[u8], index: u64, random: Option<&[u8]>) -> String {
     let show = encode_index_code(salt, index, random);
     base32::encode(base32::Alphabet::RFC4648 { padding: false }, &show)
 }
 
+/// 混淆错误
 #[derive(Debug)]
 pub enum MixNumberDecodeError {
+    /// 长度错误
     WrongLength,
+    /// 校验码错误
     WrongChecksum,
+    /// 编码错误
     Base32DecodeError,
 }
 impl std::fmt::Display for MixNumberDecodeError {
@@ -49,7 +53,7 @@ impl std::fmt::Display for MixNumberDecodeError {
 }
 impl std::error::Error for MixNumberDecodeError {}
 
-// 根据加密结果解析回序号
+/// 根据加密结果解析回序号
 pub fn decode_index_code(salt: &[u8], show: &[u8]) -> Result<u64, MixNumberDecodeError> {
     if show.len() <= 4 || show.len() % 2 != 0 {
         return Err(MixNumberDecodeError::WrongLength); // 长度不对
@@ -72,7 +76,7 @@ pub fn decode_index_code(salt: &[u8], show: &[u8]) -> Result<u64, MixNumberDecod
 
     Ok(index)
 }
-// 根据加密字符串解析回序号
+/// 根据加密字符串解析回序号
 pub fn decode_index_code_by_base32(salt: &[u8], code: &str) -> Result<u64, MixNumberDecodeError> {
     let show = base32::decode(base32::Alphabet::RFC4648 { padding: false }, code)
         .ok_or(MixNumberDecodeError::Base32DecodeError)?;

@@ -9,8 +9,8 @@ pub use ic_cdk::api::management_canister::bitcoin::{
 
 use crate::{canister::fetch_tuple0, types::CanisterCallError};
 
-// 查询余额
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_balance
+/// 查询余额
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_balance
 pub async fn bitcoin_get_balance(
     network: BitcoinNetwork,
     address: BitcoinAddress,
@@ -31,8 +31,8 @@ pub async fn bitcoin_get_balance(
     })
 }
 
-// 查询网络费用
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_current_fee_percentiles
+/// 查询网络费用
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_current_fee_percentiles
 pub async fn bitcoin_get_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> super::types::CanisterCallResult<Vec<MillisatoshiPerByte>> {
@@ -49,8 +49,8 @@ pub async fn bitcoin_get_current_fee_percentiles(
     })
 }
 
-// 查询 UTXO
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_utxos
+/// 查询 UTXO
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_utxos
 pub async fn bitcoin_get_utxos(
     network: BitcoinNetwork,
     address: BitcoinAddress,
@@ -71,8 +71,8 @@ pub async fn bitcoin_get_utxos(
     })
 }
 
-// 发送交易
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_send_transaction
+/// 发送交易
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_send_transaction
 pub async fn bitcoin_send_transaction(
     network: BitcoinNetwork,
     transaction: Vec<u8>,

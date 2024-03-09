@@ -1,17 +1,21 @@
 use std::cell::RefCell;
 
+/// 维护状态
 pub mod pausable;
 
+/// 定时任务
 pub mod schedule;
 
+/// 权限
 pub mod permission;
 
+/// 类型
 pub mod types;
 
 // 持久化相关接口
 // ! 如果通过其他方式，比如 ic-stable-structures，使用了持久化内存，则不能够使用下面传统的方式进行升级持久化
 
-// 升级后恢复
+/// 升级后恢复
 pub fn restore_after_upgrade<R>(state: &RefCell<R>)
 where
     R: candid::CandidType + for<'d> candid::Deserialize<'d>,
@@ -22,7 +26,7 @@ where
     *state = stable_state;
 }
 
-// 升级前保存
+/// 升级前保存
 pub fn store_before_upgrade<S>(state: &RefCell<S>)
 where
     S: candid::CandidType + Default,

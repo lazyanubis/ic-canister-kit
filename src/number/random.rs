@@ -25,18 +25,21 @@ pub async fn random() -> CanisterCallResult<[u8; 32]> {
 
 // 如果每次只需要使用指定数量的随机数, 通过下面的方式节省随机数
 
+/// 随机数生产对象
 pub struct RandomGenerator {
     random: [u8; 32],
     current: u8,
 }
 
 impl RandomGenerator {
+    /// 构建对象
     pub fn new() -> Self {
         RandomGenerator {
             random: [0; 32],
             current: 32,
         }
     }
+    /// 下一组随机数
     pub async fn next(&mut self, number: usize) -> CanisterCallResult<Vec<u8>> {
         let mut data = Vec::with_capacity(number);
         let mut remain = number;

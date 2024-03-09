@@ -1,25 +1,35 @@
+/// cycles
 pub mod cycles;
 
+/// status
 pub mod status;
 
+/// life
 pub mod life;
 
+/// codes
 pub mod codes;
 
+/// deploy
 pub mod deploy;
 
+/// settings
 pub mod settings;
 
+/// call
 pub mod call;
 
+/// common
 pub mod common;
 
+/// 类型
 pub mod types;
 
 // ========================= 基本方法 =========================
 
 pub use ic_cdk::api::stable::WASM_PAGE_SIZE_IN_BYTES as WASM_PAGE_SIZE;
 
+/// 罐子自身的 cycles
 #[inline]
 pub fn self_canister_cycles() -> u128 {
     #[cfg(target_arch = "wasm32")]
@@ -32,6 +42,7 @@ pub fn self_canister_cycles() -> u128 {
     }
 }
 
+/// 罐子自己的稳定内存使用量
 #[inline]
 pub fn self_canister_stable_memory_size() -> u128 {
     #[cfg(target_arch = "wasm32")]
@@ -44,6 +55,7 @@ pub fn self_canister_stable_memory_size() -> u128 {
     }
 }
 
+/// 罐子自己的堆内存使用量
 #[inline]
 pub fn self_canister_heap_memory_size() -> u128 {
     #[cfg(target_arch = "wasm32")]
@@ -56,6 +68,7 @@ pub fn self_canister_heap_memory_size() -> u128 {
     }
 }
 
+/// 罐子自身的总内存
 #[inline]
 pub fn self_canister_current_memory_size() -> u128 {
     self_canister_stable_memory_size() + self_canister_heap_memory_size()
@@ -98,8 +111,9 @@ fn wrap_call_result(
     })
 }
 
+/// 取出元组的第一个元素
 #[allow(unused)]
 #[inline]
-pub fn fetch_tuple0<T>(args: (T,)) -> T {
+pub(crate) fn fetch_tuple0<T>(args: (T,)) -> T {
     args.0
 }

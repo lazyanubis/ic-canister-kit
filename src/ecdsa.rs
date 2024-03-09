@@ -6,6 +6,8 @@ pub use ic_cdk::api::management_canister::ecdsa::{
 
 use crate::{canister::fetch_tuple0, identity::CanisterId, types::CanisterCallError};
 
+/// 私钥派生路径
+/// 不知道有没有长度要求的
 pub type EcdsaDerivationPath = Vec<Vec<u8>>;
 
 // #[derive(Debug)]
@@ -42,12 +44,19 @@ pub type EcdsaDerivationPath = Vec<Vec<u8>>;
 //     }
 // }
 
+/// 罐子管理的私钥路径，确定使用哪一个私钥
 pub struct EcdsaIdentity {
+    /// 加密曲线
     pub key_id: EcdsaKeyId,
+
+    /// 派生路径
     pub derivation_path: EcdsaDerivationPath,
 }
 
+/// 消息 hash 对象，必须 32 长度
 pub struct MessageHash(Vec<u8>);
+
+/// 消息 hash 错误
 #[derive(Debug)]
 pub struct MessageHashError;
 impl std::fmt::Display for MessageHashError {
@@ -67,8 +76,8 @@ impl TryFrom<Vec<u8>> for MessageHash {
     }
 }
 
-// 查询公钥
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-ecdsa_public_key
+/// 查询公钥
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-ecdsa_public_key
 pub async fn ecdsa_public_key(
     canister_id: Option<CanisterId>, // 不写则是自身 id
     identity: EcdsaIdentity,
@@ -89,8 +98,8 @@ pub async fn ecdsa_public_key(
     })
 }
 
-// 进行签名
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_ecdsa
+/// 进行签名
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_ecdsa
 pub async fn ecdsa_sign(
     identity: EcdsaIdentity,
     message_hash: MessageHash,

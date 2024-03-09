@@ -2,6 +2,7 @@ use crate::functions::types::{Pausable, PauseReason};
 
 // ================== 简单实现 ==================
 
+/// 记录维护状态
 #[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Default)]
 pub struct Pause(Option<PauseReason>);
 

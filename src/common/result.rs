@@ -2,8 +2,10 @@
 
 #[derive(candid::CandidType, candid::Deserialize, Debug)]
 pub enum MotokoResult<T, E> {
+    /// 正常
     #[serde(rename = "ok")]
     Ok(T),
+    /// 错误
     #[serde(rename = "err")]
     Err(E),
 }

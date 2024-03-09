@@ -7,13 +7,17 @@ use crate::{
 
 // ================== 简单实现 ==================
 
-// 多个权限对象
+/// 多个权限对象
 #[derive(candid::CandidType, serde::Deserialize, Debug, Default)]
 pub struct Permissions {
-    pub permissions: HashSet<Permission>, // 所有权限
-    pub user_permissions: HashMap<UserId, HashSet<Permission>>, // 用户分配的特别权限, Permitted表示拥有, Forbidden表示禁止
-    pub role_permissions: HashMap<String, HashSet<Permission>>, // 某角色对权限的限制
-    pub user_roles: HashMap<UserId, HashSet<String>>,           // 用户所拥有的角色
+    /// 所有权限种类
+    pub permissions: HashSet<Permission>,
+    /// 用户分配的特别权限, Permitted表示拥有, Forbidden表示禁止
+    pub user_permissions: HashMap<UserId, HashSet<Permission>>,
+    /// 某角色对权限的限制
+    pub role_permissions: HashMap<String, HashSet<Permission>>,
+    /// 用户被授权的角色
+    pub user_roles: HashMap<UserId, HashSet<String>>,
 }
 
 impl Permissions {

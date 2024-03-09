@@ -22,8 +22,8 @@ async fn canister_info(num_requested_changes: Option<u64>) -> ic_cdk::api::manag
 
 // ========================= 罐子状态信息 =========================
 
-// 查询罐子状态
-// ! Only the controllers of the canister
+/// 查询罐子状态
+/// ! Only the controllers of the canister
 pub async fn canister_status(
     canister_id: CanisterId,
 ) -> super::types::CanisterCallResult<ic_cdk::api::management_canister::main::CanisterStatusResponse>
@@ -35,8 +35,8 @@ pub async fn canister_status(
     super::fetch_and_wrap_call_result(canister_id, "ic#canister_status", call_result)
 }
 
-// 查询罐子信息
-// ! 罐子可以调用，用户身份不可以调用
+/// 查询罐子信息
+/// ! 罐子可以调用，用户身份不可以调用
 pub async fn canister_info(
     canister_id: CanisterId,
     num_requested_changes: Option<u64>,
@@ -54,8 +54,8 @@ pub async fn canister_info(
 
 // ========================= 自定义接口调用 =========================
 
-// 查询罐子状态
-// ! 必须实现 canister_status : () -> (CanisterStatusResponse) 接口
+/// 查询罐子状态
+/// ! 必须实现 canister_status : () -> (CanisterStatusResponse) 接口
 pub async fn call_canister_status(
     canister_id: CanisterId,
 ) -> super::types::CanisterCallResult<ic_cdk::api::management_canister::main::CanisterStatusResponse>
@@ -68,8 +68,8 @@ pub async fn call_canister_status(
     super::fetch_and_wrap_call_result(canister_id, "canister_status", call_result)
 }
 
-// 查询罐子信息
-// ! 必须实现 canister_info : () -> (CanisterInfoResponse) 接口
+/// 查询罐子信息
+/// ! 必须实现 canister_info : () -> (CanisterInfoResponse) 接口
 pub async fn call_canister_info(
     canister_id: CanisterId,
     num_requested_changes: Option<u64>,

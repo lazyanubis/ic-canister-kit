@@ -14,33 +14,43 @@ async fn whoami() -> ic_canister_kit::types::UserId {
 
 */
 
-// 罐子 ID
+/// 罐子 ID
 pub type CanisterId = candid::Principal; // 类型别名
+/// 字符串格式罐子 id
 pub type CanisterIdText = String; // ? 字符串格式
+
+/// 集合 id NFT 集合
 pub type CollectionId = candid::Principal; // 类型别名
+/// 字符串格式的 集合 id
 pub type CollectionIdText = String; // ? 字符串格式
 
-// 用户 ID
+/// 用户 ID
 pub type UserId = candid::Principal; // 类型别名
+/// 字符串格式的 用户 ID
 pub type UserIdText = String; // ? 字符串格式
 
-// 调用者 ID
+/// 调用者 ID
 pub type CallerId = candid::Principal; // 类型别名
+/// 字符串格式的 调用者 ID
 pub type CallerIdText = String; // ? 字符串格式
 
-// 子账户
+/// 子账户
 #[derive(Debug, Default, Clone, Copy, CandidType, Deserialize)]
 pub struct Subaccount([u8; 32]); // 长度必须是 32 长度
+/// 字符串格式的 子账户
 pub type SubaccountHex = String; // ? 16 进制文本
 
-// 账户 ID 通过 Principal 配合子账户计算得来
-// 账户 一般是 account id，如果用户使用的是 principal 也要和 subaccount 一起转换成对应的 account id
+/// 账户 ID 通过 Principal 配合子账户计算得来
+/// 账户 一般是 account id，如果用户使用的是 principal 也要和 subaccount 一起转换成对应的 account id
 #[derive(Debug, Clone, Copy, CandidType, Deserialize)]
 pub struct AccountIdentifier([u8; 32]); // 账户
+/// 字符串格式的 账户
 pub type AccountIdentifierHex = String; // ? 16 进制文本
 
+/// 错误的转换长度
 #[derive(Debug)]
 pub enum FromVecError {
+    /// 错误的长度 必须 32 长度
     InvalidLength, // length must be 32
 }
 impl std::fmt::Display for FromVecError {
@@ -52,9 +62,12 @@ impl std::fmt::Display for FromVecError {
 }
 impl std::error::Error for FromVecError {}
 
+/// 编码错误
 #[derive(Debug)]
 pub enum FromHexError {
+    /// 错误的编码
     HexError(hex::FromHexError),
+    /// 错误的长度 必须 32 长度
     InvalidLength, // length must be 32
 }
 impl std::fmt::Display for FromHexError {
@@ -122,12 +135,14 @@ impl TryFrom<&str> for AccountIdentifier {
 }
 
 impl AccountIdentifier {
+    /// 取的内部数组数据
     #[allow(unused)]
     #[inline]
     pub fn into_inner(self) -> [u8; 32] {
         self.0
     }
 
+    /// 构造
     #[inline]
     pub fn from(owner: &UserId, subaccount: &Option<Subaccount>) -> Self {
         let subaccount: Subaccount = (*subaccount).unwrap_or_default(); // 默认子账户 应该全是 0
@@ -150,6 +165,7 @@ impl AccountIdentifier {
         result.into()
     }
 
+    /// 从数组转换
     #[inline]
     pub fn from_vec(owner: &UserId, subaccount: &Option<Vec<u8>>) -> Result<Self, FromVecError> {
         let subaccount = subaccount
@@ -160,6 +176,7 @@ impl AccountIdentifier {
         Ok(Self::from(owner, &subaccount))
     }
 
+    /// 转换成 16 进制文本
     #[inline]
     pub fn to_hex(&self) -> String {
         hex::encode(self.0)
@@ -168,7 +185,7 @@ impl AccountIdentifier {
 
 // =================== 基础方法 ===================
 
-// ! 列表变数组, 长度必须是 32
+/// ! 列表变数组, 长度必须是 32
 #[inline]
 fn parse_account(account: &[u8]) -> Result<[u8; 32], FromVecError> {
     if account.len() != 32 {
@@ -179,13 +196,13 @@ fn parse_account(account: &[u8]) -> Result<[u8; 32], FromVecError> {
     Ok(array)
 }
 
-// 获取调用者 principal id
+/// 获取调用者 principal id
 #[inline]
 pub fn caller() -> CallerId {
     ic_cdk::api::caller()
 }
 
-// 获取本罐子的 principal id
+/// 获取本罐子的 principal id
 #[inline]
 pub fn self_canister_id() -> CanisterId {
     ic_cdk::api::id()

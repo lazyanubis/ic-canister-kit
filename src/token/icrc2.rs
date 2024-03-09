@@ -27,18 +27,26 @@ use super::{
 // type AllowanceArgs = record { account : Account; spender : Account };
 // type Allowance = record { allowance : nat; expires_at : opt nat64 };
 
+/// 授权对象
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Icrc2AllowanceArgs {
+    /// 被授权的账户 出钱的
     pub account: Icrc1Account,
+
+    /// 授权的账户 花钱的
     pub spender: Icrc1Account,
 }
 
+/// 授权额度
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Icrc2Allowance {
+    /// 授权的额度
     pub allowance: candid::Nat,
+    /// 过期时间
     pub expires_at: Option<u64>,
 }
 
+/// 查询授权额度
 #[allow(unused)]
 pub async fn icrc2_allowance(
     canister_id: CanisterId,
@@ -74,48 +82,81 @@ pub async fn icrc2_allowance(
 //   InsufficientFunds : record { balance : nat };
 // };
 
+/// 授权参数
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Icrc2ApproveArgs {
+    /// 被授权的子账户
     pub from_subaccount: Option<Icrc1Subaccount>,
-    pub spender: Icrc1Account, // 被授权的账户
-    pub amount: candid::Nat,   // 被授权的额度
+
+    /// 授权的账户
+    pub spender: Icrc1Account,
+    /// 授权的额度
+    pub amount: candid::Nat,
+
+    /// 授权的费用
     pub fee: Option<candid::Nat>,
+
+    /// memo
     pub memo: Option<Icrc1Memo>,
+    /// 创建时间
     pub created_at_time: Option<u64>,
 
-    pub expected_allowance: Option<candid::Nat>, // 期望转移的数量
-    pub expires_at: Option<u64>,                 // 过期时间
+    /// 期望转移的数量
+    pub expected_allowance: Option<candid::Nat>,
+    /// 过期时间
+    pub expires_at: Option<u64>,
 }
+
+/// 授权错误
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub enum Icrc2ApproveError {
+    /// 通用错误
     GenericError {
-        message: String,
+        /// 错误码
         error_code: candid::Nat,
+        /// 错误消息
+        message: String,
     },
+    /// 临时不可用
     TemporarilyUnavailable,
+    /// 交易重复
     Duplicate {
+        /// 交易重复
         duplicate_of: candid::Nat,
     },
+    /// 错误的费用
     BadFee {
+        /// 期望的费用
         expected_fee: candid::Nat,
     },
+    /// 授权额度发生变化
     AllowanceChanged {
+        /// 当前的授权额度
         current_allowance: candid::Nat,
     },
+    /// 未来的转账
     CreatedInFuture {
+        /// 当前账本时间
         ledger_time: u64,
     },
+    /// 订单太老
     TooOld,
+    /// 订单过期
     Expired {
+        /// 当前账本时间
         ledger_time: u64,
     },
+    /// 余额不足
     InsufficientFunds {
+        /// 当前余额
         balance: candid::Nat,
     },
 }
 
+/// 授权结果
 pub type Icrc2ApproveResult = Result<candid::Nat, Icrc2ApproveError>;
 
+/// 授权额度
 #[allow(unused)]
 pub async fn icrc2_approve(
     canister_id: CanisterId,
@@ -150,7 +191,7 @@ pub async fn icrc2_approve(
 //   InsufficientFunds : record { balance : nat };
 // };
 
-// 转账参数
+/// 转账参数
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct Icrc2TransferFromArgs {
     spender_subaccount: Option<Icrc1Subaccount>,
@@ -161,36 +202,55 @@ pub struct Icrc2TransferFromArgs {
     memo: Option<Icrc1Memo>,
     created_at_time: Option<u64>,
 }
-// 转账可能出现的错误
+/// 转账可能出现的错误
 #[derive(CandidType, Deserialize, Debug, Clone)]
 pub enum Icrc2TransferFromError {
+    /// 通用错误
     GenericError {
-        message: String,
+        /// 错误码
         error_code: candid::Nat,
+        /// 错误消息
+        message: String,
     },
+    /// 临时不可用
     TemporarilyUnavailable,
+    /// 授权额度不足
     InsufficientAllowance {
+        /// 授权额度
         allowance: candid::Nat,
     },
+    /// 错误的燃烧数量
     BadBurn {
+        /// 最小的燃烧数量
         min_burn_amount: candid::Nat,
     },
+    /// 交易重复
     Duplicate {
+        /// 重复的交易
         duplicate_of: candid::Nat,
     },
+    /// 错误的费用
     BadFee {
+        /// 期望的费用
         expected_fee: candid::Nat,
     },
+    /// 未来的转账
     CreatedInFuture {
+        /// 当前账本时间
         ledger_time: u64,
     },
+    /// 订单太老
     TooOld,
+    /// 余额不足
     InsufficientFunds {
+        /// 当前余额
         balance: candid::Nat,
     },
 }
-// 转账结果
+/// 转账结果
 pub type Icrc1TransferFromResult = Result<candid::Nat, Icrc2TransferFromError>;
+
+/// 通过授权进行转账
 #[allow(unused)]
 pub async fn icrc2_transfer_from(
     canister_id: CanisterId,

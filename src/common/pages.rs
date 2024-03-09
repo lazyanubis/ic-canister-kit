@@ -2,17 +2,28 @@ use std::cmp::Ordering;
 
 // ============= 分页查询 =============
 
-// 分页对象
+/// 分页对象
 #[derive(candid::CandidType, candid::Deserialize, Debug)]
 pub struct QueryPage {
-    pub page: u64, // 当前页码 1 开始计数
-    pub size: u32, // 每页大小
+    /// 当前页码 1 开始计数
+    pub page: u64,
+    /// 每页大小
+    pub size: u32,
 }
 
+/// 分页查询错误
 #[derive(Debug)]
 pub enum QueryPageError {
-    WrongPage,                         // page can not be 0
-    WrongSize { size: u32, max: u32 }, // size can not be 0 and has max value
+    /// 错误的页码，不能为 0
+    WrongPage, // page can not be 0
+
+    /// 错误的页面大小
+    WrongSize {
+        /// 页面大小
+        size: u32,
+        /// 最大页面大小
+        max: u32,
+    }, // size can not be 0 and has max value
 }
 impl std::fmt::Display for QueryPageError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -30,13 +41,17 @@ impl std::fmt::Display for QueryPageError {
 }
 impl std::error::Error for QueryPageError {}
 
-// 分页查询结果
+/// 分页查询结果
 #[derive(candid::CandidType, candid::Deserialize, Debug)]
 pub struct PageData<T> {
-    pub page: u64,    // 请求的页码
-    pub size: u32,    // 请求的页面大小
-    pub total: u64,   // 总个数
-    pub data: Vec<T>, // 查到的分页数据
+    /// 请求的页码
+    pub page: u64,
+    /// 请求的页面大小
+    pub size: u32,
+    /// 总个数
+    pub total: u64,
+    /// 查到的分页数据
+    pub data: Vec<T>,
 }
 
 impl<T: Clone> From<PageData<&T>> for PageData<T> {
@@ -52,6 +67,7 @@ impl<T: Clone> From<PageData<&T>> for PageData<T> {
 
 // 空结果
 impl QueryPage {
+    /// 空结果
     #[inline]
     pub fn empty<T>(&self) -> PageData<T> {
         PageData {
@@ -62,7 +78,7 @@ impl QueryPage {
         }
     }
 
-    // 检查分页选项是否有效
+    /// 检查分页选项是否有效
     #[inline]
     pub fn check(&self, max: u32) -> Result<(), QueryPageError> {
         if self.page == 0 {
@@ -77,6 +93,7 @@ impl QueryPage {
         Ok(())
     }
 
+    /// 分页数据对象
     #[inline]
     pub fn from_data<T>(&self, total: u64, data: Vec<T>) -> PageData<T> {
         PageData {
@@ -114,7 +131,7 @@ impl QueryPage {
         Ok(data)
     }
 
-    // 对所有数据进行分页查询
+    /// 对所有数据进行分页查询
     #[inline]
     pub fn query_by_list<'a, T>(
         &self,
@@ -128,7 +145,7 @@ impl QueryPage {
         Ok(self.from_data(total, data))
     }
 
-    // 对所有数据进行倒序分页查询
+    /// 对所有数据进行倒序分页查询
     #[inline]
     pub fn query_desc_by_list<'a, T>(
         &self,
