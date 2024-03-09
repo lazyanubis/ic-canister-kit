@@ -1,4 +1,4 @@
-use crate::types::TimestampNanos;
+use crate::types::DurationNanos;
 
 // ================== 异步执行代码 ==================
 // 不知道和 ic_cdk::spawn(future) 区别在哪里
@@ -19,14 +19,14 @@ pub use ic_cdk_timers::TimerId;
 /// 定时任务功能
 pub trait Schedulable {
     /// 查询
-    fn schedule_find(&self) -> Option<TimestampNanos>;
+    fn schedule_find(&self) -> Option<DurationNanos>;
     /// 修改
-    fn schedule_replace(&mut self, schedule: Option<TimestampNanos>);
+    fn schedule_replace(&mut self, schedule: Option<DurationNanos>);
 }
 
 /// 启动任务
 pub fn schedule_start(
-    schedule: &Option<TimestampNanos>,
+    schedule: &Option<DurationNanos>,
     task: impl FnMut() + 'static,
 ) -> Option<TimerId> {
     schedule.map(|interval| {
