@@ -1,11 +1,58 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::Display,
+};
 
 use crate::{
-    functions::types::{Permissable, Permission, PermissionUpdatedArg, PermissionUpdatedError},
+    functions::types::{Permissable, PermissionUpdatedArg, PermissionUpdatedError},
     identity::UserId,
 };
 
 // ================== 简单实现 ==================
+
+/// 被管理的用户类型
+#[derive(candid::CandidType, serde::Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum Permission {
+    /// 授权类型 默认没有该权限 只有被加入的用户才有该权限
+    Permitted(String),
+    /// 禁止类型 默认拥有该权限 如果被加入了就没有该权限了
+    Forbidden(String),
+}
+
+impl Display for Permission {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Permission::Permitted(name) => write!(f, "Permitted({name})"),
+            Permission::Forbidden(name) => write!(f, "Forbidden({name})"),
+        }
+    }
+}
+
+impl Permission {
+    /// 构造许可权限
+    pub fn by_permit(name: &str) -> Self {
+        Permission::Permitted(name.to_string())
+    }
+    /// 构造禁止权限
+    pub fn by_forbid(name: &str) -> Self {
+        Permission::Forbidden(name.to_string())
+    }
+    /// 判断是否许可权限
+    pub fn is_permit(&self) -> bool {
+        matches!(self, Self::Permitted(_))
+    }
+    /// 判断是否禁止权限
+    pub fn is_forbid(&self) -> bool {
+        matches!(self, Self::Forbidden(_))
+    }
+    /// 文本化
+    pub fn name(&self) -> &str {
+        match self {
+            Permission::Permitted(name) => name,
+            Permission::Forbidden(name) => name,
+        }
+    }
+}
 
 /// 多个权限对象
 #[derive(candid::CandidType, serde::Deserialize, Debug, Default)]
@@ -25,7 +72,7 @@ impl Permissions {
     fn assure_permission_exist(
         &self,
         permissions: &Option<HashSet<Permission>>,
-    ) -> Result<(), PermissionUpdatedError> {
+    ) -> Result<(), PermissionUpdatedError<Permission>> {
         if let Some(permissions) = permissions {
             for permission in permissions {
                 if !self.permissions.contains(permission) {
@@ -42,7 +89,7 @@ impl Permissions {
     fn assure_role_exist(
         &self,
         roles: &Option<HashSet<String>>,
-    ) -> Result<(), PermissionUpdatedError> {
+    ) -> Result<(), PermissionUpdatedError<Permission>> {
         if let Some(roles) = roles {
             for role in roles {
                 if !self.role_permissions.contains_key(role) {
@@ -54,7 +101,7 @@ impl Permissions {
     }
 }
 
-impl Permissable for Permissions {
+impl Permissable<Permission> for Permissions {
     // 查询
     fn permission_users(&self) -> HashSet<&UserId> {
         let mut users: HashSet<&UserId> = self.user_roles.keys().collect();
@@ -144,8 +191,8 @@ impl Permissable for Permissions {
     }
     fn permission_update(
         &mut self,
-        args: Vec<PermissionUpdatedArg>,
-    ) -> Result<(), PermissionUpdatedError> {
+        args: Vec<PermissionUpdatedArg<Permission>>,
+    ) -> Result<(), PermissionUpdatedError<Permission>> {
         for arg in args.iter() {
             match arg {
                 PermissionUpdatedArg::UpdateUserPermission(user_id, permissions) => {

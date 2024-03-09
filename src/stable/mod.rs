@@ -9,6 +9,9 @@ pub mod schedule;
 /// 权限
 pub mod permission;
 
+/// 记录
+pub mod record;
+
 /// 类型
 pub mod types;
 

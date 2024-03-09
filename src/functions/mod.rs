@@ -1,4 +1,3 @@
-
 /// 初始化
 pub mod initial;
 
@@ -13,6 +12,9 @@ pub mod schedule;
 
 /// 权限功能
 pub mod permission;
+
+/// 记录功能
+pub mod record;
 
 /// 类型
 pub mod types;

@@ -1,49 +1,24 @@
-use std::fmt::Display;
-
-use crate::times::{now, TimestampNanos};
-
 /// 维护状态
-
-/// 维护原因对象
-#[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
-pub struct PauseReason {
-    /// 维护时间
-    pub timestamp_nanos: TimestampNanos,
-
-    /// 维护原因
-    pub message: String,
-}
-
-impl Display for PauseReason {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&format!("{:?}", self))
-    }
-}
-
-impl std::error::Error for PauseReason {}
-
-impl PauseReason {
-    /// 构造维护原因
-    pub fn new(message: String) -> Self {
-        PauseReason {
-            timestamp_nanos: now(),
-            message,
-        }
-    }
-}
 
 // ================== 功能 ==================
 
+/// 维护原因
+pub trait Reasonable {
+    /// 维护原因
+    fn message(&self) -> &str;
+}
+
 /// 维护记录
-pub trait Pausable {
+pub trait Pausable<Reason: Reasonable> {
     // 查询
 
     /// 查询维护状态
-    fn pause_query(&self) -> &Option<PauseReason>;
+    fn pause_query(&self) -> &Option<Reason>;
+
     // 修改
 
     /// 修改维护状态
-    fn pause_replace(&mut self, reason: Option<PauseReason>);
+    fn pause_replace(&mut self, reason: Option<Reason>);
 
     // 默认方法
 
@@ -58,7 +33,7 @@ pub trait Pausable {
     /// 正常运行中才能继续
     fn pause_must_be_running(&self) -> Result<(), String> {
         if let Some(reason) = &self.pause_query() {
-            return Err(format!("Canister is paused: {}", reason.message));
+            return Err(format!("Canister is paused: {}", reason.message()));
         }
         Ok(())
     }

@@ -1,6 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
-    fmt::Display,
+    fmt::{Debug, Display},
     hash::Hash,
 };
 
@@ -8,53 +8,9 @@ use crate::identity::UserId;
 
 /// 权限管理
 
-// 被管理的用户类型
-#[derive(candid::CandidType, serde::Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub enum Permission {
-    /// 授权类型 默认没有该权限 只有被加入的用户才有该权限
-    Permitted(String),
-    /// 禁止类型 默认拥有该权限 如果被加入了就没有该权限了
-    Forbidden(String),
-}
-
-impl Display for Permission {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Permission::Permitted(name) => write!(f, "Permitted({name})"),
-            Permission::Forbidden(name) => write!(f, "Forbidden({name})"),
-        }
-    }
-}
-
-impl Permission {
-    /// 构造许可权限
-    pub fn by_permit(name: &str) -> Self {
-        Permission::Permitted(name.to_string())
-    }
-    /// 构造禁止权限
-    pub fn by_forbid(name: &str) -> Self {
-        Permission::Forbidden(name.to_string())
-    }
-    /// 判断是否许可权限
-    pub fn is_permit(&self) -> bool {
-        matches!(self, Self::Permitted(_))
-    }
-    /// 判断是否禁止权限
-    pub fn is_forbid(&self) -> bool {
-        matches!(self, Self::Forbidden(_))
-    }
-    /// 文本化
-    pub fn name(&self) -> &str {
-        match self {
-            Permission::Permitted(name) => name,
-            Permission::Forbidden(name) => name,
-        }
-    }
-}
-
 /// 权限修改参数
 #[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
-pub enum PermissionUpdatedArg {
+pub enum PermissionUpdatedArg<Permission: Eq + Hash> {
     /// 更新用户权限
     UpdateUserPermission(UserId, Option<HashSet<Permission>>),
     /// 更新角色权限
@@ -65,13 +21,13 @@ pub enum PermissionUpdatedArg {
 
 /// 权限更新错误
 #[derive(Debug)]
-pub enum PermissionUpdatedError {
+pub enum PermissionUpdatedError<Permission> {
     /// 权限不存在错误
     InvalidPermission(Permission),
     /// 角色不存在错误
     InvalidRole(String),
 }
-impl Display for PermissionUpdatedError {
+impl<Permission: Debug> Display for PermissionUpdatedError<Permission> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             PermissionUpdatedError::InvalidPermission(permission) => {
@@ -81,10 +37,10 @@ impl Display for PermissionUpdatedError {
         }
     }
 }
-impl std::error::Error for PermissionUpdatedError {}
+impl<Permission: Debug> std::error::Error for PermissionUpdatedError<Permission> {}
 
 /// 权限管理
-pub trait Permissable {
+pub trait Permissable<Permission: Eq + Hash> {
     // 查询
     ///  当前管理的所有用户 包括直接授权的和通过角色授权的
     fn permission_users(&self) -> HashSet<&UserId>;
@@ -114,6 +70,6 @@ pub trait Permissable {
     /// 权限更新
     fn permission_update(
         &mut self,
-        args: Vec<PermissionUpdatedArg>,
-    ) -> Result<(), PermissionUpdatedError>;
+        args: Vec<PermissionUpdatedArg<Permission>>,
+    ) -> Result<(), PermissionUpdatedError<Permission>>;
 }
