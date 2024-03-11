@@ -60,8 +60,17 @@ thread_local! {
 #[ic_cdk::post_upgrade]
 fn post_upgrade() {
     STATE.with(|state| {
-        ic_canister_kit::stable::restore_after_upgrade(state);
+        let record_id = ic_canister_kit::stable::restore_after_upgrade(state);
         state.borrow_mut().upgrade(); // ! 恢复后要进行升级到最新版本
+        let schedule = state.borrow().schedule_find();
+        state.borrow_mut().init(CanisterInitialArg { schedule }); // ! 升级到最新版本后, 需要执行初始化操作
+        state.borrow_mut().schedule_reload(); // * 重置定时任务
+        let version = state.borrow().version();
+        if let Some(record_id) = record_id {
+            state
+                .borrow_mut()
+                .record_update(record_id, format!("Next version: {}", version));
+        }
     });
 }
 
@@ -70,8 +79,16 @@ fn post_upgrade() {
 #[ic_cdk::pre_upgrade]
 fn pre_upgrade() {
     STATE.with(|state| {
-        state.borrow().pause_must_be_paused(); // ! 必须是维护状态, 才可以升级
+        #[allow(clippy::unwrap_used)] // ? checked
+        state.borrow().pause_must_be_paused().unwrap(); // ! 必须是维护状态, 才可以升级
+        state.borrow_mut().schedule_stop(); // * 停止定时任务
         ic_canister_kit::stable::store_before_upgrade(state);
+        let record_id = state.borrow_mut().record_push(
+            caller,
+            RecordTopics::Upgrade.topic(),
+            format!("Upgrade by {}", caller.to_text()),
+        );
+        ic_canister_kit::stable::store_before_upgrade(state, Some(record_id));
     });
 }
 
@@ -91,13 +108,28 @@ where
 
 /// 需要可变系统状态时
 #[allow(unused)]
-pub fn with_mut_state<F, R>(callback: F) -> R
+pub fn with_mut_state_without_record<F, R>(callback: F) -> R
 where
     F: FnOnce(&mut State) -> R,
 {
-    STATE.with(|_state| {
-        let mut state = _state.borrow_mut(); // 取得可变对象
+    STATE.with(|state| {
+        let mut state = state.borrow_mut(); // 取得可变对象
         callback(&mut state)
+    })
+}
+
+/// 需要可变系统状态时 // ! 变更操作一定要记录
+#[allow(unused)]
+pub fn with_mut_state<F, R>(callback: F, caller: CallerId, topic: RecordTopic, content: String) -> R
+where
+    F: FnOnce(&mut State) -> (Option<String>, R),
+{
+    STATE.with(|state| {
+        let mut state = state.borrow_mut(); // 取得可变对象
+        let record_id = state.record_push(caller, topic, content);
+        let (done, result) = callback(&mut state);
+        state.record_update(record_id, done.unwrap_or_default());
+        result
     })
 }
 
