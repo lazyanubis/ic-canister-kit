@@ -2,7 +2,6 @@ use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 
 use ic_canister_kit::identity::caller;
-use ic_canister_kit::stable::record::RecordTopic;
 use ic_canister_kit::types::*;
 
 use super::{schedule_task, CanisterInitialArg, ParsePermissionError, RecordTopics};
@@ -260,11 +259,11 @@ fn static_schedule_task() {
 
 pub trait ScheduleTask: Schedulable {
     fn schedule_stop(&self) {
-        ic_canister_kit::stable::schedule::stop_schedule();
+        ic_canister_kit::functions::schedule::stop_schedule();
     }
     fn schedule_reload(&mut self) {
         let schedule = self.schedule_find();
-        ic_canister_kit::stable::schedule::start_schedule(&schedule, static_schedule_task);
+        ic_canister_kit::functions::schedule::start_schedule(&schedule, static_schedule_task);
     }
 }
 

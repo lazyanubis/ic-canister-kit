@@ -1,9 +1,8 @@
 use super::*;
 #[allow(unused)]
 pub use ic_canister_kit::identity::self_canister_id;
-use ic_canister_kit::stable::pausable::PauseReason;
 #[allow(unused)]
-pub use ic_canister_kit::types::{CanisterId, UserId};
+pub use ic_canister_kit::types::{CanisterId, PauseReason, UserId};
 #[allow(unused)]
 pub use std::collections::{HashMap, HashSet};
 #[allow(unused)]
