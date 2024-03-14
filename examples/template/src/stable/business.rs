@@ -17,16 +17,16 @@ pub trait Business:
     + Schedulable
     + ScheduleTask
 {
-    fn business_test_template_query(&self) -> String;
-    fn business_test_template_update(&mut self, test: String);
+    fn business_example_query(&self) -> String;
+    fn business_example_update(&mut self, test: String);
 }
 
 // 业务实现
 impl Business for State {
-    fn business_test_template_query(&self) -> String {
-        self.get().business_test_template_query()
+    fn business_example_query(&self) -> String {
+        self.get().business_example_query()
     }
-    fn business_test_template_update(&mut self, test: String) {
-        self.get_mut().business_test_template_update(test)
+    fn business_example_update(&mut self, test: String) {
+        self.get_mut().business_example_update(test)
     }
 }

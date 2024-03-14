@@ -15,8 +15,8 @@ pub use super::super::v000::types::{
 };
 
 // 业务权限
-pub const ACTION_BUSINESS_TEST_TEMPLATE_QUERY: &str = "BusinessTestTemplateQuery"; // 业务查询权限
-pub const ACTION_BUSINESS_TEST_TEMPLATE_SET: &str = "BusinessTestTemplateSet"; // 业务更新权限
+pub const ACTION_BUSINESS_EXAMPLE_QUERY: &str = "BusinessExampleQuery"; // 业务查询权限
+pub const ACTION_BUSINESS_EXAMPLE_SET: &str = "BusinessExampleSet"; // 业务更新权限
 
 // 所有权限列表
 #[allow(unused)]
@@ -33,8 +33,8 @@ pub const ACTIONS: [&str; 12] = [
     ACTION_SCHEDULE_REPLACE,
     ACTION_SCHEDULE_TRIGGER,
     // 业务权限
-    ACTION_BUSINESS_TEST_TEMPLATE_QUERY,
-    ACTION_BUSINESS_TEST_TEMPLATE_SET,
+    ACTION_BUSINESS_EXAMPLE_QUERY,
+    ACTION_BUSINESS_EXAMPLE_SET,
 ];
 
 // 权限默认状态
@@ -53,8 +53,8 @@ impl ParsePermission for InnerState {
             ACTION_SCHEDULE_REPLACE => Permission::by_permit(name),
             ACTION_SCHEDULE_TRIGGER => Permission::by_permit(name),
             // 业务权限
-            ACTION_BUSINESS_TEST_TEMPLATE_QUERY => Permission::by_forbid(name),
-            ACTION_BUSINESS_TEST_TEMPLATE_SET => Permission::by_permit(name),
+            ACTION_BUSINESS_EXAMPLE_QUERY => Permission::by_forbid(name),
+            ACTION_BUSINESS_EXAMPLE_SET => Permission::by_permit(name),
             // 其他错误
             _ => return Err(ParsePermissionError(name)),
         })
@@ -72,11 +72,11 @@ pub use super::super::v000::types::{
 // 业务权限
 
 #[allow(unused)]
-pub fn has_business_test_template_query() -> Result<(), String> {
-    check_permission(ACTION_BUSINESS_TEST_TEMPLATE_QUERY, false)
+pub fn has_business_example_query() -> Result<(), String> {
+    check_permission(ACTION_BUSINESS_EXAMPLE_QUERY, false)
 }
 
 #[allow(unused)]
-pub fn has_business_test_template_set() -> Result<(), String> {
-    check_permission(ACTION_BUSINESS_TEST_TEMPLATE_SET, true)
+pub fn has_business_example_set() -> Result<(), String> {
+    check_permission(ACTION_BUSINESS_EXAMPLE_SET, true)
 }

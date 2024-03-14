@@ -58,8 +58,9 @@ type RecordSearchArg = record {
   caller : opt vec principal;
 };
 service : (opt CanisterInitialArg) -> {
-  business_test_template_query : () -> (text) query;
-  business_test_template_set : (text) -> ();
+  __get_candid_interface_tmp_hack : () -> (text) query;
+  business_example_query : () -> (text) query;
+  business_example_set : (text) -> ();
   canister_status : () -> (CanisterStatusResponse);
   pause_query : () -> (bool) query;
   pause_query_reason : () -> (opt PauseReason) query;

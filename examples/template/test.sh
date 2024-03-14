@@ -3,6 +3,7 @@
 # 运行完毕自动停止
 dfx stop
 trap 'dfx stop' EXIT
+trap 'say test over' EXIT
 
 dfx start --background --clean # 开启新的 dfx 环境
 # dfx start --background --clean >/dev/null 2>&1 # 开启新的 dfx 环境
@@ -69,7 +70,7 @@ cargo audit
 
 # ! 1. 测试 template
 red "\n=========== 1. template ===========\n"
-cargo test -p template print_candid -- --nocapture
+cargo test -p template update_candid -- --nocapture
 dfx deploy --argument "(null)" template
 template=$(canister_id "template")
 blue "Template Canister: $template"
@@ -77,32 +78,32 @@ blue "Template Canister: $template"
 blue "1.1 permission permission_query"
 test "version" "$(dfx --identity alice canister call template version 2>&1)" '(1 : nat32)'
 test "permission_all" "$(dfx --identity alice canister call template permission_all 2>&1)" 'vec { variant { Forbidden = "PauseQuery" }; variant { Permitted = "PauseReplace" }'
-test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessTestTemplateQuery" })'
-test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessTestTemplateQuery"; "BusinessTestTemplateSet";}'
+test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" })'
+test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
 test "permission_update" "$(dfx --identity bob canister call template permission_update "(vec { variant { UpdateUserPermission=record{principal \"$ALICE\"; opt vec { \"PermissionUpdate\";\"PermissionQuery\" } } } })" 2>&1)" "'PermissionUpdate' is required"
 test "permission_update" "$(dfx canister call template permission_update "(vec { variant { UpdateUserPermission=record{principal \"$ALICE\"; opt vec { \"PermissionUpdate\";\"PermissionQuery\" } } } })" 2>&1)" "()"
 test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" "'PermissionQuery' is required"
-test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessTestTemplateQuery"; "BusinessTestTemplateSet";}'
-test "permission_find_by_user" "$(dfx canister call template permission_find_by_user "(principal \"$ALICE\")" 2>&1)" '(vec { "PauseQuery"; "PermissionUpdate"; "BusinessTestTemplateQuery" })'
+test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
+test "permission_find_by_user" "$(dfx canister call template permission_find_by_user "(principal \"$ALICE\")" 2>&1)" '(vec { "PauseQuery"; "PermissionUpdate"; "BusinessExampleQuery" })'
 test "permission_update" "$(dfx --identity alice canister call template permission_update "(vec { variant { UpdateUserPermission=record{principal \"$ALICE\"; null } } })" 2>&1)" "()"
-test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessTestTemplateQuery" })'
-test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessTestTemplateQuery"; "BusinessTestTemplateSet";}'
+test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" })'
+test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
 
 blue "1.2 permission permission update"
-test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessTestTemplateQuery"; "BusinessTestTemplateSet";}'
-test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessTestTemplateQuery" }'
-test "permission_find_by_user" "$(dfx canister call template permission_find_by_user "(principal \"$DEFAULT\")" 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessTestTemplateQuery"; "BusinessTestTemplateSet";}'
-test "permission_find_by_user" "$(dfx canister call template permission_find_by_user "(principal \"$ALICE\")" 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessTestTemplateQuery" }'
+test "permission_query" "$(dfx canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
+test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
+test "permission_find_by_user" "$(dfx canister call template permission_find_by_user "(principal \"$DEFAULT\")" 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
+test "permission_find_by_user" "$(dfx canister call template permission_find_by_user "(principal \"$ALICE\")" 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
 test "permission_find_by_user" "$(dfx --identity alice canister call template permission_find_by_user "(principal \"$DEFAULT\")" 2>&1)" "'PermissionFind' is required"
 test "permission_find_by_user" "$(dfx --identity alice canister call template permission_find_by_user "(principal \"$ALICE\")" 2>&1)" "'PermissionFind' is required"
 
 blue "1.3 permission roles"
-test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessTestTemplateQuery" }'
+test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
 test "permission_update" "$(dfx canister call template permission_update "(vec { variant { UpdateRolePermission=record{\"Admin\"; opt vec {\"PauseReplace\"; \"PauseQuery\"} } } })" 2>&1)" "()"
 test "permission_update" "$(dfx canister call template permission_update "(vec { variant { UpdateUserRole=record{principal \"$ALICE\"; opt vec {\"Admin\"} } } })" 2>&1)" "()"
-test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" '(vec { "PauseReplace"; "PermissionQuery"; "BusinessTestTemplateQuery" })'
+test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" '(vec { "PauseReplace"; "PermissionQuery"; "BusinessExampleQuery" })'
 test "permission_update" "$(dfx canister call template permission_update "(vec { variant { UpdateUserRole=record{principal \"$ALICE\"; null } } })" 2>&1)" "()"
-test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessTestTemplateQuery" }'
+test "permission_query" "$(dfx --identity alice canister call template permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
 
 blue "2.1 pause permission"
 test "pause_query" "$(dfx canister call template pause_query 2>&1)" "(false)"
@@ -141,15 +142,24 @@ sleep 2
 test "schedule_trigger" "$(dfx --identity alice canister call template schedule_trigger 2>&1)" "'ScheduleTrigger' is required"
 test "schedule_trigger" "$(dfx canister call template schedule_trigger 2>&1)" "()"
 
-blue "5 template business"
-test "business_test_template_query" "$(dfx --identity alice canister call template business_test_template_query 2>&1)" "\"\""
-test "business_test_template_query" "$(dfx canister call template business_test_template_query 2>&1)" "\"\""
-test "business_test_template_set" "$(dfx --identity alice canister call template business_test_template_set "(\"test string\")" 2>&1)" "'BusinessTestTemplateSet' is required"
-test "business_test_template_set" "$(dfx canister call template business_test_template_set "(\"test string\")" 2>&1)" "()"
-test "business_test_template_query" "$(dfx --identity alice canister call template business_test_template_query 2>&1)" "test string"
-test "business_test_template_query" "$(dfx canister call template business_test_template_query 2>&1)" "test string"
+blue "5 example business"
+test "business_example_query" "$(dfx --identity alice canister call template business_example_query 2>&1)" "\"\""
+test "business_example_query" "$(dfx canister call template business_example_query 2>&1)" "\"\""
+test "business_example_set" "$(dfx --identity alice canister call template business_example_set "(\"test string\")" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_set" "$(dfx canister call template business_example_set "(\"test string\")" 2>&1)" "()"
+test "business_example_query" "$(dfx --identity alice canister call template business_example_query 2>&1)" "test string"
+test "business_example_query" "$(dfx canister call template business_example_query 2>&1)" "test string"
+
+blue "5 test stable data"
+test "pause_replace" "$(dfx canister call template pause_replace "(opt \"reason\")" 2>&1)" "()"
+test "pause_query" "$(dfx canister call template pause_query 2>&1)" "(true)"
+dfx canister install --mode=upgrade --upgrade-unchanged --argument "(null)" template
+test "pause_replace" "$(dfx canister call template pause_replace "(null)" 2>&1)" "()"
+test "pause_query" "$(dfx canister call template pause_query 2>&1)" "(false)"
+test "business_example_query" "$(dfx canister call template business_example_query 2>&1)" "test string"
+
+# test completed
 
 echo ""
 # sleep 10000
-read -s -n1 -p "按任意键结束..."
-say test completed
+# read -s -n1 -p "按任意键结束..."

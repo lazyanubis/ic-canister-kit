@@ -57,5 +57,5 @@ pub struct InnerState {
 
 #[derive(candid::CandidType, serde::Deserialize, Debug, Default)]
 pub struct InnerBusiness {
-    pub test_template: String,
+    pub example_data: String,
 }
