@@ -66,7 +66,7 @@ BOB=$(dfx --identity bob identity get-principal)
 
 cargo test
 cargo clippy
-cargo audit
+cargo audit --no-fetch --quiet
 
 # ! 1. 测试 template
 red "\n=========== 1. template ===========\n"
@@ -160,6 +160,8 @@ test "business_example_query" "$(dfx canister call template business_example_que
 
 # test completed
 
+echo ""
+echo "test completed"
 echo ""
 # sleep 10000
 # read -s -n1 -p "按任意键结束..."

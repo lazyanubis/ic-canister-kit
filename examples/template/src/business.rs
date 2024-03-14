@@ -1,3 +1,4 @@
+use ic_canister_kit::common::once::call_once_guard;
 #[allow(unused)]
 use ic_canister_kit::identity::caller;
 
@@ -15,6 +16,8 @@ fn business_example_query() -> String {
 // 修改
 #[ic_cdk::update(guard = "has_business_example_set")]
 fn business_example_set(test: String) {
+    let _guard = call_once_guard(); // post 接口应该拦截
+
     let caller = caller();
     let arg_content = format!("set test: {}", test); // * 记录参数内容
 

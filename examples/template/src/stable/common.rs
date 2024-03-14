@@ -41,8 +41,7 @@ pub fn check_permission(
 // ================= 需要持久化的数据 ================
 
 thread_local! {
-    static STATE: RefCell<State> = RefCell::default();// 存储系统数据
-    static SCHEDULE: RefCell<Option<TimerId>> = RefCell::default(); // 定时任务 id 记录
+   static STATE: RefCell<State> = RefCell::default();// 存储系统数据
 }
 
 // ==================== 初始化方法 ====================
@@ -261,16 +260,11 @@ fn static_schedule_task() {
 
 pub trait ScheduleTask: Schedulable {
     fn schedule_stop(&self) {
-        SCHEDULE.with_borrow_mut(|timer_id| {
-            ic_canister_kit::functions::schedule::schedule_stop(std::mem::take(timer_id))
-        });
+        ic_canister_kit::stable::schedule::stop_schedule();
     }
     fn schedule_reload(&mut self) {
-        use ic_canister_kit::functions::schedule::{schedule_start, schedule_stop};
         let schedule = self.schedule_find();
-        SCHEDULE.with_borrow_mut(|timer_id| schedule_stop(std::mem::take(timer_id)));
-        let new_timer_id = schedule_start(&schedule, static_schedule_task);
-        SCHEDULE.with_borrow_mut(|timer_id| *timer_id = new_timer_id);
+        ic_canister_kit::stable::schedule::start_schedule(&schedule, static_schedule_task);
     }
 }
 
