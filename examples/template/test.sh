@@ -2,8 +2,7 @@
 
 # 运行完毕自动停止
 dfx stop
-trap 'dfx stop' EXIT
-trap 'say test over' EXIT
+trap 'say test over && dfx stop' EXIT
 
 dfx start --background --clean # 开启新的 dfx 环境
 # dfx start --background --clean >/dev/null 2>&1 # 开启新的 dfx 环境
@@ -127,7 +126,7 @@ test "pause_query_reason" "$(dfx canister call template pause_query_reason 2>&1)
 
 blue "3 record no permission"
 test "record_topics" "$(dfx --identity alice canister call template record_topics 2>&1)" "'RecordFind' is required"
-test "record_topics" "$(dfx canister call template record_topics 2>&1)" '"Template"' '"CyclesCharge"'
+test "record_topics" "$(dfx canister call template record_topics 2>&1)" '"Example"' '"CyclesCharge"'
 test "record_find_by_page" "$(dfx canister call template record_find_by_page "(record{page=1:nat64;size=1:nat32},opt record{topic=opt vec{\"Pause\"}})" 2>&1)" "record { total = "
 test "record_migrate" "$(dfx canister call template record_migrate "(1:nat32)" 2>&1)" "removed = 0"
 
@@ -161,7 +160,8 @@ test "business_example_query" "$(dfx canister call template business_example_que
 # test completed
 
 echo ""
-echo "test completed"
+green "=================== TEST COMPLETED ==================="
 echo ""
+
 # sleep 10000
 # read -s -n1 -p "按任意键结束..."

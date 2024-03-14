@@ -27,7 +27,7 @@ fn business_example_set(test: String) {
             (None, ())
         },
         caller,
-        RecordTopics::Template.topic(),
+        RecordTopics::Example.topic(),
         arg_content,
     );
 }

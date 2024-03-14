@@ -583,6 +583,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "stable"
+version = "0.0.1"
+dependencies = [
+ "candid",
+ "ic-canister-kit",
+ "ic-cdk",
+ "serde",
+ "serde_json",
+ "strum",
+ "strum_macros",
+]
+
+[[package]]
 name = "stacker"
 version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -634,19 +647,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
-]
-
-[[package]]
-name = "template"
-version = "0.0.1"
-dependencies = [
- "candid",
- "ic-canister-kit",
- "ic-cdk",
- "serde",
- "serde_json",
- "strum",
- "strum_macros",
 ]
 
 [[package]]
