@@ -23,22 +23,3 @@ pub trait Schedulable {
     /// 修改
     fn schedule_replace(&mut self, schedule: Option<DurationNanos>);
 }
-
-/// 启动任务
-pub fn schedule_start(
-    schedule: &Option<DurationNanos>,
-    task: impl FnMut() + 'static,
-) -> Option<TimerId> {
-    schedule.map(|interval| {
-        ic_cdk_timers::set_timer_interval(
-            std::time::Duration::from_nanos(interval.into_inner() as u64),
-            task,
-        )
-    })
-}
-/// 停止任务
-pub fn schedule_stop(timer_id: Option<TimerId>) {
-    if let Some(timer_id) = timer_id {
-        ic_cdk_timers::clear_timer(timer_id)
-    }
-}
