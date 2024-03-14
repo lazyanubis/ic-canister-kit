@@ -1,0 +1,3 @@
+.dfx/
+target/
+source_opt.wasm
