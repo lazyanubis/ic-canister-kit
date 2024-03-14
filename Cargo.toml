@@ -42,7 +42,12 @@ http = ["canister", "serde", "serde_json"] # http 相关
 ecdsa = ["canister"] # ecdsa 相关
 bitcoin = ["canister"] # bitcoin 相关
 functions = ["times", "ic-cdk-timers"] # functions 相关
-stable = ["functions", "ic-stable-structures"] # 持久化相关
+stable = ["functions"] # 持久化相关
+
+call-once = ["common"]            # 调用一次
+schedule = ["functions", "times"] # 定时任务
+
+stable-structures = ["ic-stable-structures"] # 稳定内存
 
 # # NFT相关
 # nft = ["identity"]   # NFT

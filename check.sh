@@ -2,4 +2,6 @@
 
 cargo clippy
 
+cargo audit --quiet
+
 cargo build

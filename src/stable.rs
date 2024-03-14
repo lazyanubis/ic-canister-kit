@@ -2,21 +2,6 @@ use std::cell::RefCell;
 
 use crate::functions::types::RecordId;
 
-/// 维护状态
-pub mod pausable;
-
-/// 定时任务
-pub mod schedule;
-
-/// 权限
-pub mod permission;
-
-/// 记录
-pub mod record;
-
-/// 类型
-pub mod types;
-
 // 持久化相关接口
 // ! 如果通过其他方式，比如 ic-stable-structures，使用了持久化内存，则不能够使用下面传统的方式进行升级持久化
 

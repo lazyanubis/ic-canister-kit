@@ -8,6 +8,7 @@ pub mod result;
 pub mod option;
 
 /// 执行一次拦截
+#[cfg(feature = "call-once")]
 pub mod once;
 
 /// 类型

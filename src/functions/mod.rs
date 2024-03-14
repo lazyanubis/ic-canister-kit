@@ -16,5 +16,9 @@ pub mod permission;
 /// 记录功能
 pub mod record;
 
+/// 稳定内存功能
+#[cfg(feature = "stable-structures")]
+pub mod stable;
+
 /// 类型
 pub mod types;

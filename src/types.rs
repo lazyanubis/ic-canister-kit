@@ -42,9 +42,6 @@ pub use crate::bitcoin::{
 #[cfg(feature = "functions")]
 pub use crate::functions::types::*;
 
-#[cfg(feature = "stable")]
-pub use crate::stable::types::*;
-
 // #[cfg(feature = "nft")]
 // pub use crate::nft::types::*;
 
