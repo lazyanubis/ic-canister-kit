@@ -132,7 +132,7 @@ fn init_example_priority_queue_data() -> StablePriorityQueue<ExampleVec, Virtual
         .expect("failed to initialize")
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Default)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ExampleCell {
     pub cell_data: String,
 }
@@ -153,7 +153,7 @@ impl Storable for ExampleCell {
     const BOUND: Bound = Bound::Unbounded;
 }
 
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, PartialEq, PartialOrd)]
 pub struct ExampleVec {
     pub vec_data: u64,
 }
