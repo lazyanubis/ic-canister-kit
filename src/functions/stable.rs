@@ -62,31 +62,37 @@ pub mod common {
     use super::*;
 
     /// usize -> 4 bytes
+    #[inline]
     pub fn usize_to_4bytes(buf: &mut Vec<u8>, value: usize) {
         buf.extend(&(value as u32).to_bytes()[..]);
     }
 
     /// 4 bytes -> usize
+    #[inline]
     pub fn usize_from_4bytes(bytes: &[u8]) -> usize {
         u32::from_bytes(Cow::Borrowed(&bytes[..4])) as usize
     }
 
     /// u32 -> 4 bytes
+    #[inline]
     pub fn u32_to_bytes(buf: &mut Vec<u8>, value: u32) {
         buf.extend(&value.to_bytes()[..]);
     }
 
     /// 4 bytes -> u32
+    #[inline]
     pub fn u32_from_bytes(bytes: &[u8]) -> u32 {
         u32::from_bytes(Cow::Borrowed(&bytes[..4]))
     }
 
     /// u64 -> 8 bytes
+    #[inline]
     pub fn u64_to_bytes(buf: &mut Vec<u8>, value: u64) {
         buf.extend(&value.to_bytes()[..]);
     }
 
     /// 8 bytes -> u64
+    #[inline]
     pub fn u64_from_bytes(bytes: &[u8]) -> u64 {
         u64::from_bytes(Cow::Borrowed(&bytes[..8]))
     }
