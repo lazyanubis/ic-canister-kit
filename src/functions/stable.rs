@@ -113,14 +113,14 @@ impl<'a, M: Memory> ReadUpgradeMemory<'a, M> {
 
     /// 读取 u32
     pub fn read_u32(&mut self) -> u32 {
-        let mut bytes = Vec::with_capacity(4);
+        let mut bytes = [0; 4];
         self.read(&mut bytes);
         common::u32_from_bytes(&bytes)
     }
 
     /// 读取 u64
     pub fn read_u64(&mut self) -> u64 {
-        let mut bytes = Vec::with_capacity(8);
+        let mut bytes = [0; 8];
         self.read(&mut bytes);
         common::u64_from_bytes(&bytes)
     }
