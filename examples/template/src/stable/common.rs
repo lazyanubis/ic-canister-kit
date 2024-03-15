@@ -40,7 +40,7 @@ pub fn check_permission(
 // ================= 需要持久化的数据 ================
 
 thread_local! {
-   static STATE: RefCell<State> = RefCell::default();// 存储系统数据
+    static STATE: RefCell<State> = RefCell::default();// 存储系统数据
 }
 
 // ==================== 初始化方法 ====================
