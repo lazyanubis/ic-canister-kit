@@ -1,7 +1,10 @@
+use candid::CandidType;
+use serde::Deserialize;
+
 // ================== 罐子调用产生的错误信息 ==================
 
 /// 罐子调用会产生的错误
-#[derive(Debug)]
+#[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct CanisterCallError {
     /// 罐子 id
     pub canister_id: crate::identity::CanisterId,

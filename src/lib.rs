@@ -48,7 +48,7 @@ pub mod bitcoin;
 #[cfg(feature = "functions")]
 pub mod functions;
 
-/// 功能实现
+/// 基本的持久化
 #[cfg(feature = "stable")]
 pub mod stable;
 

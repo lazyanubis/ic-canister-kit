@@ -1,4 +1,5 @@
-use candid::{CandidType, Deserialize};
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
@@ -28,7 +29,7 @@ use crate::{
 // type Name = record { name : text };
 
 /// 账本名称
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerName {
     name: String,
 }
@@ -51,7 +52,7 @@ pub async fn ledger_name_by(canister_id: CanisterId) -> CanisterCallResult<Strin
 // type Symbol = record { symbol : text };
 
 /// symbol
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerSymbol {
     symbol: String,
 }
@@ -73,7 +74,7 @@ pub async fn ledger_symbol_by(canister_id: CanisterId) -> CanisterCallResult<Str
 // type Decimals = record { decimals : nat32 };
 
 /// 精度
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerDecimals {
     decimals: u32,
 }
@@ -96,13 +97,13 @@ pub async fn ledger_decimals_by(canister_id: CanisterId) -> CanisterCallResult<u
 // type Tokens = record { e8s : nat64 };
 
 /// 查询余额参数
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerBinaryAccountBalanceArgs {
     /// 账户识别
     pub account: LedgerAccountIdentifier,
 }
 /// 余额
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerTokens {
     ///  ICP 接口指定 8 位精度的数值
     pub e8s: u64,
@@ -133,11 +134,11 @@ pub async fn ledger_account_balance_by(
 // type TransferFee = record { transfer_fee : Tokens };
 
 /// 查询转账费用参数
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerTransferFeeArg {}
 
 /// 转账费用
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerTransferFee {
     /// The fee to pay to perform a transfer
     pub transfer_fee: LedgerTokens,
@@ -192,7 +193,7 @@ pub async fn ledger_transfer_fee_by(canister_id: CanisterId) -> CanisterCallResu
 /// 转账标识
 pub type LedgerMemo = u64; // 转账需要记录的标识码
 /// 账本时间戳
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerTimestamp {
     /// 时间戳, 纳秒
     pub timestamp_nanos: u64,
@@ -211,7 +212,7 @@ pub type LedgerAccountIdentifier = AccountIdentifier; // ! 修改为安全的参
 pub type LedgerSubaccount = Subaccount; // ! 修改为安全的参数
 
 /// 转账参数
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LedgerTransferArgs {
     /// 调用者指定的使用的子账户地址
     /// 如果没有, 则默认全 0 的子账户
@@ -237,7 +238,7 @@ pub struct LedgerTransferArgs {
 pub type LedgerBlockIndex = u64;
 
 /// 转账可能出现的错误
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum LedgerTransferError {
     /// 手续费不正确
     /// The fee that the caller specified in the transfer request was not the one that ledger expects.

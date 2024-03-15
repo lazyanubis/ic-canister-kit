@@ -4,12 +4,15 @@ use std::{
     hash::Hash,
 };
 
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
+
 use crate::{common::option::display_option_by, identity::UserId};
 
 /// 权限管理
 
 /// 权限修改参数
-#[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum PermissionUpdatedArg<Permission: Eq + Hash> {
     /// 更新用户权限
     UpdateUserPermission(UserId, Option<HashSet<Permission>>),
@@ -20,7 +23,7 @@ pub enum PermissionUpdatedArg<Permission: Eq + Hash> {
 }
 
 /// 权限更新错误
-#[derive(Debug)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum PermissionUpdatedError<Permission> {
     /// 权限不存在错误
     InvalidPermission(Permission),
@@ -117,11 +120,13 @@ impl Display for PermissionUpdatedArg<String> {
 
 /// 权限功能简单实现
 pub mod basic {
-
     use std::{
         collections::{HashMap, HashSet},
         fmt::Display,
     };
+
+    use candid::CandidType;
+    use serde::{Deserialize, Serialize};
 
     use crate::{
         functions::types::{Permissable, PermissionUpdatedArg, PermissionUpdatedError},
@@ -129,7 +134,7 @@ pub mod basic {
     };
 
     /// 被管理的用户类型
-    #[derive(candid::CandidType, serde::Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
     pub enum Permission {
         /// 授权类型 默认没有该权限 只有被加入的用户才有该权限
         Permitted(String),
@@ -173,7 +178,7 @@ pub mod basic {
     }
 
     /// 多个权限对象
-    #[derive(candid::CandidType, serde::Deserialize, Debug, Default)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
     pub struct Permissions {
         /// 所有权限种类
         pub permissions: HashSet<Permission>,

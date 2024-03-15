@@ -50,6 +50,9 @@ pub fn schedule_start(
 
 /// 定时任务简单实现
 pub mod basic {
+    use candid::CandidType;
+    use serde::{Deserialize, Serialize};
+
     use crate::{functions::types::Schedulable, types::DurationNanos};
 
     #[cfg(feature = "schedule")]
@@ -84,7 +87,7 @@ pub mod basic {
     pub use schedule::*;
 
     /// 周期定时任务
-    #[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Default)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
     pub struct Schedule(Option<DurationNanos>);
 
     impl Schedulable for Schedule {

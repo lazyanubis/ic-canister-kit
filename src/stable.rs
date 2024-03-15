@@ -8,7 +8,7 @@ use crate::functions::types::RecordId;
 /// 升级后恢复
 pub fn restore_after_upgrade<R>(state: &RefCell<R>) -> Option<RecordId>
 where
-    R: candid::CandidType + for<'d> candid::Deserialize<'d>,
+    R: candid::CandidType + for<'d> serde::Deserialize<'d>,
 {
     let mut state = state.borrow_mut();
     #[allow(clippy::unwrap_used)] // ? checked

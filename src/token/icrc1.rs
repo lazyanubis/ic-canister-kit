@@ -1,4 +1,5 @@
-use candid::{CandidType, Deserialize};
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
@@ -30,7 +31,7 @@ use crate::{
 // type StandardRecord = record { url : text; name : text };
 
 /// 支持的标准
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct Icrc1SupportedStandard {
     name: String, // ICRC-1
     url: String,  // https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1
@@ -113,7 +114,7 @@ pub async fn icrc1_total_supply(canister_id: CanisterId) -> CanisterCallResult<I
 pub type Icrc1Subaccount = Subaccount; // ! 修改为安全的参数
 
 /// icrc1 账户对象
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct Icrc1Account {
     owner: UserId,
     subaccount: Option<Icrc1Subaccount>,

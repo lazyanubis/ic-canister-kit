@@ -1,7 +1,7 @@
 use std::{borrow::Cow, collections::HashMap};
 
 use candid::CandidType;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub use ic_cdk::api::management_canister::http_request::{
     CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
@@ -19,7 +19,7 @@ use crate::{
 pub const MAX_RESPONSE_LENGTH: usize = 1024 * 1024 * 3 - 1024 * 64;
 
 /// http 请求的结构体
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct CustomHttpRequest {
     /// 请求类型
     pub method: String,
@@ -35,7 +35,7 @@ pub struct CustomHttpRequest {
 }
 
 /// 流式响应的传递 token
-#[derive(Clone, Debug, CandidType, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct StreamingCallbackToken {
     /// url 定位哪个请求
     pub path: String,
@@ -53,7 +53,7 @@ pub struct StreamingCallbackToken {
 }
 
 /// 流式响应的响应体
-#[derive(Clone, Debug, CandidType, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct StreamingCallbackHttpResponse {
     ///  响应体
     pub body: Vec<u8>,
@@ -72,7 +72,7 @@ mod callback {
 pub use callback::HttpRequestStreamingCallback;
 
 /// 流式响应的启动策略
-#[derive(Clone, Debug, CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Debug, Clone)]
 pub enum StreamingStrategy {
     /// 回调函数
     Callback {
@@ -85,7 +85,7 @@ pub enum StreamingStrategy {
 }
 
 /// http 响应的结构体
-#[derive(CandidType)]
+#[derive(CandidType, Debug, Clone)]
 pub struct CustomHttpResponse<'a> {
     /// 响应状态码
     pub status_code: u16,

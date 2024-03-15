@@ -1,16 +1,19 @@
 use std::fmt::Display;
 
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
+
 /// 时间相关
 
 /// 时间戳 纳秒
 #[derive(
-    candid::CandidType, candid::Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
+    CandidType, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
 )]
 pub struct TimestampNanos(i128);
 
 /// 时间跨度 纳秒
 #[derive(
-    candid::CandidType, candid::Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
+    CandidType, Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
 )]
 pub struct DurationNanos(u128);
 

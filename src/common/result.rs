@@ -1,6 +1,9 @@
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
+
 /// motoko 结果
 
-#[derive(candid::CandidType, candid::Deserialize, Debug)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum MotokoResult<T, E> {
     /// 正常
     #[serde(rename = "ok")]

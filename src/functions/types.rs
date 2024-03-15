@@ -18,3 +18,9 @@ pub use super::record::{
     basic::{Record, RecordSearch, RecordSearchArg, RecordTopic, Records},
     MigratedRecords, RecordId, Recordable, Searchable,
 };
+
+#[cfg(feature = "stable-structures")]
+pub use super::stable::{
+    Bound, Cow, Memory, MemoryId, StableBTreeMap, StableCell, StableLog, StableQueue, StableVec,
+    Storable, StorableHeapData, VirtualMemory, Writer,
+};

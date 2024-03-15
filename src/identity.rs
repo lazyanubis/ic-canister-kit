@@ -1,5 +1,5 @@
 use candid::CandidType;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 // 和 principal 和 identity 相关
 
@@ -35,14 +35,14 @@ pub type CallerId = candid::Principal; // 类型别名
 pub type CallerIdText = String; // ? 字符串格式
 
 /// 子账户
-#[derive(Debug, Default, Clone, Copy, CandidType, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Copy, Default)]
 pub struct Subaccount([u8; 32]); // 长度必须是 32 长度
 /// 字符串格式的 子账户
 pub type SubaccountHex = String; // ? 16 进制文本
 
 /// 账户 ID 通过 Principal 配合子账户计算得来
 /// 账户 一般是 account id，如果用户使用的是 principal 也要和 subaccount 一起转换成对应的 account id
-#[derive(Debug, Clone, Copy, CandidType, Deserialize)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct AccountIdentifier([u8; 32]); // 账户
 /// 字符串格式的 账户
 pub type AccountIdentifierHex = String; // ? 16 进制文本

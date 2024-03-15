@@ -50,8 +50,10 @@ pub trait Pausable<Reason: Reasonable> {
 
 /// 维护功能简单实现
 pub mod basic {
-
     use std::fmt::Display;
+
+    use candid::CandidType;
+    use serde::{Deserialize, Serialize};
 
     use crate::{
         functions::types::{Pausable, Reasonable},
@@ -59,7 +61,7 @@ pub mod basic {
     };
 
     /// 维护原因对象
-    #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct PauseReason {
         /// 维护时间
         pub timestamp_nanos: TimestampNanos,
@@ -93,7 +95,7 @@ pub mod basic {
     }
 
     /// 记录维护状态
-    #[derive(candid::CandidType, candid::Deserialize, Debug, Clone, Default)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
     pub struct Pause(Option<PauseReason>);
 
     impl Pausable<PauseReason> for Pause {

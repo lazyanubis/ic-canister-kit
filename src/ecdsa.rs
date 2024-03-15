@@ -1,4 +1,6 @@
+use candid::CandidType;
 use ic_cdk::api::management_canister::ecdsa::{EcdsaPublicKeyArgument, SignWithEcdsaArgument};
+use serde::{Deserialize, Serialize};
 
 pub use ic_cdk::api::management_canister::ecdsa::{
     EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyResponse, SignWithEcdsaResponse,
@@ -45,6 +47,7 @@ pub type EcdsaDerivationPath = Vec<Vec<u8>>;
 // }
 
 /// 罐子管理的私钥路径，确定使用哪一个私钥
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct EcdsaIdentity {
     /// 加密曲线
     pub key_id: EcdsaKeyId,
@@ -54,10 +57,11 @@ pub struct EcdsaIdentity {
 }
 
 /// 消息 hash 对象，必须 32 长度
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct MessageHash(Vec<u8>);
 
 /// 消息 hash 错误
-#[derive(Debug)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct MessageHashError;
 impl std::fmt::Display for MessageHashError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

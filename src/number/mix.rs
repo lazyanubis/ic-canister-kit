@@ -1,3 +1,6 @@
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
+
 /// 混合数字, 利用随机数进行数字混淆, 不容易猜中原数字
 
 // 根据指定序号生成一个加密字符串
@@ -29,7 +32,7 @@ pub fn encode_index_code_with_base32(salt: &[u8], index: u64, random: Option<&[u
 }
 
 /// 混淆错误
-#[derive(Debug)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum MixNumberDecodeError {
     /// 长度错误
     WrongLength,

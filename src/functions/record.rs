@@ -1,3 +1,6 @@
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
+
 use crate::{
     identity::CallerId,
     types::{PageData, QueryPage, QueryPageError},
@@ -5,16 +8,7 @@ use crate::{
 
 /// 记录 id
 #[derive(
-    candid::CandidType,
-    candid::Deserialize,
-    Copy,
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    PartialOrd,
-    Ord,
-    Default,
+    CandidType, Serialize, Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord,
 )]
 pub struct RecordId(u64);
 
@@ -36,7 +30,7 @@ impl RecordId {
 }
 
 /// 迁移内容
-#[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
+#[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
 pub struct MigratedRecords<Record> {
     /// 一共被删除的记录个数
     pub removed: u64,
@@ -87,6 +81,9 @@ pub trait Recordable<Record, RecordTopic, Search: Searchable<Record>> {
 pub mod basic {
     use std::collections::HashSet;
 
+    use candid::CandidType;
+    use serde::{Deserialize, Serialize};
+
     use crate::{
         functions::{
             record::MigratedRecords,
@@ -100,7 +97,7 @@ pub mod basic {
     pub type RecordTopic = u8;
 
     /// 每条记录
-    #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct Record {
         /// 记录 id
         pub id: RecordId,
@@ -129,7 +126,7 @@ pub mod basic {
     }
 
     /// 记录检索
-    #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
+    #[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
     pub struct RecordSearch {
         /// id 过滤
         pub id: Option<(Option<RecordId>, Option<RecordId>)>,
@@ -192,7 +189,7 @@ pub mod basic {
     }
 
     /// 持久化的记录对象
-    #[derive(candid::CandidType, candid::Deserialize, Debug)]
+    #[derive(candid::CandidType, serde::Serialize, serde::Deserialize, Debug)]
     pub struct Records {
         /// 最大保存个数
         pub max: u64,
@@ -294,7 +291,7 @@ pub mod basic {
     }
 
     /// 记录检索
-    #[derive(candid::CandidType, candid::Deserialize, Debug, Clone)]
+    #[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
     pub struct RecordSearchArg {
         /// id 过滤
         pub id: Option<(Option<u64>, Option<u64>)>,

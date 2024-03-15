@@ -1,4 +1,5 @@
-use candid::{CandidType, Deserialize};
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
@@ -28,7 +29,7 @@ use super::{
 // type Allowance = record { allowance : nat; expires_at : opt nat64 };
 
 /// 授权对象
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct Icrc2AllowanceArgs {
     /// 被授权的账户 出钱的
     pub account: Icrc1Account,
@@ -38,7 +39,7 @@ pub struct Icrc2AllowanceArgs {
 }
 
 /// 授权额度
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct Icrc2Allowance {
     /// 授权的额度
     pub allowance: candid::Nat,
@@ -83,7 +84,7 @@ pub async fn icrc2_allowance(
 // };
 
 /// 授权参数
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct Icrc2ApproveArgs {
     /// 被授权的子账户
     pub from_subaccount: Option<Icrc1Subaccount>,
@@ -108,7 +109,7 @@ pub struct Icrc2ApproveArgs {
 }
 
 /// 授权错误
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum Icrc2ApproveError {
     /// 通用错误
     GenericError {
@@ -192,7 +193,7 @@ pub async fn icrc2_approve(
 // };
 
 /// 转账参数
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct Icrc2TransferFromArgs {
     spender_subaccount: Option<Icrc1Subaccount>,
     from: Icrc1Account,
@@ -203,7 +204,7 @@ pub struct Icrc2TransferFromArgs {
     created_at_time: Option<u64>,
 }
 /// 转账可能出现的错误
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum Icrc2TransferFromError {
     /// 通用错误
     GenericError {

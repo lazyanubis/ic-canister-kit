@@ -26,6 +26,7 @@ pub async fn random() -> CanisterCallResult<[u8; 32]> {
 // 如果每次只需要使用指定数量的随机数, 通过下面的方式节省随机数
 
 /// 随机数生产对象
+#[derive(Debug)]
 pub struct RandomGenerator {
     random: [u8; 32],
     current: u8,
