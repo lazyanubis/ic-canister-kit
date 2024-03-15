@@ -30,7 +30,7 @@ impl RecordId {
 }
 
 /// 迁移内容
-#[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct MigratedRecords<Record> {
     /// 一共被删除的记录个数
     pub removed: u64,
@@ -126,7 +126,7 @@ pub mod basic {
     }
 
     /// 记录检索
-    #[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct RecordSearch {
         /// id 过滤
         pub id: Option<(Option<RecordId>, Option<RecordId>)>,
@@ -189,7 +189,7 @@ pub mod basic {
     }
 
     /// 持久化的记录对象
-    #[derive(candid::CandidType, serde::Serialize, serde::Deserialize, Debug)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct Records {
         /// 最大保存个数
         pub max: u64,
@@ -291,7 +291,7 @@ pub mod basic {
     }
 
     /// 记录检索
-    #[derive(candid::CandidType, serde::Deserialize, Debug, Clone)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct RecordSearchArg {
         /// id 过滤
         pub id: Option<(Option<u64>, Option<u64>)>,

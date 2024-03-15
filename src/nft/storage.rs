@@ -9,7 +9,7 @@ use super::types::{MediaData, NFTInfo, Nft, NftView};
 
 // 存储相关
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Default, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct NftStorage {
     pub info: NFTInfo,
     pub nfts: Vec<Nft>,

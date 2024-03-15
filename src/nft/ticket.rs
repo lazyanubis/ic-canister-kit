@@ -1,13 +1,13 @@
 use crate::times::{now, Duration, Timestamp};
 use crate::types::NFTOwnable;
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Default, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct ForbiddenDuration {
     start: Timestamp,
     end: Timestamp,
 }
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Default, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct NftTicket {
     activity_start: Timestamp, // 开始前不给看到秘钥, 开始后所有者可以看到秘钥
     activity_end: Timestamp,   // 结束后所有人都可以看到秘钥
@@ -16,7 +16,7 @@ pub struct NftTicket {
 
 //  所有人不可见  ownable  所有者可见  opened  匿名可见
 // ----------------> ----------------> -------------->
-#[derive(candid::CandidType, serde::Deserialize, Debug)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum NftTicketStatus {
     NoBody(Duration),                // 所有人不可见, 数字是 ownable - now
     InvalidToken,                    // 无效的 id

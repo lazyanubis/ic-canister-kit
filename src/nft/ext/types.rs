@@ -22,7 +22,7 @@ pub type ExtAccountIdentifier = Vec<u8>; // 账户识别 一般是 account id，
 pub type ExtAccountIdentifierHex = String; // 账户识别 一般是 account id，如果用户使用的是 principal 也要和 subaccount 一起转换成对应的 account id
 pub type ExtSubaccount = Vec<u8>; // 子账户
 
-#[derive(candid::CandidType, serde::Deserialize, serde::Serialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum ExtUser {
     #[serde(rename = "address")]
     Address(ExtAccountIdentifierHex),

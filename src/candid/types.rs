@@ -45,7 +45,7 @@ pub enum WrappedCandidType {
     Reference(u32),                   // 循环类型中的引用类型
 }
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 pub enum FunctionAnnotation {
     None,   // 正常的修改函数
     Query,  // 查询函数, 可以用查询机制简化消耗的 cycles

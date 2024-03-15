@@ -1,6 +1,6 @@
 use crate::times::{now, Timestamp};
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Default, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct LimitDuration {
     start: Timestamp,
     end: Timestamp,
@@ -12,7 +12,7 @@ impl LimitDuration {
     }
 }
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Default, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct NftLimit(Vec<LimitDuration>); // 该时间段内,是限制时间
 
 pub type NftLimitState = (Vec<LimitDuration>,);
