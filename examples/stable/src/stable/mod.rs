@@ -42,16 +42,11 @@ use State::*;
 // 升级版本
 impl Upgrade for State {
     fn upgrade(&mut self) {
-        loop {
-            // ! 此处应该是最新的版本
-            // *             👇👇 UPGRADE WARNING: 必须是当前代码的版本
-            if matches!(self, V1(_)) {
-                break; // !  👆👆 UPGRADE WARNING: 升级版本一定要注意修改
-            }
+        'outer: loop {
             // 进行升级操作, 不断地升到下一版本
             match self {
                 V0(s) => *self = V1(std::mem::take(&mut *s).into()), // -> V1
-                V1(_) => break,                                      // same version do nothing
+                V1(_) => break 'outer,                               // same version do nothing
             }
         }
     }
