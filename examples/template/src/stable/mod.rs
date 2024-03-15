@@ -52,8 +52,8 @@ impl Upgrade for State {
 
     fn default_by_version(version: u32) -> Self {
         match version {
-            0 => V0(Box::new(v000::types::InnerState::default())), // * 初始化
-            1 => V1(Box::new(v001::types::InnerState::default())), // * 初始化
+            0 => V0(Box::default()), // * 初始化
+            1 => V1(Box::default()), // * 初始化
             // ! 👆👆 新增版本需要添加默认的数据
             _ => {
                 #[allow(clippy::panic)] // ? SAFETY
