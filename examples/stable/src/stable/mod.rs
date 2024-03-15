@@ -32,8 +32,8 @@ pub use v001::types::*;
 
 #[derive(CandidType, Serialize, Deserialize, Debug)]
 pub enum State {
-    V0(v000::types::InnerState),
-    V1(v001::types::InnerState),
+    V0(Box<v000::types::InnerState>),
+    V1(Box<v001::types::InnerState>),
     // * 👆👆 UPGRADE WARNING: 引入新版本
 }
 
@@ -50,8 +50,8 @@ impl Upgrade for State {
             }
             // 进行升级操作, 不断地升到下一版本
             match self {
-                V0(s) => *self = V1(std::mem::take(s).into()), // -> V1
-                V1(_) => break,                                // do nothing
+                V0(s) => *self = V1(std::mem::take(&mut *s).into()), // -> V1
+                V1(_) => break,                                      // same version do nothing
             }
         }
     }
@@ -67,14 +67,14 @@ impl Upgrade for State {
 impl State {
     pub fn get(&self) -> &dyn Business {
         match self {
-            V0(s) => s, // * 获取不可变对象
-            V1(s) => s, // * 获取不可变对象
+            V0(s) => s.as_ref(), // * 获取不可变对象
+            V1(s) => s.as_ref(), // * 获取不可变对象
         }
     }
     pub fn get_mut(&mut self) -> &mut dyn Business {
         match self {
-            V0(s) => s, // * 获取可变对象
-            V1(s) => s, // * 获取可变对象
+            V0(s) => s.as_mut(), // * 获取可变对象
+            V1(s) => s.as_mut(), // * 获取可变对象
         }
     }
 }

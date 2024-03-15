@@ -2,8 +2,8 @@ use super::super::v000::types::InnerState as LastState;
 
 use super::types::*;
 
-impl From<LastState> for InnerState {
-    fn from(value: LastState) -> Self {
+impl From<Box<LastState>> for Box<InnerState> {
+    fn from(value: Box<LastState>) -> Self {
         let mut state = InnerState::default(); // ? 初始化
 
         // 1. 继承之前的数据
@@ -12,12 +12,12 @@ impl From<LastState> for InnerState {
             permissions,
             records,
             schedule,
-        } = value;
+        } = *value;
         state.pause = pause;
         state.permissions = permissions;
         state.records = records;
         state.schedule = schedule;
 
-        state
+        Box::new(state)
     }
 }

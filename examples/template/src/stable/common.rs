@@ -4,15 +4,15 @@ use std::collections::{HashMap, HashSet};
 use ic_canister_kit::identity::caller;
 use ic_canister_kit::types::*;
 
+use super::ParsePermission;
 use super::{schedule_task, CanisterInitialArg, ParsePermissionError, RecordTopics};
-use super::{v000, ParsePermission};
 use super::{State, State::*};
 
 // 默认值
 impl Default for State {
     fn default() -> Self {
         // ? 初始化和升级会先进行迁移, 因此最初的版本无关紧要
-        V0(v000::types::InnerState::default())
+        V0(Box::default())
     }
 }
 
