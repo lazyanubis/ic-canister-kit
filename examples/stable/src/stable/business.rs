@@ -15,6 +15,7 @@ pub trait Business:
     + Recordable<Record, RecordTopic, RecordSearch>
     + Schedulable
     + ScheduleTask
+    + StorableHeapData
 {
     fn business_example_query(&self) -> String;
     fn business_example_update(&mut self, test: String);

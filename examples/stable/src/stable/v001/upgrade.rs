@@ -1,4 +1,4 @@
-use super::super::v000::types::InnerState as LastState;
+use super::super::v000::types::{HeapData as LastHeapData, InnerState as LastState};
 
 use super::types::*;
 
@@ -7,16 +7,16 @@ impl From<Box<LastState>> for Box<InnerState> {
         let mut state = InnerState::default(); // ? 初始化
 
         // 1. 继承之前的数据
-        let LastState {
+        let LastHeapData {
             pause,
             permissions,
             records,
             schedule,
-        } = *value;
-        state.pause = pause;
-        state.permissions = permissions;
-        state.records = records;
-        state.schedule = schedule;
+        } = value.heap;
+        state.heap.pause = pause;
+        state.heap.permissions = permissions;
+        state.heap.records = records;
+        state.heap.schedule = schedule;
 
         Box::new(state)
     }

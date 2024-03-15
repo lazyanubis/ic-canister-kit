@@ -30,7 +30,12 @@ ic-cdk = "0.13"
 serde = { version = "1", features = ["derive"] } # 序列化/反序列化框架
 serde_json = "1.0.95"                            # json
 
-ic-canister-kit = { path = "../..", features = ["call-once", "schedule"] }
+ic-canister-kit = { path = "../..", features = [
+    "call-once",
+    "schedule",
+    "stable-structures",
+] }
+ciborium = "0.2"
 
 strum = "0.26"
 strum_macros = "0.26"

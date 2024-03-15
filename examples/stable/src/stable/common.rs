@@ -65,17 +65,33 @@ fn initial(arg: Option<CanisterInitialArg>) {
 #[ic_cdk::post_upgrade]
 fn post_upgrade() {
     STATE.with(|state| {
-        let record_id = ic_canister_kit::stable::restore_after_upgrade(state);
+        // restore data
+        let memory = ic_canister_kit::functions::stable::get_upgrades_memory();
+
+        let mut memory = ReadUpgradeMemory::new(&memory);
+
+        let record_id = memory.read_u64().into(); // restore record id
+        let version = memory.read_u32(); // restore version
+
+        let length = memory.read_u64() as usize; // restore heap data length
+        let mut bytes = vec![0; length];
+        memory.read(&mut bytes);
+
+        // 利用版本号恢复升级前的版本
+        let mut last_state = State::default_by_version(version);
+        last_state.heap_data_from_bytes(&bytes); // 恢复数据
+
+        *state.borrow_mut() = last_state;
+
         state.borrow_mut().upgrade(); // ! 恢复后要进行升级到最新版本
         let schedule = state.borrow().schedule_find();
         state.borrow_mut().init(CanisterInitialArg { schedule }); // ! 升级到最新版本后, 需要执行初始化操作
         state.borrow_mut().schedule_reload(); // * 重置定时任务
+
         let version = state.borrow().version();
-        if let Some(record_id) = record_id {
-            state
-                .borrow_mut()
-                .record_update(record_id, format!("Next version: {}", version));
-        }
+        state
+            .borrow_mut()
+            .record_update(record_id, format!("Next version: {}", version));
     });
 }
 
@@ -93,7 +109,18 @@ fn pre_upgrade() {
             RecordTopics::Upgrade.topic(),
             format!("Upgrade by {}", caller.to_text()),
         );
-        ic_canister_kit::stable::store_before_upgrade(state, Some(record_id));
+
+        let mut memory = ic_canister_kit::functions::stable::get_upgrades_memory();
+        let mut memory = WriteUpgradeMemory::new(&mut memory);
+
+        memory.write_u64(record_id.into_inner()); // store record id
+        memory.write_u32(state.borrow().version()); // store version
+
+        let bytes = state.borrow().heap_data_to_bytes();
+        let length = bytes.len();
+
+        memory.write_u64(length as u64); // store heap data length
+        memory.write(&bytes); // store heap data length
     });
 }
 
@@ -268,3 +295,13 @@ pub trait ScheduleTask: Schedulable {
 }
 
 impl ScheduleTask for State {}
+
+impl StorableHeapData for State {
+    fn heap_data_to_bytes(&self) -> Vec<u8> {
+        self.get().heap_data_to_bytes()
+    }
+
+    fn heap_data_from_bytes(&mut self, bytes: &[u8]) {
+        self.get_mut().heap_data_from_bytes(bytes)
+    }
+}
