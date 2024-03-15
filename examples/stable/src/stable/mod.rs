@@ -27,7 +27,7 @@ mod v000;
 mod v001;
 
 // ! 此处应该是最新的版本
-// *     👇👇 UPGRADE WARNING: 必须是当前代码的版本
+// !     👇👇 UPGRADE WARNING: 必须是当前代码的版本
 pub use v001::types::*;
 
 #[derive(CandidType, Serialize, Deserialize, Debug)]
