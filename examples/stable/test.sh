@@ -160,7 +160,7 @@ test "business_example_query" "$(dfx canister call stable business_example_query
 # test completed
 
 echo ""
-green "=================== TEST COMPLETED ==================="
+green "=================== TEST COMPLETED AND SUCCESSFUL ==================="
 echo ""
 
 # sleep 10000
