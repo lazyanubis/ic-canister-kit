@@ -1,5 +1,7 @@
 use std::str::FromStr;
 
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, EnumString};
 
@@ -45,7 +47,7 @@ impl RecordTopics {
     }
 }
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Default)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct InnerState {
     pub pause: Pause,             // 记录维护状态
     pub permissions: Permissions, // 记录自身权限
@@ -55,7 +57,7 @@ pub struct InnerState {
     pub business: InnerBusiness,
 }
 
-#[derive(candid::CandidType, serde::Deserialize, Debug, Default)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct InnerBusiness {
     pub example_data: String,
 }

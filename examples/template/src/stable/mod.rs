@@ -1,5 +1,6 @@
 use candid::CandidType;
 use ic_canister_kit::types::Permission;
+use serde::{Deserialize, Serialize};
 
 mod common;
 pub use common::*;
@@ -11,7 +12,7 @@ pub use business::*;
 pub trait ParsePermission {
     fn parse_permission<'a>(&self, name: &'a str) -> Result<Permission, ParsePermissionError<'a>>;
 }
-#[derive(Debug)]
+#[derive(CandidType, Serialize, Debug, Clone)]
 pub struct ParsePermissionError<'a>(&'a str);
 impl Display for ParsePermissionError<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -29,7 +30,7 @@ mod v001;
 // *     👇👇 UPGRADE WARNING: 必须是当前代码的版本
 pub use v001::types::*;
 
-#[derive(candid::CandidType, serde::Deserialize, Debug)]
+#[derive(CandidType, Serialize, Deserialize, Debug)]
 pub enum State {
     V0(v000::types::InnerState),
     V1(v001::types::InnerState),
@@ -81,7 +82,7 @@ impl State {
 // ==================== 初始化 ====================
 
 // 罐子初始化需要的参数
-#[derive(Debug, serde::Deserialize, CandidType)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct CanisterInitialArg {
     schedule: Option<DurationNanos>,
 }
