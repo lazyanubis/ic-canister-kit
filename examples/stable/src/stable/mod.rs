@@ -25,7 +25,6 @@ impl std::error::Error for ParsePermissionError<'_> {}
 mod v000;
 mod v001;
 
-use serde::Deserialize;
 // ! 此处应该是最新的版本
 // *     👇👇 UPGRADE WARNING: 必须是当前代码的版本
 pub use v001::types::*;
@@ -82,7 +81,7 @@ impl State {
 // ==================== 初始化 ====================
 
 // 罐子初始化需要的参数
-#[derive(Debug, Deserialize, CandidType)]
+#[derive(Debug, serde::Deserialize, CandidType)]
 pub struct CanisterInitialArg {
     schedule: Option<DurationNanos>,
 }
