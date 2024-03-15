@@ -7,6 +7,9 @@ pub trait Upgrade {
     /// 当前版本
     fn version(&self) -> u32;
 
+    /// 获取指定版本的默认数据
+    fn default_by_version(version: u32) -> Self;
+
     /// 进行升级
     fn upgrade(&mut self);
 }

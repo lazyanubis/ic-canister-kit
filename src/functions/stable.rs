@@ -57,6 +57,75 @@ pub fn get_upgrades_memory() -> VirtualMemory {
     get_virtual_memory(MEMORY_ID_UPGRADED)
 }
 
+/// 包装升级内存
+pub struct WriteUpgradeMemory<'a, M> {
+    writer: Writer<'a, M>,
+}
+
+/// 包装升级内存
+pub struct ReadUpgradeMemory<'a, M> {
+    memory: &'a M,
+    offset: u64,
+}
+
+impl<'a, M: Memory> WriteUpgradeMemory<'a, M> {
+    /// 构造升级对象
+    pub fn new(memory: &'a mut M) -> WriteUpgradeMemory<'a, M> {
+        Self {
+            writer: Writer::new(memory, 0),
+        }
+    }
+
+    /// 写入升级数据
+    pub fn write(&mut self, bytes: &[u8]) {
+        #[allow(clippy::expect_used)] // ? SAFETY
+        self.writer
+            .write(bytes)
+            .expect("failed to write to upgrade memory");
+    }
+
+    /// 写入 u32
+    pub fn write_u32(&mut self, value: u32) {
+        let mut bytes = Vec::with_capacity(4);
+        common::u32_to_bytes(&mut bytes, value);
+        self.write(&bytes);
+    }
+
+    /// 写入 u64
+    pub fn write_u64(&mut self, value: u64) {
+        let mut bytes = Vec::with_capacity(8);
+        common::u64_to_bytes(&mut bytes, value);
+        self.write(&bytes);
+    }
+}
+
+impl<'a, M: Memory> ReadUpgradeMemory<'a, M> {
+    /// 构造升级对象
+    pub fn new(memory: &'a M) -> ReadUpgradeMemory<'a, M> {
+        Self { memory, offset: 0 }
+    }
+
+    /// 读取升级数据
+    pub fn read(&mut self, bytes: &mut [u8]) {
+        self.memory.read(self.offset, bytes);
+        self.offset += bytes.len() as u64;
+    }
+
+    /// 读取 u32
+    pub fn read_u32(&mut self) -> u32 {
+        let mut bytes = Vec::with_capacity(4);
+        self.read(&mut bytes);
+        common::u32_from_bytes(&bytes)
+    }
+
+    /// 读取 u64
+    pub fn read_u64(&mut self) -> u64 {
+        let mut bytes = Vec::with_capacity(8);
+        self.read(&mut bytes);
+        common::u64_from_bytes(&bytes)
+    }
+}
+
 /// 一些可能用到的工具方法
 pub mod common {
     use super::*;

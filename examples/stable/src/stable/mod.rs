@@ -41,6 +41,29 @@ use State::*;
 
 // 升级版本
 impl Upgrade for State {
+    fn version(&self) -> u32 {
+        // 每个版本的版本号
+        match self {
+            V0(_) => 0,
+            V1(_) => 1,
+            // * 👆👆! 升级需要在此添加版本号
+        }
+    }
+
+    fn default_by_version(version: u32) -> Self {
+        match version {
+            0 => V0(Box::new(v000::types::InnerState::default())), // * 初始化
+            1 => V1(Box::new(v001::types::InnerState::default())), // * 初始化
+            // ! 👆👆 新增版本需要添加默认的数据
+            _ => {
+                #[allow(clippy::panic)] // ? SAFETY
+                {
+                    panic!("unsupported version")
+                }
+            }
+        }
+    }
+
     fn upgrade(&mut self) {
         'outer: loop {
             // 进行升级操作, 不断地升到下一版本
@@ -48,13 +71,6 @@ impl Upgrade for State {
                 V0(s) => *self = V1(std::mem::take(&mut *s).into()), // -> V1
                 V1(_) => break 'outer,                               // same version do nothing
             }
-        }
-    }
-
-    fn version(&self) -> u32 {
-        match self {
-            V0(_) => 0, // ? 版本号
-            V1(_) => 1, // ? 版本号
         }
     }
 }
