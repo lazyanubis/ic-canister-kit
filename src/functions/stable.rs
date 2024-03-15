@@ -15,10 +15,10 @@ pub use std::borrow::Cow;
 /// 序列化 heap data
 pub trait StorableHeapData {
     /// 序列化 堆数据
-    fn heap_data_to_bytes(&self) -> Cow<[u8]>;
+    fn heap_data_to_bytes(&self) -> Vec<u8>;
 
     /// 反序列化 堆数据
-    fn heap_data_from_bytes(&mut self, bytes: Cow<[u8]>);
+    fn heap_data_from_bytes(&mut self, bytes: &[u8]);
 }
 
 /// 稳定对象
@@ -37,7 +37,7 @@ pub type StableBTreeMap<K, V, M> = ic_stable_structures::BTreeMap<K, V, M>;
 pub type StableLog<T, INDEX, DATA> = ic_stable_structures::Log<T, INDEX, DATA>;
 /// 稳定优先级队列 按照排序方式存放数据
 /// ! 内部使用 vec 方式实现，优缺点一致
-pub type StableQueue<T, M> = ic_stable_structures::MinHeap<T, M>;
+pub type StablePriorityQueue<T, M> = ic_stable_structures::MinHeap<T, M>;
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));

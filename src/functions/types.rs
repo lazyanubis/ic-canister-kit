@@ -21,6 +21,6 @@ pub use super::record::{
 
 #[cfg(feature = "stable-structures")]
 pub use super::stable::{
-    Bound, Cow, Memory, MemoryId, StableBTreeMap, StableCell, StableLog, StableQueue, StableVec,
-    Storable, StorableHeapData, VirtualMemory, Writer,
+    Bound, Cow, Memory, MemoryId, StableBTreeMap, StableCell, StableLog, StablePriorityQueue,
+    StableVec, Storable, StorableHeapData, VirtualMemory, Writer,
 };
