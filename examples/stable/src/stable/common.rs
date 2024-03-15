@@ -28,7 +28,7 @@ pub fn check_permission(
             s.parse_permission(permission).unwrap()
         }) {
             if running {
-                #[allow(clippy::unwrap_used)] // ? checked
+                #[allow(clippy::unwrap_used)] // ? SAFETY
                 s.pause_must_be_running().unwrap();
             }
             return Ok(());
@@ -85,7 +85,7 @@ fn post_upgrade() {
 fn pre_upgrade() {
     let caller = caller();
     STATE.with(|state| {
-        #[allow(clippy::unwrap_used)] // ? checked
+        #[allow(clippy::unwrap_used)] // ? SAFETY
         state.borrow().pause_must_be_paused().unwrap(); // ! 必须是维护状态, 才可以升级
         state.borrow_mut().schedule_stop(); // * 停止定时任务
         let record_id = state.borrow_mut().record_push(
