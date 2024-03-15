@@ -1,13 +1,13 @@
-use super::super::v000::types::InnerState as OldState;
+use super::super::v000::types::InnerState as LastState;
 
 use super::types::*;
 
-impl From<OldState> for InnerState {
-    fn from(value: OldState) -> Self {
+impl From<LastState> for InnerState {
+    fn from(value: LastState) -> Self {
         let mut state = InnerState::default(); // ? 初始化
 
         // 1. 继承之前的数据
-        let OldState {
+        let LastState {
             pause,
             permissions,
             records,
