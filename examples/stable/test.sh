@@ -162,6 +162,86 @@ test "pause_replace" "$(dfx canister call stable pause_replace "(null)" 2>&1)" "
 test "pause_query" "$(dfx canister call stable pause_query 2>&1)" "(false)"
 test "business_example_query" "$(dfx canister call stable business_example_query 2>&1)" "test string"
 
+blue "7 test stable cell"
+test "business_example_cell_query" "$(dfx --identity alice canister call stable business_example_cell_query 2>&1)" "\"\""
+test "business_example_cell_query" "$(dfx canister call stable business_example_cell_query 2>&1)" "\"\""
+test "business_example_cell_set" "$(dfx --identity alice canister call stable business_example_cell_set "(\"test string\")" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_cell_set" "$(dfx canister call stable business_example_cell_set "(\"test string\")" 2>&1)" "()"
+test "business_example_cell_query" "$(dfx --identity alice canister call stable business_example_cell_query 2>&1)" "test string"
+test "business_example_cell_query" "$(dfx canister call stable business_example_cell_query 2>&1)" "test string"
+
+blue "8 test stable vec"
+test "business_example_vec_query" "$(dfx --identity alice canister call stable business_example_vec_query 2>&1)" "(vec {})"
+test "business_example_vec_query" "$(dfx canister call stable business_example_vec_query 2>&1)" "(vec {})"
+test "business_example_vec_pop" "$(dfx --identity alice canister call stable business_example_vec_pop "()" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_vec_pop" "$(dfx canister call stable business_example_vec_pop "()" 2>&1)" "(null)"
+test "business_example_vec_push" "$(dfx --identity alice canister call stable business_example_vec_push "(5: nat64)" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_vec_push" "$(dfx canister call stable business_example_vec_push "(5: nat64)" 2>&1)" "()"
+test "business_example_vec_query" "$(dfx --identity alice canister call stable business_example_vec_query 2>&1)" "(vec { record { vec_data = 5 : nat64 } })"
+test "business_example_vec_query" "$(dfx canister call stable business_example_vec_query 2>&1)" "(vec { record { vec_data = 5 : nat64 } })"
+test "business_example_vec_pop" "$(dfx --identity alice canister call stable business_example_vec_pop "()" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_vec_pop" "$(dfx canister call stable business_example_vec_pop "()" 2>&1)" "(opt record { vec_data = 5 : nat64 })"
+test "business_example_vec_query" "$(dfx --identity alice canister call stable business_example_vec_query 2>&1)" "(vec {})"
+test "business_example_vec_query" "$(dfx canister call stable business_example_vec_query 2>&1)" "(vec {})"
+
+blue "9 test stable map"
+test "business_example_map_query" "$(dfx --identity alice canister call stable business_example_map_query 2>&1)" "(vec {})"
+test "business_example_map_query" "$(dfx canister call stable business_example_map_query 2>&1)" "(vec {})"
+test "business_example_map_update" "$(dfx --identity alice canister call stable business_example_map_update "(1:nat64, opt \"111\")" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_map_update" "$(dfx canister call stable business_example_map_update "(1:nat64, opt \"111\")" 2>&1)" "(null)"
+test "business_example_map_query" "$(dfx --identity alice canister call stable business_example_map_query 2>&1)" '(vec { record { 1 : nat64; "111" } })'
+test "business_example_map_query" "$(dfx canister call stable business_example_map_query 2>&1)" '(vec { record { 1 : nat64; "111" } })'
+test "business_example_map_update" "$(dfx canister call stable business_example_map_update "(1:nat64, opt \"123\")" 2>&1)" "(opt \"111\")"
+test "business_example_map_update" "$(dfx canister call stable business_example_map_update "(1:nat64, null)" 2>&1)" "(opt \"123\")"
+test "business_example_map_update" "$(dfx canister call stable business_example_map_update "(2:nat64, opt \"222\")" 2>&1)" "(null)"
+test "business_example_map_query" "$(dfx --identity alice canister call stable business_example_map_query 2>&1)"'(vec { record { 2 : nat64; "222" } })'
+test "business_example_map_query" "$(dfx canister call stable business_example_map_query 2>&1)" '(vec { record { 2 : nat64; "222" } })'
+
+blue "10 test stable log"
+test "business_example_log_query" "$(dfx --identity alice canister call stable business_example_log_query 2>&1)" "(vec {})"
+test "business_example_log_query" "$(dfx canister call stable business_example_log_query 2>&1)" "(vec {})"
+test "business_example_log_update" "$(dfx --identity alice canister call stable business_example_log_update "(\"111\")" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_log_update" "$(dfx canister call stable business_example_log_update "(\"111\")" 2>&1)" "(0 : nat64)"
+test "business_example_log_query" "$(dfx --identity alice canister call stable business_example_log_query 2>&1)" '(vec { "111" })'
+test "business_example_log_query" "$(dfx canister call stable business_example_log_query 2>&1)" '(vec { "111" })'
+test "business_example_log_update" "$(dfx canister call stable business_example_log_update "(\"123\")" 2>&1)" "(1 : nat64)"
+test "business_example_log_query" "$(dfx --identity alice canister call stable business_example_log_query 2>&1)"'(vec { "111"; "123" })'
+test "business_example_log_query" "$(dfx canister call stable business_example_log_query 2>&1)" '(vec { "111"; "123" })'
+
+blue "11 test stable priority queue"
+test "business_example_priority_queue_query" "$(dfx --identity alice canister call stable business_example_priority_queue_query 2>&1)" "(vec {})"
+test "business_example_priority_queue_query" "$(dfx canister call stable business_example_priority_queue_query 2>&1)" "(vec {})"
+test "business_example_priority_queue_pop" "$(dfx --identity alice canister call stable business_example_priority_queue_pop "()" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_priority_queue_pop" "$(dfx canister call stable business_example_priority_queue_pop "()" 2>&1)" "(null)"
+test "business_example_priority_queue_push" "$(dfx --identity alice canister call stable business_example_priority_queue_push "(5: nat64)" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_priority_queue_push" "$(dfx canister call stable business_example_priority_queue_push "(5: nat64)" 2>&1)" "()"
+test "business_example_priority_queue_query" "$(dfx --identity alice canister call stable business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
+test "business_example_priority_queue_query" "$(dfx canister call stable business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
+test "business_example_priority_queue_push" "$(dfx canister call stable business_example_priority_queue_push "(2: nat64)" 2>&1)" "()"
+test "business_example_priority_queue_query" "$(dfx canister call stable business_example_priority_queue_query 2>&1)" "(vec { 2 : nat64; 5 : nat64 })"
+test "business_example_priority_queue_pop" "$(dfx --identity alice canister call stable business_example_priority_queue_pop "()" 2>&1)" "'BusinessExampleSet' is required"
+test "business_example_priority_queue_pop" "$(dfx canister call stable business_example_priority_queue_pop "()" 2>&1)" "(opt (2 : nat64))"
+test "business_example_priority_queue_query" "$(dfx --identity alice canister call stable business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
+test "business_example_priority_queue_query" "$(dfx canister call stable business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
+
+blue "12 test stable priority queue"
+test "pause_replace" "$(dfx canister call stable pause_replace "(opt \"reason\")" 2>&1)" "()"
+test "pause_query" "$(dfx canister call stable pause_query 2>&1)" "(true)"
+dfx canister install --mode=upgrade --upgrade-unchanged --argument "(null)" stable
+test "pause_replace" "$(dfx canister call stable pause_replace "(null)" 2>&1)" "()"
+test "pause_query" "$(dfx canister call stable pause_query 2>&1)" "(false)"
+test "business_example_query" "$(dfx canister call stable business_example_query 2>&1)" "test string"
+test "business_example_cell_query" "$(dfx --identity alice canister call stable business_example_cell_query 2>&1)" "test string"
+test "business_example_cell_query" "$(dfx canister call stable business_example_cell_query 2>&1)" "test string"
+test "business_example_vec_query" "$(dfx --identity alice canister call stable business_example_vec_query 2>&1)" "(vec {})"
+test "business_example_vec_query" "$(dfx canister call stable business_example_vec_query 2>&1)" "(vec {})"
+test "business_example_map_query" "$(dfx --identity alice canister call stable business_example_map_query 2>&1)"'(vec { record { 2 : nat64; "222" } })'
+test "business_example_map_query" "$(dfx canister call stable business_example_map_query 2>&1)" '(vec { record { 2 : nat64; "222" } })'
+test "business_example_log_query" "$(dfx --identity alice canister call stable business_example_log_query 2>&1)"'(vec { "111"; "123" })'
+test "business_example_log_query" "$(dfx canister call stable business_example_log_query 2>&1)" '(vec { "111"; "123" })'
+test "business_example_priority_queue_query" "$(dfx --identity alice canister call stable business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
+test "business_example_priority_queue_query" "$(dfx canister call stable business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
+
 # test completed
 
 echo ""

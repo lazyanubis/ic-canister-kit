@@ -23,7 +23,12 @@ pub use super::schedule::schedule_task;
 #[derive(Debug, Clone, Copy, EnumIter, EnumString, strum_macros::Display)]
 pub enum RecordTopics {
     // ! 新的权限类型从 0 开始
-    Example = 0, // 模版样例
+    Example = 0,              // 模版样例
+    ExampleCell = 1,          // 模版样例
+    ExampleVec = 2,           // 模版样例
+    ExampleMap = 3,           // 模版样例
+    ExampleLog = 4,           // 模版样例
+    ExamplePriorityQueue = 5, // 模版样例
 
     // ! 系统倒序排列
     CyclesCharge = 249, // 充值
