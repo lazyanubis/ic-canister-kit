@@ -149,7 +149,7 @@ test "business_example_set" "$(dfx canister call template business_example_set "
 test "business_example_query" "$(dfx --identity alice canister call template business_example_query 2>&1)" "test string"
 test "business_example_query" "$(dfx canister call template business_example_query 2>&1)" "test string"
 
-blue "5 test stable data"
+blue "6 test stable data"
 test "pause_replace" "$(dfx canister call template pause_replace "(opt \"reason\")" 2>&1)" "()"
 test "pause_query" "$(dfx canister call template pause_query 2>&1)" "(true)"
 dfx canister install --mode=upgrade --upgrade-unchanged --argument "(null)" template
