@@ -70,7 +70,7 @@ cargo clippy
 # ! 1. 测试 stable
 red "\n=========== 1. stable ===========\n"
 dfx canister create stable
-dfx deploy --argument "(null)" stable
+dfx deploy --mode=reinstall --yes --argument "(null)" stable
 stable=$(canister_id "stable")
 blue "Stable Canister: $stable"
 
