@@ -56,11 +56,11 @@ pub struct InnerState {
     pub heap: HeapData, // 保存在堆内存上的数据 最大 4G
 
     // ! 大的业务数据可以放这里
-    pub example_cell: StableCell<ExampleCell, VirtualMemory>,
-    pub example_vec: StableVec<ExampleVec, VirtualMemory>,
-    pub example_map: StableBTreeMap<u64, String, VirtualMemory>,
-    pub example_log: StableLog<String, VirtualMemory, VirtualMemory>,
-    pub example_priority_queue: StablePriorityQueue<ExampleVec, VirtualMemory>,
+    pub example_cell: StableCell<ExampleCell>,
+    pub example_vec: StableVec<ExampleVec>,
+    pub example_map: StableBTreeMap<u64, String>,
+    pub example_log: StableLog<String>,
+    pub example_priority_queue: StablePriorityQueue<ExampleVec>,
 }
 
 #[allow(clippy::derivable_impls)]
@@ -94,7 +94,7 @@ pub struct InnerBusiness {
     pub example_data: String,
 }
 
-use ic_canister_kit::functions::stable::get_virtual_memory;
+use ic_canister_kit::functions::stable;
 
 const MEMORY_ID_EXAMPLE_CELL: MemoryId = MemoryId::new(0); // 测试 Cell
 const MEMORY_ID_EXAMPLE_VEC: MemoryId = MemoryId::new(1); // 测试 Vec
@@ -103,38 +103,24 @@ const MEMORY_ID_EXAMPLE_LOG_ID: MemoryId = MemoryId::new(3); // 测试 Log
 const MEMORY_ID_EXAMPLE_LOG_DATA: MemoryId = MemoryId::new(4); // 测试 Log
 const MEMORY_ID_EXAMPLE_PRIORITY_QUEUE: MemoryId = MemoryId::new(5); // 测试 PriorityQueue
 
-fn init_example_cell_data() -> StableCell<ExampleCell, VirtualMemory> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StableCell::init(
-        get_virtual_memory(MEMORY_ID_EXAMPLE_CELL),
-        ExampleCell::default(),
-    )
-    .expect("failed to initialize")
+fn init_example_cell_data() -> StableCell<ExampleCell> {
+    stable::init_cell_data(MEMORY_ID_EXAMPLE_CELL, ExampleCell::default())
 }
 
-fn init_example_vec_data() -> StableVec<ExampleVec, VirtualMemory> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StableVec::init(get_virtual_memory(MEMORY_ID_EXAMPLE_VEC)).expect("failed to initialize")
+fn init_example_vec_data() -> StableVec<ExampleVec> {
+    stable::init_vec_data(MEMORY_ID_EXAMPLE_VEC)
 }
 
-fn init_example_map_data() -> StableBTreeMap<u64, String, VirtualMemory> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StableBTreeMap::init(get_virtual_memory(MEMORY_ID_EXAMPLE_MAP))
+fn init_example_map_data() -> StableBTreeMap<u64, String> {
+    stable::init_map_data(MEMORY_ID_EXAMPLE_MAP)
 }
 
-fn init_example_log_data() -> StableLog<String, VirtualMemory, VirtualMemory> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StableLog::init(
-        get_virtual_memory(MEMORY_ID_EXAMPLE_LOG_ID),
-        get_virtual_memory(MEMORY_ID_EXAMPLE_LOG_DATA),
-    )
-    .expect("failed to initialize")
+fn init_example_log_data() -> StableLog<String> {
+    stable::init_log_data(MEMORY_ID_EXAMPLE_LOG_ID, MEMORY_ID_EXAMPLE_LOG_DATA)
 }
 
-fn init_example_priority_queue_data() -> StablePriorityQueue<ExampleVec, VirtualMemory> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StablePriorityQueue::init(get_virtual_memory(MEMORY_ID_EXAMPLE_PRIORITY_QUEUE))
-        .expect("failed to initialize")
+fn init_example_priority_queue_data() -> StablePriorityQueue<ExampleVec> {
+    stable::init_priority_queue_data(MEMORY_ID_EXAMPLE_PRIORITY_QUEUE)
 }
 
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]

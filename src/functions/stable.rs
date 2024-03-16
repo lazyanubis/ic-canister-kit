@@ -23,21 +23,21 @@ pub trait StorableHeapData {
 
 /// 稳定对象
 /// ! 读取和写入都是全量操作，成本比较大
-pub type StableCell<T, M> = ic_stable_structures::Cell<T, M>;
+pub type StableCell<T> = ic_stable_structures::Cell<T, VirtualMemory>;
 /// 稳定列表
 /// ! 存储有限长度数据，若不固定长度，则按照最大长度存储，不均匀的数据使用空间浪费比较严重
 /// ! push 和 pop 没有任意位置删除的功能
 /// ! 若不在乎顺序，则移动末尾元素到被删除的位置可实现任意删除。结合 StableBTreeMap 存储双向的缩影数据，可实现任意位置删除。
 /// ! 最大的问题还是数据长度问题，任意删除功能不是核心难题。
-pub type StableVec<T, M> = ic_stable_structures::Vec<T, M>;
+pub type StableVec<T> = ic_stable_structures::Vec<T, VirtualMemory>;
 /// 稳定映射
-pub type StableBTreeMap<K, V, M> = ic_stable_structures::BTreeMap<K, V, M>;
+pub type StableBTreeMap<K, V> = ic_stable_structures::BTreeMap<K, V, VirtualMemory>;
 /// 稳定日志
 /// ! 支持变长 无法删除和移动
-pub type StableLog<T, INDEX, DATA> = ic_stable_structures::Log<T, INDEX, DATA>;
+pub type StableLog<T> = ic_stable_structures::Log<T, VirtualMemory, VirtualMemory>;
 /// 稳定优先级队列 按照排序方式存放数据
 /// ! 内部使用 vec 方式实现，优缺点一致
-pub type StablePriorityQueue<T, M> = ic_stable_structures::MinHeap<T, M>;
+pub type StablePriorityQueue<T> = ic_stable_structures::MinHeap<T, VirtualMemory>;
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
@@ -55,6 +55,43 @@ pub fn get_virtual_memory(memory_id: MemoryId) -> VirtualMemory {
 #[inline]
 pub fn get_upgrades_memory() -> VirtualMemory {
     get_virtual_memory(MEMORY_ID_UPGRADED)
+}
+
+/// 初始化内存
+pub fn init_cell_data<T: Storable>(memory_id: MemoryId, default: T) -> StableCell<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableCell::init(get_virtual_memory(memory_id), default).expect("failed to initialize")
+}
+/// 初始化内存
+pub fn init_vec_data<T: Storable>(memory_id: MemoryId) -> StableVec<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableVec::init(get_virtual_memory(memory_id)).expect("failed to initialize")
+}
+/// 初始化内存
+pub fn init_map_data<K: Storable + Ord + Clone, V: Storable>(
+    memory_id: MemoryId,
+) -> StableBTreeMap<K, V> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableBTreeMap::init(get_virtual_memory(memory_id))
+}
+/// 初始化内存
+pub fn init_log_data<T: Storable>(
+    id_memory_id: MemoryId,
+    data_memory_id: MemoryId,
+) -> StableLog<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableLog::init(
+        get_virtual_memory(id_memory_id),
+        get_virtual_memory(data_memory_id),
+    )
+    .expect("failed to initialize")
+}
+/// 初始化内存
+pub fn init_priority_queue_data<T: Storable + PartialOrd>(
+    memory_id: MemoryId,
+) -> StablePriorityQueue<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StablePriorityQueue::init(get_virtual_memory(memory_id)).expect("failed to initialize")
 }
 
 /// 包装升级内存
