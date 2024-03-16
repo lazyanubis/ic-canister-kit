@@ -35,7 +35,6 @@ ic-canister-kit = { path = "../..", features = [
     "schedule",
     "stable-structures",
 ] }
-ciborium = "0.2"
 
 strum = "0.26"
 strum_macros = "0.26"

@@ -631,7 +631,6 @@ name = "stable"
 version = "0.0.1"
 dependencies = [
  "candid",
- "ciborium",
  "ic-canister-kit",
  "ic-cdk",
  "serde",

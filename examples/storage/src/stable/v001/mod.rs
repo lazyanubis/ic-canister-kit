@@ -131,16 +131,10 @@ impl ScheduleTask for InnerState {}
 
 impl StorableHeapData for InnerState {
     fn heap_data_to_bytes(&self) -> Vec<u8> {
-        let mut bytes = vec![];
-        #[allow(clippy::unwrap_used)] // ? SAFETY
-        ciborium::ser::into_writer(&self.heap, &mut bytes).unwrap();
-        bytes
+        ic_canister_kit::functions::stable::common::to_bytes(&self.heap)
     }
 
     fn heap_data_from_bytes(&mut self, bytes: &[u8]) {
-        #[allow(clippy::expect_used)] // ? SAFETY
-        {
-            self.heap = ciborium::de::from_reader(bytes).expect("deserialization must succeed.");
-        }
+        self.heap = ic_canister_kit::functions::stable::common::from_bytes(bytes)
     }
 }
