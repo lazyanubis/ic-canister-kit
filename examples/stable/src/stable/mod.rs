@@ -49,7 +49,7 @@ impl Upgrade for State {
         }
     }
 
-    fn default_by_version(version: u32) -> Self {
+    fn from_version(version: u32) -> Self {
         match version {
             0 => V0(Box::default()), // * 初始化
             1 => V1(Box::default()), // * 初始化

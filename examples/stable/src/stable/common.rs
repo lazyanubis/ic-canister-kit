@@ -78,7 +78,7 @@ fn post_upgrade() {
         memory.read(&mut bytes);
 
         // 利用版本号恢复升级前的版本
-        let mut last_state = State::default_by_version(version);
+        let mut last_state = State::from_version(version);
         last_state.heap_data_from_bytes(&bytes); // 恢复数据
 
         *state.borrow_mut() = last_state;
