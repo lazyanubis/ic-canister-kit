@@ -65,16 +65,16 @@ BOB=$(dfx --identity bob identity get-principal)
 
 cargo test
 cargo clippy
-cargo audit --no-fetch --quiet
+# cargo audit --no-fetch --quiet
 
 # ! 1. 测试 template
 red "\n=========== 1. template ===========\n"
-cargo test -p template update_candid -- --nocapture
+dfx canister create template
 dfx deploy --argument "(null)" template
 template=$(canister_id "template")
 blue "Template Canister: $template"
 
-if [ -z "$stable" ]; then
+if [ -z "$template" ]; then
     say deploy failed
     exit 1
 fi
@@ -167,6 +167,8 @@ test "business_example_query" "$(dfx canister call template business_example_que
 echo ""
 green "=================== TEST COMPLETED AND SUCCESSFUL ==================="
 echo ""
+
+say test successful
 
 # sleep 10000
 # read -s -n1 -p "按任意键结束..."

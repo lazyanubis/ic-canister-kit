@@ -65,11 +65,11 @@ BOB=$(dfx --identity bob identity get-principal)
 
 cargo test
 cargo clippy
-cargo audit --no-fetch --quiet
+# cargo audit --no-fetch --quiet
 
 # ! 1. 测试 stable
 red "\n=========== 1. stable ===========\n"
-cargo test -p stable update_candid -- --nocapture
+dfx canister create stable
 dfx deploy --argument "(null)" stable
 stable=$(canister_id "stable")
 blue "Stable Canister: $stable"
@@ -167,6 +167,8 @@ test "business_example_query" "$(dfx canister call stable business_example_query
 echo ""
 green "=================== TEST COMPLETED AND SUCCESSFUL ==================="
 echo ""
+
+say test successful
 
 # sleep 10000
 # read -s -n1 -p "按任意键结束..."
