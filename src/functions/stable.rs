@@ -165,4 +165,18 @@ pub mod common {
     pub fn u64_from_bytes(bytes: &[u8]) -> u64 {
         u64::from_bytes(Cow::Borrowed(&bytes[..8]))
     }
+
+    /// 序列化
+    pub fn to_bytes<T: ?Sized + serde::Serialize>(value: &T) -> Vec<u8> {
+        let mut bytes = vec![];
+        #[allow(clippy::unwrap_used)] // ? SAFETY
+        ciborium::ser::into_writer(value, &mut bytes).unwrap();
+        bytes
+    }
+
+    /// 序列化
+    pub fn from_bytes<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> T {
+        #[allow(clippy::expect_used)] // ? SAFETY
+        ciborium::de::from_reader(bytes).expect("deserialization must succeed.")
+    }
 }

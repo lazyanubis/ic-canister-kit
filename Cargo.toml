@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -47,7 +47,7 @@ stable = ["functions"] # 持久化相关
 call-once = ["common"]            # 调用一次
 schedule = ["functions", "times"] # 定时任务
 
-stable-structures = ["ic-stable-structures"] # 稳定内存
+stable-structures = ["ic-stable-structures", "ciborium"] # 稳定内存
 
 # # NFT相关
 # nft = ["identity"]   # NFT
@@ -77,3 +77,4 @@ base32 = { version = "0.4", optional = true } # base32 加密解密
 
 serde = { version = "1", optional = true, features = ["derive"] } # 序列化/反序列化框架
 serde_json = { version = "1", optional = true }                   # json
+ciborium = { version = " 0.2", optional = true }                  # 序列化/反序列化

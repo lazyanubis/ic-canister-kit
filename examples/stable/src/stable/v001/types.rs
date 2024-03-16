@@ -144,15 +144,11 @@ pub struct ExampleCell {
 
 impl Storable for ExampleCell {
     fn to_bytes(&self) -> Cow<[u8]> {
-        let mut bytes = vec![];
-        #[allow(clippy::unwrap_used)] // ? SAFETY
-        ciborium::ser::into_writer(&self, &mut bytes).unwrap();
-        Cow::Owned(bytes)
+        Cow::Owned(ic_canister_kit::functions::stable::common::to_bytes(self))
     }
 
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
-        #[allow(clippy::expect_used)] // ? SAFETY
-        ciborium::de::from_reader(&*bytes).expect("deserialization must succeed.")
+        ic_canister_kit::functions::stable::common::from_bytes(&bytes)
     }
 
     const BOUND: Bound = Bound::Unbounded;
