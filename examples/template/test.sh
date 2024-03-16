@@ -74,6 +74,11 @@ dfx deploy --argument "(null)" template
 template=$(canister_id "template")
 blue "Template Canister: $template"
 
+if [ -z "$stable" ]; then
+    say deploy failed
+    exit 1
+fi
+
 blue "1.1 permission permission_query"
 test "version" "$(dfx --identity alice canister call template version 2>&1)" '(1 : nat32)'
 test "permission_all" "$(dfx --identity alice canister call template permission_all 2>&1)" 'vec { variant { Forbidden = "PauseQuery" }; variant { Permitted = "PauseReplace" }'
