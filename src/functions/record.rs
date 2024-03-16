@@ -204,7 +204,7 @@ pub mod basic {
     impl Default for Records {
         fn default() -> Self {
             Self {
-                max: 1024 * 1024, // 假设一条占用 1KB 则最大 1GB 记录
+                max: 1024 * 256, // 假设一条占用 1KB 则最大 256MB 记录
                 removed: Default::default(),
                 next_id: Default::default(),
                 records: Default::default(),

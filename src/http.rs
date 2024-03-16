@@ -1,4 +1,4 @@
-use std::{borrow::Cow, collections::HashMap};
+use std::collections::HashMap;
 
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
@@ -21,11 +21,11 @@ pub const MAX_RESPONSE_LENGTH: usize = 1024 * 1024 * 3 - 1024 * 64;
 /// http 请求的结构体
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct CustomHttpRequest {
-    /// 请求类型
-    pub method: String,
-
     /// 请求路径
     pub url: String,
+
+    /// 请求类型
+    pub method: String,
 
     /// 请求头
     pub headers: HashMap<String, String>,
@@ -86,18 +86,21 @@ pub enum StreamingStrategy {
 
 /// http 响应的结构体
 #[derive(CandidType, Debug, Clone)]
-pub struct CustomHttpResponse<'a> {
+pub struct CustomHttpResponse {
     /// 响应状态码
     pub status_code: u16,
 
     /// 响应头
-    pub headers: HashMap<&'a str, Cow<'a, str>>,
+    pub headers: HashMap<String, String>,
 
     /// 响应体
-    pub body: Cow<'a, [u8]>,
+    pub body: Vec<u8>,
 
     /// 如果有额外的数据需要通过流的方式继续传输 每个 http 请求最大只能支持 3M 的响应数据，因此太大的话需要采用此种方式
     pub streaming_strategy: Option<StreamingStrategy>, // 如果需要使用流式响应
+
+    /// 升级
+    pub upgrade: Option<bool>,
 }
 
 // ====================== http 请求 ======================
