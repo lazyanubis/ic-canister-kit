@@ -9,6 +9,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
 
 [[package]]
+name = "app"
+version = "0.0.1"
+dependencies = [
+ "candid",
+ "ic-canister-kit",
+ "ic-cdk",
+ "serde",
+ "serde_json",
+ "strum",
+ "strum_macros",
+]
+
+[[package]]
 name = "arrayvec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -624,19 +637,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dbff4acf519f630b3a3ddcfaea6c06b42174d9a44bc70c620e9ed1649d58b82a"
 dependencies = [
  "version_check",
-]
-
-[[package]]
-name = "stable"
-version = "0.0.1"
-dependencies = [
- "candid",
- "ic-canister-kit",
- "ic-cdk",
- "serde",
- "serde_json",
- "strum",
- "strum_macros",
 ]
 
 [[package]]

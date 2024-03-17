@@ -1,5 +1,5 @@
 [package]
-name = "stable"   # 项目名
+name = "app"      # 项目名
 version = "0.0.1" # 版本
 edition = "2021"  # 大版本
 
