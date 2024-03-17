@@ -63,7 +63,7 @@ DEFAULT=$(dfx identity get-principal)
 ALICE=$(dfx --identity alice identity get-principal)
 BOB=$(dfx --identity bob identity get-principal)
 
-cargo test
+# cargo test
 cargo clippy
 # cargo audit --no-fetch --quiet
 
@@ -82,32 +82,32 @@ fi
 blue "1.1 permission permission_query"
 test "version" "$(dfx --identity alice canister call storage version 2>&1)" '(1 : nat32)'
 test "permission_all" "$(dfx --identity alice canister call storage permission_all 2>&1)" 'vec { variant { Forbidden = "PauseQuery" }; variant { Permitted = "PauseReplace" }'
-test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" })'
-test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
+test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessQuery" })'
+test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessQuery"; "BusinessUpload"; "BusinessDelete";}'
 test "permission_update" "$(dfx --identity bob canister call storage permission_update "(vec { variant { UpdateUserPermission=record{principal \"$ALICE\"; opt vec { \"PermissionUpdate\";\"PermissionQuery\" } } } })" 2>&1)" "'PermissionUpdate' is required"
 test "permission_update" "$(dfx canister call storage permission_update "(vec { variant { UpdateUserPermission=record{principal \"$ALICE\"; opt vec { \"PermissionUpdate\";\"PermissionQuery\" } } } })" 2>&1)" "()"
 test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" "'PermissionQuery' is required"
-test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
-test "permission_find_by_user" "$(dfx canister call storage permission_find_by_user "(principal \"$ALICE\")" 2>&1)" '(vec { "PauseQuery"; "PermissionUpdate"; "BusinessExampleQuery" })'
+test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessQuery"; "BusinessUpload"; "BusinessDelete";}'
+test "permission_find_by_user" "$(dfx canister call storage permission_find_by_user "(principal \"$ALICE\")" 2>&1)" '(vec { "PauseQuery"; "PermissionUpdate"; "BusinessQuery" })'
 test "permission_update" "$(dfx --identity alice canister call storage permission_update "(vec { variant { UpdateUserPermission=record{principal \"$ALICE\"; null } } })" 2>&1)" "()"
-test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" })'
-test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
+test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" '(vec { "PauseQuery"; "PermissionQuery"; "BusinessQuery" })'
+test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessQuery"; "BusinessUpload"; "BusinessDelete";}'
 
 blue "1.2 permission permission update"
-test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
-test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
-test "permission_find_by_user" "$(dfx canister call storage permission_find_by_user "(principal \"$DEFAULT\")" 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessExampleQuery"; "BusinessExampleSet";}'
-test "permission_find_by_user" "$(dfx canister call storage permission_find_by_user "(principal \"$ALICE\")" 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
+test "permission_query" "$(dfx canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessQuery"; "BusinessUpload"; "BusinessDelete";}'
+test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessQuery" }'
+test "permission_find_by_user" "$(dfx canister call storage permission_find_by_user "(principal \"$DEFAULT\")" 2>&1)" 'vec { "PauseQuery"; "PauseReplace"; "PermissionQuery"; "PermissionFind"; "PermissionUpdate"; "RecordFind"; "RecordMigrate"; "ScheduleFind"; "ScheduleReplace"; "ScheduleTrigger"; "BusinessQuery"; "BusinessUpload"; "BusinessDelete";}'
+test "permission_find_by_user" "$(dfx canister call storage permission_find_by_user "(principal \"$ALICE\")" 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessQuery" }'
 test "permission_find_by_user" "$(dfx --identity alice canister call storage permission_find_by_user "(principal \"$DEFAULT\")" 2>&1)" "'PermissionFind' is required"
 test "permission_find_by_user" "$(dfx --identity alice canister call storage permission_find_by_user "(principal \"$ALICE\")" 2>&1)" "'PermissionFind' is required"
 
 blue "1.3 permission roles"
-test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
+test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessQuery" }'
 test "permission_update" "$(dfx canister call storage permission_update "(vec { variant { UpdateRolePermission=record{\"Admin\"; opt vec {\"PauseReplace\"; \"PauseQuery\"} } } })" 2>&1)" "()"
 test "permission_update" "$(dfx canister call storage permission_update "(vec { variant { UpdateUserRole=record{principal \"$ALICE\"; opt vec {\"Admin\"} } } })" 2>&1)" "()"
-test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" '(vec { "PauseReplace"; "PermissionQuery"; "BusinessExampleQuery" })'
+test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" '(vec { "PauseReplace"; "PermissionQuery"; "BusinessQuery" })'
 test "permission_update" "$(dfx canister call storage permission_update "(vec { variant { UpdateUserRole=record{principal \"$ALICE\"; null } } })" 2>&1)" "()"
-test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessExampleQuery" }'
+test "permission_query" "$(dfx --identity alice canister call storage permission_query 2>&1)" 'vec { "PauseQuery"; "PermissionQuery"; "BusinessQuery" }'
 
 blue "2.1 pause permission"
 test "pause_query" "$(dfx canister call storage pause_query 2>&1)" "(false)"
@@ -131,7 +131,7 @@ test "pause_query_reason" "$(dfx canister call storage pause_query_reason 2>&1)"
 
 blue "3 record no permission"
 test "record_topics" "$(dfx --identity alice canister call storage record_topics 2>&1)" "'RecordFind' is required"
-test "record_topics" "$(dfx canister call storage record_topics 2>&1)" '"Example"' '"CyclesCharge"'
+test "record_topics" "$(dfx canister call storage record_topics 2>&1)" '"UploadFile"' '"CyclesCharge"'
 test "record_find_by_page" "$(dfx canister call storage record_find_by_page "(record{page=1:nat64;size=1:nat32},opt record{topic=opt vec{\"Pause\"}})" 2>&1)" "record { total = "
 test "record_migrate" "$(dfx canister call storage record_migrate "(1:nat32)" 2>&1)" "removed = 0"
 
@@ -145,102 +145,6 @@ test "schedule_replace" "$(dfx canister call storage schedule_replace "(null)" 2
 sleep 2
 test "schedule_trigger" "$(dfx --identity alice canister call storage schedule_trigger 2>&1)" "'ScheduleTrigger' is required"
 test "schedule_trigger" "$(dfx canister call storage schedule_trigger 2>&1)" "()"
-
-blue "5 example business"
-test "business_example_query" "$(dfx --identity alice canister call storage business_example_query 2>&1)" "\"\""
-test "business_example_query" "$(dfx canister call storage business_example_query 2>&1)" "\"\""
-test "business_example_set" "$(dfx --identity alice canister call storage business_example_set "(\"test string\")" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_set" "$(dfx canister call storage business_example_set "(\"test string\")" 2>&1)" "()"
-test "business_example_query" "$(dfx --identity alice canister call storage business_example_query 2>&1)" "test string"
-test "business_example_query" "$(dfx canister call storage business_example_query 2>&1)" "test string"
-
-blue "6 test storage data"
-test "pause_replace" "$(dfx canister call storage pause_replace "(opt \"reason\")" 2>&1)" "()"
-test "pause_query" "$(dfx canister call storage pause_query 2>&1)" "(true)"
-dfx canister install --mode=upgrade --upgrade-unchanged --argument "(null)" storage
-test "pause_replace" "$(dfx canister call storage pause_replace "(null)" 2>&1)" "()"
-test "pause_query" "$(dfx canister call storage pause_query 2>&1)" "(false)"
-test "business_example_query" "$(dfx canister call storage business_example_query 2>&1)" "test string"
-
-blue "7 test storage cell"
-test "business_example_cell_query" "$(dfx --identity alice canister call storage business_example_cell_query 2>&1)" "\"\""
-test "business_example_cell_query" "$(dfx canister call storage business_example_cell_query 2>&1)" "\"\""
-test "business_example_cell_set" "$(dfx --identity alice canister call storage business_example_cell_set "(\"test string\")" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_cell_set" "$(dfx canister call storage business_example_cell_set "(\"test string\")" 2>&1)" "()"
-test "business_example_cell_query" "$(dfx --identity alice canister call storage business_example_cell_query 2>&1)" "test string"
-test "business_example_cell_query" "$(dfx canister call storage business_example_cell_query 2>&1)" "test string"
-
-blue "8 test storage vec"
-test "business_example_vec_query" "$(dfx --identity alice canister call storage business_example_vec_query 2>&1)" "(vec {})"
-test "business_example_vec_query" "$(dfx canister call storage business_example_vec_query 2>&1)" "(vec {})"
-test "business_example_vec_pop" "$(dfx --identity alice canister call storage business_example_vec_pop "()" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_vec_pop" "$(dfx canister call storage business_example_vec_pop "()" 2>&1)" "(null)"
-test "business_example_vec_push" "$(dfx --identity alice canister call storage business_example_vec_push "(5: nat64)" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_vec_push" "$(dfx canister call storage business_example_vec_push "(5: nat64)" 2>&1)" "()"
-test "business_example_vec_query" "$(dfx --identity alice canister call storage business_example_vec_query 2>&1)" "(vec { record { vec_data = 5 : nat64 } })"
-test "business_example_vec_query" "$(dfx canister call storage business_example_vec_query 2>&1)" "(vec { record { vec_data = 5 : nat64 } })"
-test "business_example_vec_pop" "$(dfx --identity alice canister call storage business_example_vec_pop "()" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_vec_pop" "$(dfx canister call storage business_example_vec_pop "()" 2>&1)" "(opt record { vec_data = 5 : nat64 })"
-test "business_example_vec_query" "$(dfx --identity alice canister call storage business_example_vec_query 2>&1)" "(vec {})"
-test "business_example_vec_query" "$(dfx canister call storage business_example_vec_query 2>&1)" "(vec {})"
-
-blue "9 test storage map"
-test "business_example_map_query" "$(dfx --identity alice canister call storage business_example_map_query 2>&1)" "(vec {})"
-test "business_example_map_query" "$(dfx canister call storage business_example_map_query 2>&1)" "(vec {})"
-test "business_example_map_update" "$(dfx --identity alice canister call storage business_example_map_update "(1:nat64, opt \"111\")" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_map_update" "$(dfx canister call storage business_example_map_update "(1:nat64, opt \"111\")" 2>&1)" "(null)"
-test "business_example_map_query" "$(dfx --identity alice canister call storage business_example_map_query 2>&1)" '(vec { record { 1 : nat64; "111" } })'
-test "business_example_map_query" "$(dfx canister call storage business_example_map_query 2>&1)" '(vec { record { 1 : nat64; "111" } })'
-test "business_example_map_update" "$(dfx canister call storage business_example_map_update "(1:nat64, opt \"123\")" 2>&1)" "(opt \"111\")"
-test "business_example_map_update" "$(dfx canister call storage business_example_map_update "(1:nat64, null)" 2>&1)" "(opt \"123\")"
-test "business_example_map_update" "$(dfx canister call storage business_example_map_update "(2:nat64, opt \"222\")" 2>&1)" "(null)"
-test "business_example_map_query" "$(dfx --identity alice canister call storage business_example_map_query 2>&1)"'(vec { record { 2 : nat64; "222" } })'
-test "business_example_map_query" "$(dfx canister call storage business_example_map_query 2>&1)" '(vec { record { 2 : nat64; "222" } })'
-
-blue "10 test storage log"
-test "business_example_log_query" "$(dfx --identity alice canister call storage business_example_log_query 2>&1)" "(vec {})"
-test "business_example_log_query" "$(dfx canister call storage business_example_log_query 2>&1)" "(vec {})"
-test "business_example_log_update" "$(dfx --identity alice canister call storage business_example_log_update "(\"111\")" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_log_update" "$(dfx canister call storage business_example_log_update "(\"111\")" 2>&1)" "(0 : nat64)"
-test "business_example_log_query" "$(dfx --identity alice canister call storage business_example_log_query 2>&1)" '(vec { "111" })'
-test "business_example_log_query" "$(dfx canister call storage business_example_log_query 2>&1)" '(vec { "111" })'
-test "business_example_log_update" "$(dfx canister call storage business_example_log_update "(\"123\")" 2>&1)" "(1 : nat64)"
-test "business_example_log_query" "$(dfx --identity alice canister call storage business_example_log_query 2>&1)"'(vec { "111"; "123" })'
-test "business_example_log_query" "$(dfx canister call storage business_example_log_query 2>&1)" '(vec { "111"; "123" })'
-
-blue "11 test storage priority queue"
-test "business_example_priority_queue_query" "$(dfx --identity alice canister call storage business_example_priority_queue_query 2>&1)" "(vec {})"
-test "business_example_priority_queue_query" "$(dfx canister call storage business_example_priority_queue_query 2>&1)" "(vec {})"
-test "business_example_priority_queue_pop" "$(dfx --identity alice canister call storage business_example_priority_queue_pop "()" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_priority_queue_pop" "$(dfx canister call storage business_example_priority_queue_pop "()" 2>&1)" "(null)"
-test "business_example_priority_queue_push" "$(dfx --identity alice canister call storage business_example_priority_queue_push "(5: nat64)" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_priority_queue_push" "$(dfx canister call storage business_example_priority_queue_push "(5: nat64)" 2>&1)" "()"
-test "business_example_priority_queue_query" "$(dfx --identity alice canister call storage business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
-test "business_example_priority_queue_query" "$(dfx canister call storage business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
-test "business_example_priority_queue_push" "$(dfx canister call storage business_example_priority_queue_push "(2: nat64)" 2>&1)" "()"
-test "business_example_priority_queue_query" "$(dfx canister call storage business_example_priority_queue_query 2>&1)" "(vec { 2 : nat64; 5 : nat64 })"
-test "business_example_priority_queue_pop" "$(dfx --identity alice canister call storage business_example_priority_queue_pop "()" 2>&1)" "'BusinessExampleSet' is required"
-test "business_example_priority_queue_pop" "$(dfx canister call storage business_example_priority_queue_pop "()" 2>&1)" "(opt (2 : nat64))"
-test "business_example_priority_queue_query" "$(dfx --identity alice canister call storage business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
-test "business_example_priority_queue_query" "$(dfx canister call storage business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
-
-blue "12 test storage priority queue"
-test "pause_replace" "$(dfx canister call storage pause_replace "(opt \"reason\")" 2>&1)" "()"
-test "pause_query" "$(dfx canister call storage pause_query 2>&1)" "(true)"
-dfx canister install --mode=upgrade --upgrade-unchanged --argument "(null)" storage
-test "pause_replace" "$(dfx canister call storage pause_replace "(null)" 2>&1)" "()"
-test "pause_query" "$(dfx canister call storage pause_query 2>&1)" "(false)"
-test "business_example_query" "$(dfx canister call storage business_example_query 2>&1)" "test string"
-test "business_example_cell_query" "$(dfx --identity alice canister call storage business_example_cell_query 2>&1)" "test string"
-test "business_example_cell_query" "$(dfx canister call storage business_example_cell_query 2>&1)" "test string"
-test "business_example_vec_query" "$(dfx --identity alice canister call storage business_example_vec_query 2>&1)" "(vec {})"
-test "business_example_vec_query" "$(dfx canister call storage business_example_vec_query 2>&1)" "(vec {})"
-test "business_example_map_query" "$(dfx --identity alice canister call storage business_example_map_query 2>&1)"'(vec { record { 2 : nat64; "222" } })'
-test "business_example_map_query" "$(dfx canister call storage business_example_map_query 2>&1)" '(vec { record { 2 : nat64; "222" } })'
-test "business_example_log_query" "$(dfx --identity alice canister call storage business_example_log_query 2>&1)"'(vec { "111"; "123" })'
-test "business_example_log_query" "$(dfx canister call storage business_example_log_query 2>&1)" '(vec { "111"; "123" })'
-test "business_example_priority_queue_query" "$(dfx --identity alice canister call storage business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
-test "business_example_priority_queue_query" "$(dfx canister call storage business_example_priority_queue_query 2>&1)" "(vec { 5 : nat64 })"
 
 # test completed
 

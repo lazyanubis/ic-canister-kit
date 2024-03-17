@@ -4,51 +4,47 @@ use super::types::*;
 #[allow(clippy::panic)] // ? SAFETY
 #[allow(unused_variables)]
 impl Business for InnerState {
-    fn business_example_query(&self) -> String {
+    fn business_files(&self) -> Vec<crate::stable::QueryFile> {
         panic!("Not supported operation by this version.")
     }
-    fn business_example_update(&mut self, test: String) {
+    fn business_download(&self, path: String) -> Vec<u8> {
         panic!("Not supported operation by this version.")
     }
-
-    fn business_example_cell_query(&self) -> crate::stable::ExampleCell {
-        panic!("Not supported operation by this version.")
-    }
-    fn business_example_cell_update(&mut self, test: String) {
+    fn business_download_by(&self, path: String, offset: u64, offset_end: u64) -> Vec<u8> {
         panic!("Not supported operation by this version.")
     }
 
-    fn business_example_vec_query(&self) -> Vec<crate::stable::ExampleVec> {
-        panic!("Not supported operation by this version.")
-    }
-    fn business_example_vec_push(&mut self, test: u64) {
+    fn business_upload(&mut self, args: Vec<crate::stable::UploadingArg>) {
         panic!("Not supported operation by this version.")
     }
 
-    fn business_example_vec_pop(&mut self) -> Option<crate::stable::ExampleVec> {
-        panic!("Not supported operation by this version.")
-    }
-    fn business_example_map_query(&self) -> HashMap<u64, String> {
-        panic!("Not supported operation by this version.")
-    }
-    fn business_example_map_update(&mut self, key: u64, value: Option<String>) -> Option<String> {
+    fn business_delete(&mut self, names: Vec<String>) {
         panic!("Not supported operation by this version.")
     }
 
-    fn business_example_log_query(&self) -> Vec<String> {
+    fn business_assets_files(&self) -> &HashMap<String, crate::stable::AssetFile> {
         panic!("Not supported operation by this version.")
     }
-    fn business_example_log_update(&mut self, item: String) -> u64 {
+    fn business_assets_assets(
+        &self,
+    ) -> &StableBTreeMap<crate::stable::HashDigest, crate::stable::AssetData> {
         panic!("Not supported operation by this version.")
     }
 
-    fn business_example_priority_queue_query(&self) -> Vec<crate::stable::ExampleVec> {
+    fn business_assets_insert(
+        &mut self,
+        hash: crate::stable::HashDigest,
+        asset: crate::stable::AssetData,
+    ) {
         panic!("Not supported operation by this version.")
     }
-    fn business_example_priority_queue_push(&mut self, item: u64) {
+    fn business_assets_remove(&mut self, hash: &crate::stable::HashDigest) {
         panic!("Not supported operation by this version.")
     }
-    fn business_example_priority_queue_pop(&mut self) -> Option<crate::stable::ExampleVec> {
+    fn business_assets_get(
+        &self,
+        hash: &crate::stable::HashDigest,
+    ) -> Option<crate::stable::AssetData> {
         panic!("Not supported operation by this version.")
     }
 }

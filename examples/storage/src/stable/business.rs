@@ -17,74 +17,56 @@ pub trait Business:
     + ScheduleTask
     + StorableHeapData
 {
-    fn business_example_query(&self) -> String;
-    fn business_example_update(&mut self, test: String);
+    fn business_files(&self) -> Vec<QueryFile>;
+    fn business_download(&self, path: String) -> Vec<u8>;
+    fn business_download_by(&self, path: String, offset: u64, offset_end: u64) -> Vec<u8>;
 
-    fn business_example_cell_query(&self) -> ExampleCell;
-    fn business_example_cell_update(&mut self, test: String);
+    fn business_upload(&mut self, args: Vec<UploadingArg>);
 
-    fn business_example_vec_query(&self) -> Vec<ExampleVec>;
-    fn business_example_vec_push(&mut self, test: u64);
-    fn business_example_vec_pop(&mut self) -> Option<ExampleVec>;
+    fn business_delete(&mut self, names: Vec<String>);
 
-    fn business_example_map_query(&self) -> HashMap<u64, String>;
-    fn business_example_map_update(&mut self, key: u64, value: Option<String>) -> Option<String>;
+    fn business_assets_files(&self) -> &HashMap<String, AssetFile>;
+    fn business_assets_assets(&self) -> &StableBTreeMap<HashDigest, AssetData>;
 
-    fn business_example_log_query(&self) -> Vec<String>;
-    fn business_example_log_update(&mut self, item: String) -> u64;
-
-    fn business_example_priority_queue_query(&self) -> Vec<ExampleVec>;
-    fn business_example_priority_queue_push(&mut self, item: u64);
-    fn business_example_priority_queue_pop(&mut self) -> Option<ExampleVec>;
+    fn business_assets_insert(&mut self, hash: HashDigest, asset: AssetData);
+    fn business_assets_remove(&mut self, hash: &HashDigest);
+    fn business_assets_get(&self, hash: &HashDigest) -> Option<AssetData>;
 }
 
 // 业务实现
 impl Business for State {
-    fn business_example_query(&self) -> String {
-        self.get().business_example_query()
+    fn business_files(&self) -> Vec<QueryFile> {
+        self.get().business_files()
     }
-    fn business_example_update(&mut self, test: String) {
-        self.get_mut().business_example_update(test)
+    fn business_download(&self, path: String) -> Vec<u8> {
+        self.get().business_download(path)
     }
-
-    fn business_example_cell_query(&self) -> ExampleCell {
-        self.get().business_example_cell_query()
-    }
-    fn business_example_cell_update(&mut self, test: String) {
-        self.get_mut().business_example_cell_update(test)
+    fn business_download_by(&self, path: String, offset: u64, offset_end: u64) -> Vec<u8> {
+        self.get().business_download_by(path, offset, offset_end)
     }
 
-    fn business_example_vec_query(&self) -> Vec<ExampleVec> {
-        self.get().business_example_vec_query()
-    }
-    fn business_example_vec_push(&mut self, test: u64) {
-        self.get_mut().business_example_vec_push(test)
-    }
-    fn business_example_vec_pop(&mut self) -> Option<ExampleVec> {
-        self.get_mut().business_example_vec_pop()
+    fn business_upload(&mut self, args: Vec<UploadingArg>) {
+        self.get_mut().business_upload(args)
     }
 
-    fn business_example_map_query(&self) -> HashMap<u64, String> {
-        self.get().business_example_map_query()
-    }
-    fn business_example_map_update(&mut self, key: u64, value: Option<String>) -> Option<String> {
-        self.get_mut().business_example_map_update(key, value)
+    fn business_delete(&mut self, names: Vec<String>) {
+        self.get_mut().business_delete(names)
     }
 
-    fn business_example_log_query(&self) -> Vec<String> {
-        self.get().business_example_log_query()
+    fn business_assets_files(&self) -> &HashMap<String, AssetFile> {
+        self.get().business_assets_files()
     }
-    fn business_example_log_update(&mut self, item: String) -> u64 {
-        self.get_mut().business_example_log_update(item)
+    fn business_assets_assets(&self) -> &StableBTreeMap<HashDigest, AssetData> {
+        self.get().business_assets_assets()
     }
 
-    fn business_example_priority_queue_query(&self) -> Vec<ExampleVec> {
-        self.get().business_example_priority_queue_query()
+    fn business_assets_insert(&mut self, hash: HashDigest, asset: AssetData) {
+        self.get_mut().business_assets_insert(hash, asset);
     }
-    fn business_example_priority_queue_push(&mut self, item: u64) {
-        self.get_mut().business_example_priority_queue_push(item)
+    fn business_assets_remove(&mut self, hash: &HashDigest) {
+        self.get_mut().business_assets_remove(hash)
     }
-    fn business_example_priority_queue_pop(&mut self) -> Option<ExampleVec> {
-        self.get_mut().business_example_priority_queue_pop()
+    fn business_assets_get(&self, hash: &HashDigest) -> Option<AssetData> {
+        self.get().business_assets_get(hash)
     }
 }
