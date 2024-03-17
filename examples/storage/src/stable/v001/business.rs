@@ -27,7 +27,7 @@ impl Business for InnerState {
     }
 
     fn business_assets_files(&self) -> &HashMap<String, AssetFile> {
-        &self.heap.business.files
+        &self.heap_state.business.files
     }
     fn business_assets_assets(&self) -> &StableBTreeMap<HashDigest, AssetData> {
         &self.stable_business.assets

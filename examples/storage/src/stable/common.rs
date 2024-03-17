@@ -66,7 +66,7 @@ fn initial(arg: Option<CanisterInitialArg>) {
 fn post_upgrade() {
     STATE.with(|state| {
         // restore data
-        let memory = ic_canister_kit::functions::stable::get_upgrades_memory();
+        let memory = ic_canister_kit::stable::get_upgrades_memory();
 
         let mut memory = ReadUpgradeMemory::new(&memory);
 
@@ -79,7 +79,7 @@ fn post_upgrade() {
 
         // 利用版本号恢复升级前的版本
         let mut last_state = State::from_version(version);
-        last_state.heap_data_from_bytes(&bytes); // 恢复数据
+        last_state.heap_from_bytes(&bytes); // 恢复数据
 
         *state.borrow_mut() = last_state;
 
@@ -110,13 +110,13 @@ fn pre_upgrade() {
             format!("Upgrade by {}", caller.to_text()),
         );
 
-        let mut memory = ic_canister_kit::functions::stable::get_upgrades_memory();
+        let mut memory = ic_canister_kit::stable::get_upgrades_memory();
         let mut memory = WriteUpgradeMemory::new(&mut memory);
 
         memory.write_u64(record_id.into_inner()); // store record id
         memory.write_u32(state.borrow().version()); // store version
 
-        let bytes = state.borrow().heap_data_to_bytes();
+        let bytes = state.borrow().heap_to_bytes();
         let length = bytes.len();
 
         memory.write_u64(length as u64); // store heap data length
@@ -296,12 +296,12 @@ pub trait ScheduleTask: Schedulable {
 
 impl ScheduleTask for State {}
 
-impl StorableHeapData for State {
-    fn heap_data_to_bytes(&self) -> Vec<u8> {
-        self.get().heap_data_to_bytes()
+impl StableHeap for State {
+    fn heap_to_bytes(&self) -> Vec<u8> {
+        self.get().heap_to_bytes()
     }
 
-    fn heap_data_from_bytes(&mut self, bytes: &[u8]) {
-        self.get_mut().heap_data_from_bytes(bytes)
+    fn heap_from_bytes(&mut self, bytes: &[u8]) {
+        self.get_mut().heap_from_bytes(bytes)
     }
 }

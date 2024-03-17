@@ -19,9 +19,4 @@ pub use super::record::{
     MigratedRecords, RecordId, Recordable, Searchable,
 };
 
-#[cfg(feature = "stable-structures")]
-pub use super::stable::{
-    Bound, Cow, Memory, MemoryId, ReadUpgradeMemory, StableBTreeMap, StableCell, StableLog,
-    StablePriorityQueue, StableVec, Storable, StorableHeapData, VirtualMemory, WriteUpgradeMemory,
-    Writer,
-};
+pub use super::stable::StableHeap;

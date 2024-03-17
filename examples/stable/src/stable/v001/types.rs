@@ -53,8 +53,12 @@ impl RecordTopics {
 }
 
 pub struct InnerState {
-    pub heap: HeapData, // 保存在堆内存上的数据 最大 4G
+    // ? 堆内存 不需要序列化的数据
 
+    // ? 堆内存 需要序列化的数据
+    pub heap_state: HeapState,
+
+    // ? 稳定内存
     // ! 大的业务数据可以放这里
     pub example_cell: StableCell<ExampleCell>,
     pub example_vec: StableVec<ExampleVec>,
@@ -63,11 +67,11 @@ pub struct InnerState {
     pub example_priority_queue: StablePriorityQueue<ExampleVec>,
 }
 
-#[allow(clippy::derivable_impls)]
 impl Default for InnerState {
     fn default() -> Self {
+        ic_cdk::println!("InnerState::default()");
         InnerState {
-            heap: HeapData::default(),
+            heap_state: HeapState::default(),
 
             example_cell: init_example_cell_data(),
             example_vec: init_example_vec_data(),
@@ -79,13 +83,12 @@ impl Default for InnerState {
 }
 
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
-pub struct HeapData {
+pub struct HeapState {
     pub pause: Pause,             // 记录维护状态
     pub permissions: Permissions, // 记录自身权限
     pub records: Records,         // 记录操作记录
     pub schedule: Schedule,       // 记录定时任务
-
-    // ! 小的业务数据可以放这里
+    // 记录业务数据 // ! 小的业务数据可以放这里
     pub business: InnerBusiness,
 }
 
@@ -94,7 +97,7 @@ pub struct InnerBusiness {
     pub example_data: String,
 }
 
-use ic_canister_kit::functions::stable;
+use ic_canister_kit::stable;
 
 const MEMORY_ID_EXAMPLE_CELL: MemoryId = MemoryId::new(0); // 测试 Cell
 const MEMORY_ID_EXAMPLE_VEC: MemoryId = MemoryId::new(1); // 测试 Vec
@@ -130,11 +133,11 @@ pub struct ExampleCell {
 
 impl Storable for ExampleCell {
     fn to_bytes(&self) -> Cow<[u8]> {
-        Cow::Owned(ic_canister_kit::functions::stable::common::to_bytes(self))
+        Cow::Owned(ic_canister_kit::functions::stable::to_bytes(self))
     }
 
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
-        ic_canister_kit::functions::stable::common::from_bytes(&bytes)
+        ic_canister_kit::functions::stable::from_bytes(&bytes)
     }
 
     const BOUND: Bound = Bound::Unbounded;
@@ -148,13 +151,13 @@ pub struct ExampleVec {
 impl Storable for ExampleVec {
     fn to_bytes(&self) -> Cow<[u8]> {
         let mut bytes = vec![];
-        ic_canister_kit::functions::stable::common::u64_to_bytes(&mut bytes, self.vec_data);
+        ic_canister_kit::stable::common::u64_to_bytes(&mut bytes, self.vec_data);
         Cow::Owned(bytes)
     }
 
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
         Self {
-            vec_data: ic_canister_kit::functions::stable::common::u64_from_bytes(&bytes),
+            vec_data: ic_canister_kit::stable::common::u64_from_bytes(&bytes),
         }
     }
 

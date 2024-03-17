@@ -47,20 +47,24 @@ impl RecordTopics {
 }
 
 pub struct InnerState {
-    pub heap: HeapData, // 保存在堆内存上的数据 最大 4G
+    // ? 堆内存 不需要序列化的数据
+
+    // ? 堆内存 需要序列化的数据
+    pub heap_state: HeapState,
+    // ? 稳定内存
 }
 
-#[allow(clippy::derivable_impls)]
 impl Default for InnerState {
     fn default() -> Self {
-        InnerState {
-            heap: HeapData::default(),
+        ic_cdk::println!("InnerState::default()");
+        Self {
+            heap_state: Default::default(),
         }
     }
 }
 
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
-pub struct HeapData {
+pub struct HeapState {
     pub pause: Pause,             // 记录维护状态
     pub permissions: Permissions, // 记录自身权限
     pub records: Records,         // 记录操作记录

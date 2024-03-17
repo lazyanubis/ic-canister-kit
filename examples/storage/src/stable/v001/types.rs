@@ -49,17 +49,21 @@ impl RecordTopics {
 }
 
 pub struct InnerState {
-    pub heap: HeapData, // 保存在堆内存上的数据 最大 4G
+    // ? 堆内存 不需要序列化的数据
 
+    // ? 堆内存 需要序列化的数据
+    pub heap_state: HeapState,
+
+    // ? 稳定内存
     // ! 大的业务数据可以放这里
     pub stable_business: StableBusiness,
 }
 
-#[allow(clippy::derivable_impls)]
 impl Default for InnerState {
     fn default() -> Self {
+        ic_cdk::println!("InnerState::default()");
         InnerState {
-            heap: HeapData::default(),
+            heap_state: HeapState::default(),
 
             stable_business: StableBusiness::default(),
         }
@@ -67,7 +71,7 @@ impl Default for InnerState {
 }
 
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
-pub struct HeapData {
+pub struct HeapState {
     pub pause: Pause,             // 记录维护状态
     pub permissions: Permissions, // 记录自身权限
     pub records: Records,         // 记录操作记录
@@ -86,28 +90,13 @@ pub struct InnerBusiness {
     uploading: HashMap<String, UploadingFile>, // key 是 path
 }
 
-use ic_canister_kit::functions::stable;
+use ic_canister_kit::stable;
 
 const MEMORY_ID_ASSETS: MemoryId = MemoryId::new(0); // 存放实际文件，hash 为键
-                                                     // const MEMORY_ID_FILES: MemoryId = MemoryId::new(1); // 存放文件描述信息，path 为键
-                                                     // const MEMORY_ID_HASHES: MemoryId = MemoryId::new(2); //
-                                                     // const MEMORY_ID_UPLOAD_FILES: MemoryId = MemoryId::new(3); // 测试 Log
 
 fn init_assets_data() -> StableBTreeMap<HashDigest, AssetData> {
     stable::init_map_data(MEMORY_ID_ASSETS)
 }
-
-// fn init_files_data() -> StableBTreeMap<String, AssetFile> {
-//     stable::init_map_data(MEMORY_ID_FILES)
-// }
-
-// fn init_hashes_data() -> StableBTreeMap<HashDigest, HashedPath> {
-//     stable::init_map_data(MEMORY_ID_HASHES)
-// }
-
-// fn init_upload_files_data() -> StableBTreeMap<String, UploadingFile> {
-//     stable::init_map_data(MEMORY_ID_UPLOAD_FILES)
-// }
 
 pub struct StableBusiness {
     pub assets: StableBTreeMap<HashDigest, AssetData>, // key 是 hash
@@ -140,11 +129,11 @@ impl Storable for HashDigest {
 
 impl Storable for AssetData {
     fn to_bytes(&self) -> Cow<[u8]> {
-        Cow::Owned(ic_canister_kit::functions::stable::common::to_bytes(self))
+        Cow::Owned(ic_canister_kit::functions::stable::to_bytes(self))
     }
 
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
-        ic_canister_kit::functions::stable::common::from_bytes(&bytes)
+        ic_canister_kit::functions::stable::from_bytes(&bytes)
     }
 
     const BOUND: Bound = Bound::Unbounded;
@@ -244,12 +233,12 @@ impl InnerState {
         );
         // 3. 插入 files: path -> hash
         let now = ic_canister_kit::times::now();
-        if let Some(exist) = self.heap.business.files.get_mut(&file.path) {
+        if let Some(exist) = self.heap_state.business.files.get_mut(&file.path) {
             exist.modified = now;
             exist.headers = file.headers;
             exist.hash = hash;
         } else {
-            self.heap.business.files.insert(
+            self.heap_state.business.files.insert(
                 file.path.clone(),
                 AssetFile {
                     path: file.path.clone(),
@@ -263,8 +252,8 @@ impl InnerState {
         }
 
         // 4. 插入 hashes: hash -> [path]
-        self.heap.business.hashes.entry(hash).or_default();
-        if let Some(hash_path) = self.heap.business.hashes.get_mut(&hash) {
+        self.heap_state.business.hashes.entry(hash).or_default();
+        if let Some(hash_path) = self.heap_state.business.hashes.get_mut(&hash) {
             if !hash_path.0.contains(&file.path) {
                 hash_path.0.insert(file.path);
             }
@@ -272,25 +261,25 @@ impl InnerState {
     }
     pub fn clean_file(&mut self, path: &String) {
         // 1. 找到文件
-        let file = match self.heap.business.files.get(path) {
+        let file = match self.heap_state.business.files.get(path) {
             Some(file) => file.clone(),
             None => return,
         };
         // 2. 清除 file
-        self.heap.business.files.remove(path);
+        self.heap_state.business.files.remove(path);
         // 3. 清除 hashes
-        if let Some(HashedPath(path_set)) = self.heap.business.hashes.get_mut(&file.hash) {
+        if let Some(HashedPath(path_set)) = self.heap_state.business.hashes.get_mut(&file.hash) {
             path_set.remove(&file.path);
             if path_set.is_empty() {
                 // 需要清空
-                self.heap.business.hashes.remove(&file.hash);
+                self.heap_state.business.hashes.remove(&file.hash);
                 // 4. 清空 assets
                 self.business_assets_remove(&file.hash);
             }
         }
     }
     pub fn files(&self) -> Vec<QueryFile> {
-        self.heap
+        self.heap_state
             .business
             .files
             .iter()
@@ -309,7 +298,12 @@ impl InnerState {
     }
     pub fn download(&self, path: String) -> Vec<u8> {
         #[allow(clippy::expect_used)] // ? SAFETY
-        let file = self.heap.business.files.get(&path).expect("File not found");
+        let file = self
+            .heap_state
+            .business
+            .files
+            .get(&path)
+            .expect("File not found");
         #[allow(clippy::expect_used)] // ? SAFETY
         let asset = self
             .business_assets_get(&file.hash)
@@ -318,7 +312,12 @@ impl InnerState {
     }
     pub fn download_by(&self, path: String, offset: u64, offset_end: u64) -> Vec<u8> {
         #[allow(clippy::expect_used)] // ? SAFETY
-        let file = self.heap.business.files.get(&path).expect("File not found");
+        let file = self
+            .heap_state
+            .business
+            .files
+            .get(&path)
+            .expect("File not found");
         #[allow(clippy::expect_used)] // ? SAFETY
         let asset = self
             .business_assets_get(&file.hash)
@@ -374,7 +373,7 @@ impl InnerState {
         }
     }
     fn check_file(&mut self, arg: &UploadingArg) {
-        if let Some(file) = self.heap.business.uploading.get(&arg.path) {
+        if let Some(file) = self.heap_state.business.uploading.get(&arg.path) {
             // 已经有这个文件了, 需要比较一下, 参数是否一致
             assert!(arg.path == file.path, "wrong path, system error.");
             let chunks = Self::chunks(arg);
@@ -385,12 +384,12 @@ impl InnerState {
                 || file.chunked.len() < file.chunks as usize
             {
                 // 非致命错误, 清空原来的文件就好
-                self.heap.business.files.remove(&arg.path);
+                self.heap_state.business.files.remove(&arg.path);
             }
         } else {
             // 原来没有的情况下
             let chunks = Self::chunks(arg);
-            self.heap.business.uploading.insert(
+            self.heap_state.business.uploading.insert(
                 arg.path.clone(),
                 UploadingFile {
                     path: arg.path.clone(),
@@ -413,7 +412,7 @@ impl InnerState {
 
         // 2. 找的对应的缓存文件
         let mut done = false;
-        if let Some(file) = self.heap.business.uploading.get_mut(&arg.path) {
+        if let Some(file) = self.heap_state.business.uploading.get_mut(&arg.path) {
             // 3. 复制有效的信息
             let (offset, offset_end) = Self::offset(&arg);
             file.headers = arg.headers;
@@ -429,12 +428,12 @@ impl InnerState {
             done = true; // 已经完成的
         }
         if done {
-            if let Some(file) = self.heap.business.uploading.remove(&arg.path) {
+            if let Some(file) = self.heap_state.business.uploading.remove(&arg.path) {
                 self.put_file(file);
             }
         }
     }
     pub fn clean_uploading(&mut self, path: &String) {
-        self.heap.business.files.remove(path);
+        self.heap_state.business.files.remove(path);
     }
 }

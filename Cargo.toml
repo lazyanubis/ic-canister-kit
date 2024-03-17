@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -30,7 +30,6 @@ default = [
     "ecdsa",
     "bitcoin",
     "functions",
-    "stable",
 ]
 common = ["candid"] # 通用工具
 times = ["ic-cdk"] # 时间相关
@@ -41,13 +40,12 @@ token = ["canister", "ic-ledger-types"] # 代币标准
 http = ["canister", "serde", "serde_json"] # http 相关
 ecdsa = ["canister"] # ecdsa 相关
 bitcoin = ["canister"] # bitcoin 相关
-functions = ["times", "ic-cdk-timers"] # functions 相关
-stable = ["functions"] # 持久化相关
+functions = ["times", "ic-cdk-timers", "ciborium"] # functions 相关
 
 call-once = ["common"]            # 调用一次
 schedule = ["functions", "times"] # 定时任务
 
-stable-structures = ["ic-stable-structures", "ciborium"] # 稳定内存
+stable = ["functions", "ic-stable-structures"] # 稳定内存
 
 # # NFT相关
 # nft = ["identity"]   # NFT

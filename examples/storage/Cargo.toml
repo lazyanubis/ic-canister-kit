@@ -33,7 +33,7 @@ serde_json = "1"                                 # json
 ic-canister-kit = { path = "../..", features = [
     "call-once",
     "schedule",
-    "stable-structures",
+    "stable",
 ] }
 
 strum = "0.26"

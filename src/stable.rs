@@ -1,121 +1,196 @@
 use std::cell::RefCell;
 
-use crate::functions::types::RecordId;
+use ic_stable_structures::{memory_manager::MemoryManager, DefaultMemoryImpl};
 
-// 持久化相关接口
-// ! 如果通过其他方式，比如 ic-stable-structures，使用了持久化内存，则不能够使用下面传统的方式进行升级持久化
+/// 简化虚拟内存
+pub type VirtualMemory =
+    ic_stable_structures::memory_manager::VirtualMemory<ic_stable_structures::DefaultMemoryImpl>;
+pub use ic_stable_structures::memory_manager::MemoryId;
+pub use ic_stable_structures::storable::Bound;
+pub use ic_stable_structures::writer::Writer;
+pub use ic_stable_structures::Memory;
+pub use ic_stable_structures::Storable;
+pub use std::borrow::Cow;
 
-/// 升级后恢复
-pub fn restore_after_upgrade<R>(state: &RefCell<R>) -> Option<RecordId>
-where
-    R: candid::CandidType + for<'d> serde::Deserialize<'d>,
-{
-    let mut state = state.borrow_mut();
-    #[allow(clippy::unwrap_used)] // ? checked
-    let (stable_state, record_id): (R, Option<RecordId>) =
-        ic_cdk::storage::stable_restore().unwrap();
-    *state = stable_state;
-    record_id
-}
-
-/// 升级前保存
-pub fn store_before_upgrade<S>(state: &RefCell<S>, record_id: Option<RecordId>)
-where
-    S: candid::CandidType + Default,
-{
-    let stable_state: S = std::mem::take(&mut *state.borrow_mut());
-    #[allow(clippy::unwrap_used)] // ? checked
-    ic_cdk::storage::stable_save((stable_state, record_id)).unwrap();
-}
-
-/*
-
-引入包后, 直接使用如下代码即可拥有可恢复数据对象
-
-
-// ================= 需要持久化的数据 ================
+/// 稳定对象
+/// ! 读取和写入都是全量操作，成本比较大
+pub type StableCell<T> = ic_stable_structures::Cell<T, VirtualMemory>;
+/// 稳定列表
+/// ! 存储有限长度数据，若不固定长度，则按照最大长度存储，不均匀的数据使用空间浪费比较严重
+/// ! push 和 pop 没有任意位置删除的功能
+/// ! 若不在乎顺序，则移动末尾元素到被删除的位置可实现任意删除。结合 StableBTreeMap 存储双向的缩影数据，可实现任意位置删除。
+/// ! 最大的问题还是数据长度问题，任意删除功能不是核心难题。
+pub type StableVec<T> = ic_stable_structures::Vec<T, VirtualMemory>;
+/// 稳定映射
+pub type StableBTreeMap<K, V> = ic_stable_structures::BTreeMap<K, V, VirtualMemory>;
+/// 稳定日志
+/// ! 支持变长 无法删除和移动
+pub type StableLog<T> = ic_stable_structures::Log<T, VirtualMemory, VirtualMemory>;
+/// 稳定优先级队列 按照排序方式存放数据
+/// ! 内部使用 vec 方式实现，优缺点一致
+pub type StablePriorityQueue<T> = ic_stable_structures::MinHeap<T, VirtualMemory>;
 
 thread_local! {
-    // 存储系统数据
-    static STATE: RefCell<State> = RefCell::default();
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
 }
 
-// ==================== 升级时的恢复逻辑 ====================
+const MEMORY_ID_UPGRADED: MemoryId = MemoryId::new(254);
 
-#[ic_cdk::post_upgrade]
-fn post_upgrade() {
-    STATE.with(|state| {
-        let record_id = ic_canister_kit::stable::restore_after_upgrade(state);
-        state.borrow_mut().upgrade(); // ! 恢复后要进行升级到最新版本
-        let schedule = state.borrow().schedule_find();
-        state.borrow_mut().init(CanisterInitialArg { schedule }); // ! 升级到最新版本后, 需要执行初始化操作
-        state.borrow_mut().schedule_reload(); // * 重置定时任务
-        let version = state.borrow().version();
-        if let Some(record_id) = record_id {
-            state
-                .borrow_mut()
-                .record_update(record_id, format!("Next version: {}", version));
+/// 获取虚拟内存
+#[inline]
+pub fn get_virtual_memory(memory_id: MemoryId) -> VirtualMemory {
+    MEMORY_MANAGER.with(|memory_manager| memory_manager.borrow().get(memory_id))
+}
+
+/// 获取升级用的虚拟内存
+#[inline]
+pub fn get_upgrades_memory() -> VirtualMemory {
+    get_virtual_memory(MEMORY_ID_UPGRADED)
+}
+
+/// 初始化内存
+pub fn init_cell_data<T: Storable>(memory_id: MemoryId, default: T) -> StableCell<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableCell::init(get_virtual_memory(memory_id), default).expect("failed to initialize")
+}
+/// 初始化内存
+pub fn init_vec_data<T: Storable>(memory_id: MemoryId) -> StableVec<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableVec::init(get_virtual_memory(memory_id)).expect("failed to initialize")
+}
+/// 初始化内存
+pub fn init_map_data<K: Storable + Ord + Clone, V: Storable>(
+    memory_id: MemoryId,
+) -> StableBTreeMap<K, V> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableBTreeMap::init(get_virtual_memory(memory_id))
+}
+/// 初始化内存
+pub fn init_log_data<T: Storable>(
+    id_memory_id: MemoryId,
+    data_memory_id: MemoryId,
+) -> StableLog<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StableLog::init(
+        get_virtual_memory(id_memory_id),
+        get_virtual_memory(data_memory_id),
+    )
+    .expect("failed to initialize")
+}
+/// 初始化内存
+pub fn init_priority_queue_data<T: Storable + PartialOrd>(
+    memory_id: MemoryId,
+) -> StablePriorityQueue<T> {
+    #[allow(clippy::expect_used)] // ? SAFETY
+    StablePriorityQueue::init(get_virtual_memory(memory_id)).expect("failed to initialize")
+}
+
+/// 包装升级内存
+pub struct WriteUpgradeMemory<'a, M> {
+    writer: Writer<'a, M>,
+}
+
+/// 包装升级内存
+pub struct ReadUpgradeMemory<'a, M> {
+    memory: &'a M,
+    offset: u64,
+}
+
+impl<'a, M: Memory> WriteUpgradeMemory<'a, M> {
+    /// 构造升级对象
+    pub fn new(memory: &'a mut M) -> WriteUpgradeMemory<'a, M> {
+        Self {
+            writer: Writer::new(memory, 0),
         }
-    });
+    }
+
+    /// 写入升级数据
+    pub fn write(&mut self, bytes: &[u8]) {
+        #[allow(clippy::expect_used)] // ? SAFETY
+        self.writer
+            .write(bytes)
+            .expect("failed to write to upgrade memory");
+    }
+
+    /// 写入 u32
+    pub fn write_u32(&mut self, value: u32) {
+        let mut bytes = Vec::with_capacity(4);
+        common::u32_to_bytes(&mut bytes, value);
+        self.write(&bytes);
+    }
+
+    /// 写入 u64
+    pub fn write_u64(&mut self, value: u64) {
+        let mut bytes = Vec::with_capacity(8);
+        common::u64_to_bytes(&mut bytes, value);
+        self.write(&bytes);
+    }
 }
 
-// ==================== 升级时的保存逻辑，下次升级执行 ====================
+impl<'a, M: Memory> ReadUpgradeMemory<'a, M> {
+    /// 构造升级对象
+    pub fn new(memory: &'a M) -> ReadUpgradeMemory<'a, M> {
+        Self { memory, offset: 0 }
+    }
 
-#[ic_cdk::pre_upgrade]
-fn pre_upgrade() {
-    STATE.with(|state| {
-        #[allow(clippy::unwrap_used)] // ? checked
-        state.borrow().pause_must_be_paused().unwrap(); // ! 必须是维护状态, 才可以升级
-        state.borrow_mut().schedule_stop(); // * 停止定时任务
-        ic_canister_kit::stable::store_before_upgrade(state);
-        let record_id = state.borrow_mut().record_push(
-            caller,
-            RecordTopics::Upgrade.topic(),
-            format!("Upgrade by {}", caller.to_text()),
-        );
-        ic_canister_kit::stable::store_before_upgrade(state, Some(record_id));
-    });
+    /// 读取升级数据
+    pub fn read(&mut self, bytes: &mut [u8]) {
+        self.memory.read(self.offset, bytes);
+        self.offset += bytes.len() as u64;
+    }
+
+    /// 读取 u32
+    pub fn read_u32(&mut self) -> u32 {
+        let mut bytes = [0; 4];
+        self.read(&mut bytes);
+        common::u32_from_bytes(&bytes)
+    }
+
+    /// 读取 u64
+    pub fn read_u64(&mut self) -> u64 {
+        let mut bytes = [0; 8];
+        self.read(&mut bytes);
+        common::u64_from_bytes(&bytes)
+    }
 }
 
-// ==================== 工具方法 ====================
+/// 一些可能用到的工具方法
+pub mod common {
+    use super::*;
 
-/// 外界需要系统状态时
-#[allow(unused)]
-pub fn with_state<F, R>(callback: F) -> R
-where
-    F: FnOnce(&State) -> R,
-{
-    STATE.with(|_state| {
-        let state = _state.borrow(); // 取得不可变对象
-        callback(&state)
-    })
+    /// usize -> 4 bytes
+    #[inline]
+    pub fn usize_to_4bytes(buf: &mut Vec<u8>, value: usize) {
+        buf.extend(&(value as u32).to_bytes()[..]);
+    }
+
+    /// 4 bytes -> usize
+    #[inline]
+    pub fn usize_from_4bytes(bytes: &[u8]) -> usize {
+        u32::from_bytes(Cow::Borrowed(&bytes[..4])) as usize
+    }
+
+    /// u32 -> 4 bytes
+    #[inline]
+    pub fn u32_to_bytes(buf: &mut Vec<u8>, value: u32) {
+        buf.extend(&value.to_bytes()[..]);
+    }
+
+    /// 4 bytes -> u32
+    #[inline]
+    pub fn u32_from_bytes(bytes: &[u8]) -> u32 {
+        u32::from_bytes(Cow::Borrowed(&bytes[..4]))
+    }
+
+    /// u64 -> 8 bytes
+    #[inline]
+    pub fn u64_to_bytes(buf: &mut Vec<u8>, value: u64) {
+        buf.extend(&value.to_bytes()[..]);
+    }
+
+    /// 8 bytes -> u64
+    #[inline]
+    pub fn u64_from_bytes(bytes: &[u8]) -> u64 {
+        u64::from_bytes(Cow::Borrowed(&bytes[..8]))
+    }
 }
-
-/// 需要可变系统状态时
-#[allow(unused)]
-pub fn with_mut_state_without_record<F, R>(callback: F) -> R
-where
-    F: FnOnce(&mut State) -> R,
-{
-    STATE.with(|state| {
-        let mut state = state.borrow_mut(); // 取得可变对象
-        callback(&mut state)
-    })
-}
-
-/// 需要可变系统状态时 // ! 变更操作一定要记录
-#[allow(unused)]
-pub fn with_mut_state<F, R>(callback: F, caller: CallerId, topic: RecordTopic, content: String) -> R
-where
-    F: FnOnce(&mut State) -> (Option<String>, R),
-{
-    STATE.with(|state| {
-        let mut state = state.borrow_mut(); // 取得可变对象
-        let record_id = state.record_push(caller, topic, content);
-        let (done, result) = callback(&mut state);
-        state.record_update(record_id, done.unwrap_or_default());
-        result
-    })
-}
-
-*/
