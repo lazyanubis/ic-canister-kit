@@ -1,55 +1,95 @@
 use std::collections::HashMap;
 
-// 自定义的包装 Candid 类型
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+use candid::CandidType;
+use serde::{Deserialize, Serialize};
+
+/// 自定义的包装 Candid 类型
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum WrappedCandidType {
     // 基本类型
+    /// bool
     Bool,
+    /// nat
     Nat,
+    /// int
     Int,
+    /// nat8
     Nat8,
+    /// nat16
     Nat16,
+    /// nat32
     Nat32,
+    /// nat32
     Nat64,
+    /// int8
     Int8,
+    /// int16
     Int16,
+    /// int32
     Int32,
+    /// int64
     Int64,
+    /// float32
     Float32,
+    /// float64
     Float64,
+    /// null
     Null,
+    /// text
     Text,
+    /// principal
     Principal,
     // Blob, // 一律以 vec nat8 替代
     // 子类型
+    /// vec T
     Vec(Box<WrappedCandidType>),
+    /// opt T
     Opt(Box<WrappedCandidType>),
     // 多个子类型
+    /// record { .. } // name=T
     Record(Vec<(String, WrappedCandidType)>),
+    /// variant { .. }
     Variant(Vec<(String, Option<WrappedCandidType>)>),
+    /// tuple record { .. } // T
     Tuple(Vec<WrappedCandidType>),
     // 特殊类型
+    /// unknown
     Unknown,
-    Empty,    // 没有值的类型, 是其他类型的子类型
+    /// empty
+    Empty, // 没有值的类型, 是其他类型的子类型
+    /// reserved
     Reserved, // 占位不使用的类型
+    /// func
     Func {
+        /// args
         args: Vec<WrappedCandidType>,
+        /// results
         results: Vec<WrappedCandidType>,
+        /// annotation update query
         annotation: FunctionAnnotation,
     },
+    /// service
     Service {
+        /// init args
         args: Vec<WrappedCandidType>,
+        /// methods
         methods: Vec<(String, WrappedCandidType)>, // 子类型一定是函数
     },
+    /// rec
     Rec(Box<WrappedCandidType>, u32), // 循环类型中的主类型
-    Reference(u32),                   // 循环类型中的引用类型
+    /// ref
+    Reference(u32), // 循环类型中的引用类型
 }
 
+/// 函数的注解
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Copy, Eq, PartialEq)]
 pub enum FunctionAnnotation {
-    None,   // 正常的修改函数
-    Query,  // 查询函数, 可以用查询机制简化消耗的 cycles
-    Oneway, // 用于不关心返回值的函数, 触发即忘场景
+    /// 正常的修改函数
+    None,
+    /// 查询函数, 可以用查询机制简化消耗的 cycles
+    Query,
+    /// 用于不关心返回值的函数, 触发即忘场景
+    Oneway,
 }
 
 fn wrapped_key_word(name: &str) -> String {
@@ -82,8 +122,8 @@ fn wrapped_key_word(name: &str) -> String {
         "service" => true,
         "rec" => true, // 可能是关键字
         _ => false,
-    } || name.contains(" ")
-        || name.contains("\\")
+    } || name.contains(' ')
+        || name.contains('\\')
     {
         format!("\"{}\"", name)
     } else {
@@ -92,6 +132,7 @@ fn wrapped_key_word(name: &str) -> String {
 }
 
 impl WrappedCandidType {
+    /// 文本
     pub fn to_text(&self) -> String {
         match self {
             Self::Bool => String::from("bool"),
@@ -132,7 +173,7 @@ impl WrappedCandidType {
                         if let Some(subtype) = subtype {
                             format!("{} : {}", wrapped_key_word(name), subtype.to_text())
                         } else {
-                            format!("{}", wrapped_key_word(name),)
+                            wrapped_key_word(name)
                         }
                     })
                     .collect::<Vec<_>>()
@@ -142,7 +183,7 @@ impl WrappedCandidType {
                 "variant {{ {} }}",
                 subitems
                     .iter()
-                    .map(|subtype| format!("{}", subtype.to_text()))
+                    .map(|subtype| subtype.to_text())
                     .collect::<Vec<_>>()
                     .join("; ")
             ),
@@ -198,22 +239,23 @@ impl WrappedCandidType {
         }
     }
 
-    pub fn to_methods(&self) -> HashMap<String, String> {
+    /// 转化为方法
+    pub fn to_methods(&self) -> Result<HashMap<String, String>, String> {
         match self {
-            Self::Service { methods, .. } => methods
+            Self::Service { methods, .. } => Ok(methods
                 .iter()
                 .map(|(method, candid)| {
                     (method.to_string(), {
                         let func = candid.to_text();
-                        if func.starts_with("func ") {
-                            func[5..].to_string()
+                        if let Some(func) = func.strip_prefix("func ") {
+                            func.to_string()
                         } else {
                             func
                         }
                     })
                 })
-                .collect(),
-            _ => panic!("must be service"),
+                .collect()),
+            _ => Err("must be service".into()),
         }
     }
 }

@@ -55,8 +55,9 @@ pub mod stable;
 // #[cfg(feature = "nft")]
 // pub mod nft;
 
-// #[cfg(feature = "candid_type")]
-// pub mod candid;
+/// candid 解析
+#[cfg(feature = "canister-did")]
+pub mod candid;
 
 /// 所有类型
 pub mod types;

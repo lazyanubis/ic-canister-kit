@@ -57,24 +57,24 @@ impl RecRecord {
     fn push(&mut self, name: String) {
         self.names.push(name)
     }
-    fn pop(&mut self) {
-        self.names.pop().expect("names is empty");
+    fn pop(&mut self) -> Result<String, String> {
+        self.names.pop().ok_or_else(|| "names is empty".into())
     }
     fn id(&self, name: &String) -> Option<u32> {
-        self.records.get(name).and_then(|id| Some(*id))
+        self.records.get(name).copied()
     }
-    fn insert(&mut self, name: String) -> u32 {
+    fn insert(&mut self, name: String) -> Result<u32, String> {
         if self.records.contains_key(&name) {
-            panic!("already recorded: {}", name)
+            return Err(format!("already recorded: {name}"));
         }
         let id = self.records.len() as u32;
         self.records.insert(name, id);
-        id
+        Ok(id)
     }
-    fn remove(&mut self, name: &String) -> u32 {
+    fn remove(&mut self, name: &String) -> Result<u32, String> {
         self.records
             .remove(name)
-            .expect(&format!("not exist: {}", name))
+            .ok_or_else(|| format!("not exist: {}", name))
     }
 }
 
@@ -103,7 +103,7 @@ impl CandidBuilder {
     }
     // 剩下的字符串
     fn remain(&self, cursor: Option<usize>) -> String {
-        let cursor = cursor.unwrap_or_else(|| self.cursor);
+        let cursor = cursor.unwrap_or(self.cursor);
         let mut remain = String::new();
         let mut offset = 0;
         while self.has(offset) {
@@ -137,12 +137,10 @@ impl CandidBuilder {
             let current = self.codes[self.cursor];
             if current == ' ' || current == '\t' {
                 self.cursor += 1
+            } else if chars.contains(&current) {
+                self.cursor += 1;
             } else {
-                if chars.contains(&current) {
-                    self.cursor += 1;
-                } else {
-                    break;
-                }
+                break;
             }
         }
     }
@@ -170,15 +168,15 @@ impl CandidBuilder {
                             ));
                         }
                         let current2 = self.codes[self.cursor + 1];
-                        self.cursor = self.cursor + 2;
+                        self.cursor += 2;
                         name.push(current2); // 下一个字符一定加入
                     }
                     '"' => {
-                        self.cursor = self.cursor + 1; // 结束
+                        self.cursor += 1; // 结束
                         break;
                     }
                     _ => {
-                        self.cursor = self.cursor + 1;
+                        self.cursor += 1;
                         name.push(current);
                     }
                 }
@@ -186,7 +184,7 @@ impl CandidBuilder {
                 match current {
                     ' ' | ':' | ',' | ';' | '{' | '}' | '(' | ')' | '\t' | '\n' | '\r' => break,
                     _ => {
-                        self.cursor = self.cursor + 1;
+                        self.cursor += 1;
                         name.push(current)
                     }
                 }
@@ -256,7 +254,7 @@ impl CandidBuilder {
         println!("read inner done");
         builder.read_service()?;
         println!("read service done");
-        builder.service.ok_or(format!("can not parse"))
+        builder.service.ok_or_else(|| "can not parse".into())
     }
     // 读取所有的类型
     fn read_inner_types(&mut self) -> Result<(), String> {
@@ -689,17 +687,17 @@ impl CandidBuilder {
         // 如果没有
         let inner = self.inner_types.get(&name);
         let inner = inner
-            .expect(&format!("can not find type: {}", name))
+            .ok_or_else(|| format!("can not find type: {}", name))?
             .clone();
         rec_record.push(name.clone());
         let mut wrapped = self.read_wrapped_candid_type_by_inner(rec_record, &inner)?;
         if let Some(id) = rec_record.id(&name) {
             wrapped = WrappedCandidType::Rec(Box::new(wrapped), id);
-            rec_record.remove(&name);
+            rec_record.remove(&name)?;
         } else {
             self.known_type(name, wrapped.clone());
         }
-        rec_record.pop();
+        rec_record.pop()?;
         Ok(wrapped)
     }
     fn read_wrapped_candid_type_by_inner(
@@ -748,7 +746,7 @@ impl CandidBuilder {
                     let mut inner_type = None;
                     if let Some(inner) = inner {
                         inner_type =
-                            Some(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?);
+                            Some(self.read_wrapped_candid_type_by_inner(rec_record, inner)?);
                     }
                     list.push((name.clone(), inner_type))
                 }
@@ -780,7 +778,7 @@ impl CandidBuilder {
                 WrappedCandidType::Func {
                     args: wrapped_args,
                     results: wrapped_results,
-                    annotation: annotation.clone(),
+                    annotation: *annotation,
                 }
             }
             InnerCandidType::Service { args, methods } => {
@@ -801,16 +799,14 @@ impl CandidBuilder {
                 }
             }
             InnerCandidType::Reference(name) => {
-                let id = rec_record.id(&name);
+                let id = rec_record.id(name);
                 if let Some(id) = id {
                     WrappedCandidType::Reference(id)
+                } else if rec_record.contains(name) {
+                    let id = rec_record.insert(name.clone())?;
+                    WrappedCandidType::Reference(id)
                 } else {
-                    if rec_record.contains(name) {
-                        let id = rec_record.insert(name.clone());
-                        WrappedCandidType::Reference(id)
-                    } else {
-                        self.read_wrapped_candid_type_by_name(rec_record, name.clone())?
-                    }
+                    self.read_wrapped_candid_type_by_name(rec_record, name.clone())?
                 }
             }
         };
@@ -818,36 +814,39 @@ impl CandidBuilder {
     }
 }
 
+/// 解析 candid
 pub fn parse_candid(candid: &str) -> Result<WrappedCandidType, String> {
     CandidBuilder::parse(candid)
 }
 
-pub fn parse_methods(candid: &str) -> HashMap<String, String> {
-    let candid = CandidBuilder::parse(candid);
-    if let Err(err) = candid {
-        panic!("{}", &err);
-    }
-    candid.unwrap().to_methods()
+/// 解析 candid
+pub fn parse_methods(candid: &str) -> Result<HashMap<String, String>, String> {
+    let candid = CandidBuilder::parse(candid)?;
+    candid.to_methods()
 }
 
 // ================
 
-#[allow(unused)]
-fn print_candid(filename: &str, candid: &str) {
-    // 输出到对应的文件
-    use std::io::Write;
-    std::fs::remove_file(filename);
-    std::fs::File::create(&filename)
-        .expect("create failed")
-        .write_all(candid.as_bytes())
-        .expect("write candid failed");
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_parse_candid() {
-    std::fs::create_dir_all("./tmp").unwrap();
+    #[allow(unused)]
+    fn print_candid(filename: &str, candid: &str) {
+        // 输出到对应的文件
+        use std::io::Write;
+        std::fs::remove_file(filename);
+        std::fs::File::create(filename)
+            .expect("create failed")
+            .write_all(candid.as_bytes())
+            .expect("write candid failed");
+    }
 
-    let candid1 = r##"type CanisterInitialArg = record {
+    #[test]
+    fn test_parse_candid() {
+        std::fs::create_dir_all("./tmp").unwrap();
+
+        let candid1 = r##"type CanisterInitialArg = record {
       permission_host : opt principal;
       record_collector : opt principal;
       schedule : opt nat64;
@@ -950,24 +949,24 @@ fn test_parse_candid() {
       whoami : () -> (principal) query;
     }"##;
 
-    let wrapped1 = CandidBuilder::parse(candid1).unwrap();
+        let wrapped1 = CandidBuilder::parse(candid1).unwrap();
 
-    // println!("wrapped1: {:#?}", wrapped1);
+        // println!("wrapped1: {:#?}", wrapped1);
 
-    assert_ne!(
-        wrapped1,
-        WrappedCandidType::Service {
-            args: vec![],
-            methods: vec![]
-        }
-    );
+        assert_ne!(
+            wrapped1,
+            WrappedCandidType::Service {
+                args: vec![],
+                methods: vec![]
+            }
+        );
 
-    print_candid("./tmp/candid1.tmp", &format!("{:#?}", wrapped1));
-    print_candid("./tmp/candid11.tmp", &format!("{}", wrapped1.to_text()));
+        print_candid("./tmp/candid1.tmp", &format!("{:#?}", wrapped1));
+        print_candid("./tmp/candid11.tmp", &format!("{}", wrapped1.to_text()));
 
-    println!("\n ======= candid1 done =======\n");
+        println!("\n ======= candid1 done =======\n");
 
-    let candid2 = r##"type CanisterStatusResponse = record {
+        let candid2 = r##"type CanisterStatusResponse = record {
       status : CanisterStatusType;
       memory_size : nat;
       cycles : nat;
@@ -1161,24 +1160,24 @@ fn test_parse_candid() {
       whoami : () -> (principal) query;
     }"##;
 
-    let wrapped2 = CandidBuilder::parse(candid2).unwrap();
+        let wrapped2 = CandidBuilder::parse(candid2).unwrap();
 
-    // println!("wrapped2: {:#?}", wrapped2);
+        // println!("wrapped2: {:#?}", wrapped2);
 
-    assert_ne!(
-        wrapped2,
-        WrappedCandidType::Service {
-            args: vec![],
-            methods: vec![]
-        }
-    );
+        assert_ne!(
+            wrapped2,
+            WrappedCandidType::Service {
+                args: vec![],
+                methods: vec![]
+            }
+        );
 
-    print_candid("./tmp/candid2.tmp", &format!("{:#?}", wrapped2));
-    print_candid("./tmp/candid22.tmp", &format!("{}", wrapped2.to_text()));
+        print_candid("./tmp/candid2.tmp", &format!("{:#?}", wrapped2));
+        print_candid("./tmp/candid22.tmp", &format!("{}", wrapped2.to_text()));
 
-    println!("\n ======= candid2 done =======\n");
+        println!("\n ======= candid2 done =======\n");
 
-    let candid3 = r##"type definite_canister_settings = 
+        let candid3 = r##"type definite_canister_settings = 
     record {
       compute_allocation: nat;
       controllers: opt vec principal;
@@ -2933,20 +2932,21 @@ fn test_parse_candid() {
    }
    "##;
 
-    let wrapped3 = CandidBuilder::parse(candid3).unwrap();
+        let wrapped3 = CandidBuilder::parse(candid3).unwrap();
 
-    // println!("wrapped3: {:#?}", wrapped3);
+        // println!("wrapped3: {:#?}", wrapped3);
 
-    assert_ne!(
-        wrapped3,
-        WrappedCandidType::Service {
-            args: vec![],
-            methods: vec![]
-        }
-    );
+        assert_ne!(
+            wrapped3,
+            WrappedCandidType::Service {
+                args: vec![],
+                methods: vec![]
+            }
+        );
 
-    print_candid("./tmp/candid3.tmp", &format!("{:#?}", wrapped3));
-    print_candid("./tmp/candid33.tmp", &format!("{}", wrapped3.to_text()));
+        print_candid("./tmp/candid3.tmp", &format!("{:#?}", wrapped3));
+        print_candid("./tmp/candid33.tmp", &format!("{}", wrapped3.to_text()));
 
-    println!("\n ======= candid3 done =======\n");
+        println!("\n ======= candid3 done =======\n");
+    }
 }

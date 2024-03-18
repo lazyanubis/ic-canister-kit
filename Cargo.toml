@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "1.0.4"
+version = "1.0.5"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -47,6 +47,9 @@ schedule = ["functions", "times"] # 定时任务
 
 stable = ["functions", "ic-stable-structures"] # 稳定内存
 
+# candid 类型
+canister-did = []
+
 # # NFT相关
 # nft = ["identity"]   # NFT
 # nft_ext = ["nft"]    # NFT EXT 标准
@@ -54,8 +57,6 @@ stable = ["functions", "ic-stable-structures"] # 稳定内存
 # nft_limit = ["nft"]  # NFT 是否限制指定时间的功能
 # nft_traits = ["nft"] # NFT 的属性记录
 
-# # candid 类型
-# candid_type = []
 
 all = ["default"]
 

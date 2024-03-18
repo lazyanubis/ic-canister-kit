@@ -51,5 +51,5 @@ pub use crate::stable::{
 // #[cfg(feature = "nft")]
 // pub use crate::nft::types::*;
 
-// #[cfg(feature = "candid_type")]
-// pub use crate::candid::types::*;
+#[cfg(feature = "canister-did")]
+pub use crate::candid::types::*;
