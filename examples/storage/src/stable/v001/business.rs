@@ -24,7 +24,6 @@ impl Business for InnerState {
             self.put_uploading(arg)
         }
     }
-
     fn business_delete(&mut self, names: Vec<String>) {
         for name in names {
             self.clean_uploading(&name);

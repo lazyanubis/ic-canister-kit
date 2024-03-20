@@ -70,8 +70,8 @@ pub struct InnerState {
 impl Default for InnerState {
     fn default() -> Self {
         ic_cdk::println!("InnerState::default()");
-        InnerState {
-            heap_state: HeapState::default(),
+        Self {
+            heap_state: Default::default(),
 
             example_cell: init_example_cell_data(),
             example_vec: init_example_vec_data(),

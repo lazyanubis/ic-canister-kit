@@ -55,13 +55,14 @@ pub struct InnerState {
     pub heap_state: HeapState,
     // ? 稳定内存
     // ! 大的业务数据可以放这里
+    // 本罐子需要的数据直接通过 AssetData 读取稳定内存了，无需外部对象
 }
 
 impl Default for InnerState {
     fn default() -> Self {
         ic_cdk::println!("InnerState::default()");
-        InnerState {
-            heap_state: HeapState::default(),
+        Self {
+            heap_state: Default::default(),
         }
     }
 }
@@ -115,11 +116,11 @@ impl Storable for HashDigest {
 
 impl Storable for AssetData {
     fn to_bytes(&self) -> Cow<[u8]> {
-        Cow::Owned(ic_canister_kit::functions::stable::to_bytes(self))
+        Cow::Owned(Vec::new())
     }
 
-    fn from_bytes(bytes: Cow<[u8]>) -> Self {
-        ic_canister_kit::functions::stable::from_bytes(&bytes)
+    fn from_bytes(_bytes: Cow<[u8]>) -> Self {
+        Self {}
     }
 
     const BOUND: Bound = Bound::Unbounded;

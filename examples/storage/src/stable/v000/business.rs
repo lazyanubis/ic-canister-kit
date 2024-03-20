@@ -23,7 +23,6 @@ impl Business for InnerState {
     fn business_upload(&mut self, args: Vec<crate::stable::UploadingArg>) {
         panic!("Not supported operation by this version.")
     }
-
     fn business_delete(&mut self, names: Vec<String>) {
         panic!("Not supported operation by this version.")
     }

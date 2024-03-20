@@ -67,16 +67,13 @@ fn post_upgrade() {
     STATE.with(|state| {
         // restore data
         let memory = ic_canister_kit::stable::get_upgrades_memory();
-
         let mut memory = ReadUpgradeMemory::new(&memory);
 
         let record_id = memory.read_u64().into(); // restore record id
         let version = memory.read_u32(); // restore version
-
         let length = memory.read_u64() as usize; // restore heap data length
         let mut bytes = vec![0; length];
         memory.read(&mut bytes);
-
         // 利用版本号恢复升级前的版本
         let mut last_state = State::from_version(version);
         last_state.heap_from_bytes(&bytes); // 恢复数据
@@ -103,21 +100,20 @@ fn pre_upgrade() {
         #[allow(clippy::unwrap_used)] // ? SAFETY
         state.borrow().pause_must_be_paused().unwrap(); // ! 必须是维护状态, 才可以升级
         state.borrow_mut().schedule_stop(); // * 停止定时任务
+
         let record_id = state.borrow_mut().record_push(
             caller,
             RecordTopics::Upgrade.topic(),
             format!("Upgrade by {}", caller.to_text()),
         );
+        let bytes = state.borrow().heap_to_bytes();
+        let length = bytes.len();
 
         let mut memory = ic_canister_kit::stable::get_upgrades_memory();
         let mut memory = WriteUpgradeMemory::new(&mut memory);
 
         memory.write_u64(record_id.into_inner()); // store record id
         memory.write_u32(state.borrow().version()); // store version
-
-        let bytes = state.borrow().heap_to_bytes();
-        let length = bytes.len();
-
         memory.write_u64(length as u64); // store heap data length
         memory.write(&bytes); // store heap data length
     });

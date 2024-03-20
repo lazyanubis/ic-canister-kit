@@ -26,7 +26,6 @@ pub trait Business:
     // 对外的修改接口
     fn business_hashed_update(&mut self, hashed: bool);
     fn business_upload(&mut self, args: Vec<UploadingArg>);
-
     fn business_delete(&mut self, names: Vec<String>);
 
     // 内部使用的接口
@@ -55,7 +54,6 @@ impl Business for State {
     fn business_upload(&mut self, args: Vec<UploadingArg>) {
         self.get_mut().business_upload(args)
     }
-
     fn business_delete(&mut self, names: Vec<String>) {
         self.get_mut().business_delete(names)
     }
