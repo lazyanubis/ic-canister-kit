@@ -605,7 +605,8 @@ fn do_upload_file(local_files: &Vec<UploadFile>, index: usize) {
             .iter()
             .map(|file| {
                 format!(
-                    "record{{ path=\"{}\"; headers=vec{{{}}}; hash=vec{{{}}}; size={}:nat64; chunk_size={}:nat32; index={}:nat32; chunk=vec{{{}}} }}",                    file.file.path,
+                    "record{{ path=\"{}\"; headers=vec{{{}}}; hash=vec{{{}}}; size={}:nat64; chunk_size={}:nat32; index={}:nat32; chunk=vec{{{}}} }}",
+                    file.file.path,
                     file.file
                         .headers
                         .iter()
