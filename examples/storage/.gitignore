@@ -1,3 +1,7 @@
-.dfx/
 target/
-source_opt.wasm
+canister_ids.json
+.dfx/
+sources/*.wasm
+.DS_Store
+.args.*
+assets-test/

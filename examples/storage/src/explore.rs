@@ -1,12 +1,12 @@
-use std::collections::HashMap;
+use std::{borrow::Cow, collections::HashMap};
 
 use crate::stable::{Business, State};
 
 pub const HTML: &str = include_str!("../web/index.html");
 pub const CSS: &str = include_str!("../web/index.css");
 
-pub fn explore(headers: &mut HashMap<String, String>, state: &State) -> Vec<u8> {
-    headers.insert("Content-Type".into(), "text/html".into());
+pub fn explore<'a>(headers: &mut HashMap<&'a str, Cow<'a, str>>, state: &State) -> Vec<u8> {
+    headers.insert("Content-Type", "text/html".into());
 
     let files = state.business_files();
     let mut json = String::from("");

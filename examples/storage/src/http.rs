@@ -42,7 +42,7 @@ fn inner_http_request(state: &State, req: CustomHttpRequest) -> CustomHttpRespon
     // }
 
     let mut code = 200; // 响应码默认是 200
-    let mut headers: HashMap<String, String> = HashMap::new();
+    let mut headers: HashMap<&str, Cow<str>> = HashMap::new();
     let body: Vec<u8>;
     let mut streaming_strategy: Option<StreamingStrategy> = None;
 
@@ -50,9 +50,9 @@ fn inner_http_request(state: &State, req: CustomHttpRequest) -> CustomHttpRespon
         body = explore(&mut headers, state); // 主页内容
     } else {
         // 根据路径找文件
-        let file = state.business_assets_files().get(&path.to_string());
+        let file = state.business_assets_get_file(path.as_ref());
         if let Some(file) = file {
-            let asset = state.business_assets_assets().get(&file.hash);
+            let asset = state.business_assets_get(&file.hash);
             if let Some(asset) = asset {
                 let (_body, _streaming_strategy): (Vec<u8>, Option<StreamingStrategy>) = toast(
                     &path,
@@ -85,41 +85,42 @@ fn inner_http_request(state: &State, req: CustomHttpRequest) -> CustomHttpRespon
     }
 }
 
-fn toast(
+#[inline]
+fn toast<'a>(
     path: &str,
     params: &str,
     request_headers: &HashMap<String, String>,
-    file: &AssetFile,
-    asset: AssetData,
+    file: &'a AssetFile,
+    asset: &AssetData,
     code: &mut u16,
-    headers: &mut HashMap<String, String>,
+    headers: &mut HashMap<&'a str, Cow<'a, str>>,
 ) -> (Vec<u8>, Option<StreamingStrategy>) {
     // 1. 设置 header
-    let (offset, offset_end, streaming_strategy) = set_headers(
+    let (offset, size, streaming_strategy) = set_headers(
         path,
         params,
         request_headers,
         file,
-        asset.size as usize,
+        file.size as usize,
         code,
         headers,
     );
 
     // 2. 返回指定的内容
     (
-        (asset.data[offset..offset_end]).to_vec(),
+        (asset.slice(&file.hash, file.size, offset, size)).to_vec(),
         streaming_strategy,
     )
 }
 
-fn set_headers(
+fn set_headers<'a>(
     path: &str,
     params: &str,
     request_headers: &HashMap<String, String>,
-    file: &AssetFile,
+    file: &'a AssetFile,
     size: usize,
     code: &mut u16,
-    headers: &mut HashMap<String, String>,
+    headers: &mut HashMap<&'a str, Cow<'a, str>>,
 ) -> (usize, usize, Option<StreamingStrategy>) {
     // let mut gzip = false;
     // let mut content_type = "";
@@ -147,8 +148,8 @@ fn set_headers(
             }
             if !file_name.is_empty() {
                 headers.insert(
-                    "Content-Disposition".into(),
-                    format!("attachment; filename=\"{}\"", file_name),
+                    "Content-Disposition",
+                    format!("attachment; filename=\"{}\"", file_name).into(),
                 ); // 下载文件名
             }
         }
@@ -160,29 +161,29 @@ fn set_headers(
     // headers.insert("Last-Modified", modified.to_rfc2822().into());
 
     // 额外增加的请求头
-    headers.insert("Accept-Ranges".into(), "bytes".into()); // 支持范围请求
-    headers.insert("ETag".into(), file.hash.hex()); // 缓存标识
+    headers.insert("Accept-Ranges", "bytes".into()); // 支持范围请求
+    headers.insert("ETag", file.hash.hex().into()); // 缓存标识
 
     // 访问控制
-    headers.insert("Access-Control-Allow-Origin".into(), "*".into());
+    headers.insert("Access-Control-Allow-Origin", "*".into());
     headers.insert(
-        "Access-Control-Allow-Methods".into(),
+        "Access-Control-Allow-Methods",
         "HEAD, GET, POST, OPTIONS".into(),
     );
     headers.insert(
-        "Access-Control-Allow-Headers".into(),
+        "Access-Control-Allow-Headers",
         "Origin,Access-Control-Request-Headers,Access-Control-Allow-Headers,DNT,X-Requested-With,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Accept,Connection,Cook ie,X-XSRF-TOKEN,X-CSRF-TOKEN,Authorization".into(),
     );
     headers.insert(
-        "Access-Control-Expose-Headers".into(),
+        "Access-Control-Expose-Headers",
         "Accept-Ranges,Content-Length,Content-Range,Transfer-Encoding,Connection,Cache-Control,Content-Disposition"
             .into(),
     );
-    headers.insert("Access-Control-Max-Age".into(), "86400".into());
+    headers.insert("Access-Control-Max-Age", "86400".into());
 
     // Range 设置
-    let mut start: usize = 0;
-    let mut end: usize = size;
+    let mut offset: usize = 0;
+    let mut offset_end: usize = size;
     if let Some(range) = {
         let mut range = None;
         for (key, value) in request_headers.iter() {
@@ -201,13 +202,13 @@ fn set_headers(
             if let Some(s) = s {
                 let s: usize = s.parse().unwrap_or(0);
                 if s < size {
-                    start = s
+                    offset = s
                 };
             }
             if let Some(e) = e {
                 let e: usize = e.parse().unwrap_or(size - 1);
-                if start < e && e < size {
-                    end = e + 1
+                if offset < e && e < size {
+                    offset_end = e + 1
                 };
             }
         }
@@ -215,16 +216,16 @@ fn set_headers(
 
     // 独立的请求头内容
     for (key, value) in file.headers.iter() {
-        headers.insert(key.into(), value.into());
+        headers.insert(key, value.into());
     }
     // ic_cdk::println!("---------- {} {} ----------", start, end);
     // 如果过长, 需要阶段显示
-    let mut streaming_end = end;
+    let mut streaming_end = offset_end;
     let mut streaming_strategy: Option<StreamingStrategy> = None;
-    let range = streaming_end - start;
-    if MAX_RESPONSE_LENGTH < range && start + MAX_RESPONSE_LENGTH < end {
+    let range = streaming_end - offset;
+    if MAX_RESPONSE_LENGTH < range {
         // 响应的范围太大了, 缩短为最大长度, 此时应当开启流式响应
-        streaming_end = start + MAX_RESPONSE_LENGTH;
+        streaming_end = offset + MAX_RESPONSE_LENGTH;
         streaming_strategy = Some(StreamingStrategy::Callback {
             callback: HttpRequestStreamingCallback::new(ic_cdk::id(), "http_streaming".to_string()),
             token: StreamingCallbackToken {
@@ -232,34 +233,34 @@ fn set_headers(
                 params: params.to_string(),
                 headers: request_headers.clone(),
                 start: streaming_end as u64,
-                end: end as u64,
+                end: offset_end as u64,
             },
         });
-        headers.insert("Transfer-Encoding".into(), "chunked".into());
-        headers.insert("Connection".into(), "keep-alive".into()); // 保持链接
+        headers.insert("Transfer-Encoding", "chunked".into());
+        headers.insert("Connection", "keep-alive".into()); // 保持链接
     }
     // Content-Range: bytes 0-499/10000
     headers.insert(
-        "Content-Range".into(),
-        format!("bytes {}-{}/{}", start, end - 1, size), // 流式响应也要设置正确的内容范围
+        "Content-Range",
+        format!("bytes {}-{}/{}", offset, offset_end - 1, size).into(), // 流式响应也要设置正确的内容范围
     );
     // ! 长度设置了会出错
     // headers.insert("Content-Length", format!("{}", end - start).into()); // ? 这个应该是本次返回的长度
 
     // 如果是视频可能需要返回其他的
     *code = 200;
-    if end < size {
+    if offset_end < size {
         *code = 206; // 还有内容没给
     }
 
-    (start, streaming_end, streaming_strategy)
+    (offset, streaming_end - offset, streaming_strategy)
 }
 
 // 找不到对应的文件
-fn not_found(code: &mut u16, headers: &mut HashMap<String, String>) -> Vec<u8> {
+fn not_found<'a>(code: &mut u16, headers: &mut HashMap<&'a str, Cow<'a, str>>) -> Vec<u8> {
     *code = 404;
 
-    headers.insert("Content-Type".into(), "text/plain".into());
+    headers.insert("Content-Type", "text/plain".into());
 
     b"Not found"[..].into()
 }
@@ -291,27 +292,29 @@ fn http_streaming(
         };
     }
     crate::stable::with_state(|state| {
-        let file = state.business_assets_files().get(&path);
+        let file = state.business_assets_get_file(&path);
         if let Some(file) = file {
-            let asset = state.business_assets_assets().get(&file.hash);
+            let asset = state.business_assets_get(&file.hash);
             if let Some(asset) = asset {
                 // 如果过长, 需要阶段显示
-                let start = start as usize;
-                let end = end as usize;
-                let mut streaming_end = end;
-                let range = streaming_end - start;
-                if MAX_RESPONSE_LENGTH < range && start + MAX_RESPONSE_LENGTH < end {
+                let offset = start as usize;
+                let offset_end = end as usize;
+                let mut streaming_end = offset_end;
+                let range = streaming_end - offset;
+                if MAX_RESPONSE_LENGTH < range {
                     // 响应的范围太大了, 缩短为最大长度, 此时应当继续流式响应
-                    streaming_end = start + MAX_RESPONSE_LENGTH;
+                    streaming_end = offset + MAX_RESPONSE_LENGTH;
                 }
                 return StreamingCallbackHttpResponse {
-                    body: (asset.data[start..streaming_end]).to_vec(),
+                    body: asset
+                        .slice(&file.hash, file.size, offset, streaming_end - offset)
+                        .to_vec(),
                     token: Some(StreamingCallbackToken {
                         path: path.to_string(),
                         params: params.to_string(),
                         headers: headers.clone(),
                         start: streaming_end as u64, // 继续
-                        end: end as u64,
+                        end,
                     }),
                 };
             }
