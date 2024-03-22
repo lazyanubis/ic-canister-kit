@@ -40,26 +40,25 @@ pub struct StreamingCallbackToken {
     /// url 定位哪个请求
     pub path: String,
 
-    /// 请求参数
-    pub params: String,
-
-    /// 请求头
-    pub headers: HashMap<String, String>,
-
-    /// 数据起始位置  本次流开始位置
-    pub start: u64,
-    /// 数据结束位置  本次流最大结束位置 可以继续以流的方式返回
-    pub end: u64,
+    /// 继续请求需要使用的标识
+    pub token: HashMap<String, String>,
 }
 
 /// 流式响应的响应体
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
 pub struct StreamingCallbackHttpResponse {
     ///  响应体
     pub body: Vec<u8>,
 
     ///  是否要继续流式响应
     pub token: Option<StreamingCallbackToken>,
+}
+
+impl StreamingCallbackHttpResponse {
+    /// 空响应体
+    pub fn empty() -> Self {
+        Self::default()
+    }
 }
 
 /// 定义流回调函数
