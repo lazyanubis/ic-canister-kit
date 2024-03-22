@@ -93,40 +93,13 @@ use ic_canister_kit::stable;
 
 const MEMORY_ID_ASSETS: MemoryId = MemoryId::new(0); // 存放实际文件，hash 为键
 
-fn init_assets_data() -> StableBTreeMap<[u8; 32 + 4], Vec<u8>> {
+fn init_assets_data() -> StableBTreeMap<SliceOfHashDigest, Vec<u8>> {
     stable::init_map_data(MEMORY_ID_ASSETS)
 }
 
-impl Storable for HashDigest {
-    fn to_bytes(&self) -> Cow<[u8]> {
-        Cow::Borrowed(&self.0)
-    }
-
-    fn from_bytes(bytes: Cow<[u8]>) -> Self {
-        let mut value = [0; 32];
-        value.copy_from_slice(&bytes[0..32]);
-        Self(value)
-    }
-
-    const BOUND: Bound = Bound::Bounded {
-        max_size: 32,
-        is_fixed_size: true,
-    };
-}
-
-impl Storable for AssetData {
-    fn to_bytes(&self) -> Cow<[u8]> {
-        Cow::Owned(Vec::new())
-    }
-
-    fn from_bytes(_bytes: Cow<[u8]>) -> Self {
-        Self {}
-    }
-
-    const BOUND: Bound = Bound::Unbounded;
-}
-
 // ============================== 文件数据 ==============================
+
+pub type SliceOfHashDigest = [u8; 4 + 32];
 
 #[derive(
     CandidType, Serialize, Deserialize, Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord,
@@ -145,7 +118,7 @@ mod assets {
 
     use crate::stable::v001::types::init_assets_data;
 
-    use super::HashDigest;
+    use super::{HashDigest, SliceOfHashDigest};
 
     // 单个文件数据
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
@@ -154,8 +127,8 @@ mod assets {
     const MAX_BUCKET_SIZE: u64 = 1024 * 1024 * 2;
 
     #[inline]
-    fn get_key(hash: &HashDigest, chunk: u32) -> [u8; 32 + 4] {
-        let mut key = [0; 32 + 4];
+    fn get_key(hash: &HashDigest, chunk: u32) -> SliceOfHashDigest {
+        let mut key = [0; 36];
         key[..4].copy_from_slice(&chunk.to_be_bytes());
         key[4..].copy_from_slice(&hash.0);
         key
