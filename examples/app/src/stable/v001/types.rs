@@ -82,7 +82,7 @@ impl Default for InnerState {
     }
 }
 
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct HeapState {
     pub pause: Pause,             // 记录维护状态
     pub permissions: Permissions, // 记录自身权限
@@ -92,7 +92,7 @@ pub struct HeapState {
     pub business: InnerBusiness,
 }
 
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct InnerBusiness {
     pub example_data: String,
 }

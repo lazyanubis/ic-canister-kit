@@ -67,7 +67,7 @@ impl Default for InnerState {
     }
 }
 
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct HeapState {
     pub pause: Pause,             // 记录维护状态
     pub permissions: Permissions, // 记录自身权限
@@ -78,7 +78,7 @@ pub struct HeapState {
     pub business: InnerBusiness,
 }
 
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct InnerBusiness {
     pub hashed: bool, // 是否相信上传的 hash 值，true -> 直接采用接口传递的 hash 值， false -> 数据上传完成后，需要罐子再 hash 一次
 
