@@ -8,6 +8,8 @@ pub use std::collections::{HashMap, HashSet};
 #[allow(unused)]
 pub use std::fmt::Display;
 
+#[allow(clippy::panic)] // ? SAFETY
+#[allow(unused_variables)]
 pub trait Business:
     Pausable<PauseReason>
     + ParsePermission
@@ -17,8 +19,12 @@ pub trait Business:
     + ScheduleTask
     + StableHeap
 {
-    fn business_example_query(&self) -> String;
-    fn business_example_update(&mut self, test: String);
+    fn business_example_query(&self) -> String {
+        panic!("Not supported operation by this version.")
+    }
+    fn business_example_update(&mut self, test: String) {
+        panic!("Not supported operation by this version.")
+    }
 }
 
 // 业务实现

@@ -1,6 +1,5 @@
 use std::str::FromStr;
 
-use candid::CandidType;
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, EnumString};
@@ -52,26 +51,47 @@ impl RecordTopics {
     }
 }
 
+// 框架需要的数据结构
+#[derive(Serialize, Deserialize, Default)]
+pub struct CanisterKit {
+    pub pause: Pause,             // 记录维护状态 // ? 堆内存 序列化
+    pub permissions: Permissions, // 记录自身权限 // ? 堆内存 序列化
+    pub records: Records,         // 记录操作记录 // ? 堆内存 序列化
+    pub schedule: Schedule,       // 记录定时任务 // ? 堆内存 序列化
+}
+
+// 能序列化的和不能序列化的放在一起
+// 其中不能序列化的采用如下注解
+// #[serde(skip)] 默认初始化方式
+// #[serde(skip, default="init_xxx")] 指定初始化方式
+// ! 如果使用 ic-stable-structures 提供的稳定内存，不能变更 memory_id 的使用类型，否则会出现各个版本不兼容，数据会被清空
+#[derive(Serialize, Deserialize)]
 pub struct InnerState {
-    // ? 堆内存 不需要序列化的数据
+    pub canister_kit: CanisterKit, // 框架需要的数据 // ? 堆内存 序列化
 
-    // ? 堆内存 需要序列化的数据
-    pub heap_state: HeapState,
+    // 业务数据
+    pub example_data: String, // 样例数据 // ? 堆内存 序列化
 
-    // ? 稳定内存
-    // ! 大的业务数据可以放这里
-    pub example_cell: StableCell<ExampleCell>,
-    pub example_vec: StableVec<ExampleVec>,
-    pub example_map: StableBTreeMap<u64, String>,
-    pub example_log: StableLog<String>,
-    pub example_priority_queue: StablePriorityQueue<ExampleVec>,
+    #[serde(skip, default = "init_example_cell_data")]
+    pub example_cell: StableCell<ExampleCell>, // 样例数据 // ? 稳定内存
+    #[serde(skip, default = "init_example_vec_data")]
+    pub example_vec: StableVec<ExampleVec>, // 样例数据 // ? 稳定内存
+    #[serde(skip, default = "init_example_map_data")]
+    pub example_map: StableBTreeMap<u64, String>, // 样例数据 // ? 稳定内存
+    #[serde(skip, default = "init_example_log_data")]
+    pub example_log: StableLog<String>, // 样例数据 // ? 稳定内存
+    #[serde(skip, default = "init_example_priority_queue_data")]
+    pub example_priority_queue: StablePriorityQueue<ExampleVec>, // 样例数据 // ? 稳定内存
 }
 
 impl Default for InnerState {
     fn default() -> Self {
         ic_cdk::println!("InnerState::default()");
         Self {
-            heap_state: Default::default(),
+            canister_kit: Default::default(),
+
+            // 业务数据
+            example_data: Default::default(),
 
             example_cell: init_example_cell_data(),
             example_vec: init_example_vec_data(),
@@ -82,21 +102,7 @@ impl Default for InnerState {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct HeapState {
-    pub pause: Pause,             // 记录维护状态
-    pub permissions: Permissions, // 记录自身权限
-    pub records: Records,         // 记录操作记录
-    pub schedule: Schedule,       // 记录定时任务
-    // 记录业务数据 // ! 小的业务数据可以放这里
-    pub business: InnerBusiness,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct InnerBusiness {
-    pub example_data: String,
-}
-
+use candid::CandidType;
 use ic_canister_kit::stable;
 
 const MEMORY_ID_EXAMPLE_CELL: MemoryId = MemoryId::new(0); // 测试 Cell
