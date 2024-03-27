@@ -23,9 +23,8 @@ fn business_example_set(test: String) {
     let arg_content = format!("set test: {}", test); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             s.business_example_update(test);
-            (None, ())
         },
         caller,
         RecordTopics::Example.topic(),
@@ -48,9 +47,8 @@ fn business_example_cell_set(test: String) {
     let arg_content = format!("set test: {}", test); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             s.business_example_cell_update(test);
-            (None, ())
         },
         caller,
         RecordTopics::ExampleCell.topic(),
@@ -73,9 +71,8 @@ fn business_example_vec_push(test: u64) {
     let arg_content = format!("set test: {}", test); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             s.business_example_vec_push(test);
-            (None, ())
         },
         caller,
         RecordTopics::ExampleVec.topic(),
@@ -92,10 +89,7 @@ fn business_example_vec_pop() -> Option<ExampleVec> {
     let arg_content = format!("set test: {}", ""); // * 记录参数内容
 
     with_mut_state(
-        |s| {
-            let r = s.business_example_vec_pop();
-            (None, r)
-        },
+        |s, _done| s.business_example_vec_pop(),
         caller,
         RecordTopics::ExampleVec.topic(),
         arg_content,
@@ -117,10 +111,7 @@ fn business_example_map_update(key: u64, value: Option<String>) -> Option<String
     let arg_content = format!("set test: {} {:?}", key, value); // * 记录参数内容
 
     with_mut_state(
-        |s| {
-            let result = s.business_example_map_update(key, value);
-            (None, result)
-        },
+        |s, _done| s.business_example_map_update(key, value),
         caller,
         RecordTopics::ExampleMap.topic(),
         arg_content,
@@ -142,10 +133,7 @@ fn business_example_log_update(item: String) -> u64 {
     let arg_content = format!("set test: {}", item); // * 记录参数内容
 
     with_mut_state(
-        |s| {
-            let result = s.business_example_log_update(item);
-            (None, result)
-        },
+        |s, _done| s.business_example_log_update(item),
         caller,
         RecordTopics::ExampleLog.topic(),
         arg_content,
@@ -172,9 +160,8 @@ fn business_example_priority_queue_push(item: u64) {
     let arg_content = format!("set test: {}", item); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             s.business_example_priority_queue_push(item);
-            (None, ())
         },
         caller,
         RecordTopics::ExamplePriorityQueue.topic(),
@@ -191,10 +178,7 @@ fn business_example_priority_queue_pop() -> Option<u64> {
     let arg_content = format!("set test: {}", ""); // * 记录参数内容
 
     with_mut_state(
-        |s| {
-            let result = s.business_example_priority_queue_pop().map(|v| v.vec_data);
-            (None, result)
-        },
+        |s, _done| s.business_example_priority_queue_pop().map(|v| v.vec_data),
         caller,
         RecordTopics::ExamplePriorityQueue.topic(),
         arg_content,
