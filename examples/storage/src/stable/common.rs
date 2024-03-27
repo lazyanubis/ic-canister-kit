@@ -84,10 +84,10 @@ fn post_upgrade() {
         state.borrow_mut().init(CanisterInitialArg { schedule }); // ! 升级到最新版本后, 需要执行初始化操作
         state.borrow_mut().schedule_reload(); // * 重置定时任务
 
-            let version = state.borrow().version();
-            state
-                .borrow_mut()
-                .record_update(record_id, format!("Next version: {}", version));
+        let version = state.borrow().version();
+        state
+            .borrow_mut()
+            .record_update(record_id, format!("Next version: {}", version));
     });
 }
 
