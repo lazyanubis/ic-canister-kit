@@ -84,10 +84,10 @@ fn post_upgrade() {
         state.borrow_mut().init(CanisterInitialArg { schedule }); // ! 升级到最新版本后, 需要执行初始化操作
         state.borrow_mut().schedule_reload(); // * 重置定时任务
 
-        let version = state.borrow().version();
-        state
-            .borrow_mut()
-            .record_update(record_id, format!("Next version: {}", version));
+            let version = state.borrow().version();
+            state
+                .borrow_mut()
+                .record_update(record_id, format!("Next version: {}", version));
     });
 }
 
@@ -149,13 +149,21 @@ where
 #[allow(unused)]
 pub fn with_mut_state<F, R>(callback: F, caller: CallerId, topic: RecordTopic, content: String) -> R
 where
-    F: FnOnce(&mut State) -> (Option<String>, R),
+    F: FnOnce(&mut State, &mut Option<String>) -> R,
+    R: serde::Serialize,
 {
     STATE.with(|state| {
         let mut state = state.borrow_mut(); // 取得可变对象
         let record_id = state.record_push(caller, topic, content);
-        let (done, result) = callback(&mut state);
-        state.record_update(record_id, done.unwrap_or_default());
+        let mut done = None;
+        let result = callback(&mut state, &mut done);
+        state.record_update(
+            record_id,
+            done.unwrap_or_else(|| match serde_json::to_string(&result) {
+                Ok(s) => s,
+                Err(e) => format!("Serialize failed: {e}"),
+            }),
+        );
         result
     })
 }
