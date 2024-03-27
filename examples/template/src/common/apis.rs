@@ -68,9 +68,8 @@ fn pause_replace(reason: Option<String>) {
     let arg_content = format!("{} -> {}", display_option(&old), display_option(&reason)); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             s.pause_replace(reason.map(PauseReason::new));
-            (None, ())
         },
         caller,
         RecordTopics::Pause.topic(),
@@ -171,7 +170,7 @@ fn permission_update(args: Vec<PermissionUpdatedArg<String>>) {
     ); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             #[allow(clippy::unwrap_used)] // ? SAFETY
             let args = args
                 .into_iter()
@@ -180,7 +179,6 @@ fn permission_update(args: Vec<PermissionUpdatedArg<String>>) {
                 .unwrap();
             #[allow(clippy::unwrap_used)] // ? SAFETY
             s.permission_update(args).unwrap();
-            (None, ())
         },
         caller,
         RecordTopics::Permission.topic(),
@@ -219,18 +217,15 @@ fn record_migrate(max: u32) -> MigratedRecords<Record> {
     let arg_content = format!("wanna migrate {} records", max); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, done| {
             let result = s.record_migrate(max);
-
-            (
-                Some(format!(
-                    "removed: {} total: {} record size: {} ",
-                    result.removed,
-                    result.next_id,
-                    result.records.len(),
-                )),
-                result,
-            )
+            *done = Some(format!(
+                "removed: {} total: {} record size: {} ",
+                result.removed,
+                result.next_id,
+                result.records.len(),
+            ));
+            result
         },
         caller,
         RecordTopics::Schedule.topic(),
@@ -255,10 +250,9 @@ fn schedule_replace(schedule: Option<u64>) {
     let arg_content = format!("{} -> {}", display_option(&old), display_option(&schedule)); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             s.schedule_replace(schedule.map(|s| (s as u128).into()));
             s.schedule_reload(); // * 重置定时任务
-            (None, ())
         },
         caller,
         RecordTopics::Schedule.topic(),

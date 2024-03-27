@@ -23,9 +23,8 @@ fn business_example_set(test: String) {
     let arg_content = format!("set test: {}", test); // * 记录参数内容
 
     with_mut_state(
-        |s| {
+        |s, _done| {
             s.business_example_update(test);
-            (None, ())
         },
         caller,
         RecordTopics::Example.topic(),
