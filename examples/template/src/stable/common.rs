@@ -66,8 +66,8 @@ fn initial(arg: Option<CanisterInitialArg>) {
 fn post_upgrade() {
     STATE.with(|state| {
         #[allow(clippy::unwrap_used)] // ? SAFETY
-        let (record_id, version, bytes): (Option<RecordId>, u32, Vec<u8>) =
-            ic_cdk::storage::stable_restore().unwrap();
+        let stable: (RecordId, u32, Vec<u8>) = ic_cdk::storage::stable_restore().unwrap();
+        let (record_id, version, bytes) = stable;
 
         // 利用版本号恢复升级前的版本
         let mut last_state = State::from_version(version);
@@ -79,12 +79,10 @@ fn post_upgrade() {
         state.borrow_mut().init(CanisterInitialArg { schedule }); // ! 升级到最新版本后, 需要执行初始化操作
         state.borrow_mut().schedule_reload(); // * 重置定时任务
 
-        if let Some(record_id) = record_id {
-            let version = state.borrow().version();
-            state
-                .borrow_mut()
-                .record_update(record_id, format!("Next version: {}", version));
-        }
+        let version = state.borrow().version(); // 先不可变借用取出版本号
+        state
+            .borrow_mut()
+            .record_update(record_id, format!("Next version: {}", version));
     });
 }
 
@@ -106,8 +104,9 @@ fn pre_upgrade() {
         let version = state.borrow().version();
         let bytes = state.borrow().heap_to_bytes();
 
+        let stable: (RecordId, u32, Vec<u8>) = (record_id, version, bytes);
         #[allow(clippy::unwrap_used)] // ? SAFETY
-        ic_cdk::storage::stable_save((record_id, version, bytes)).unwrap();
+        ic_cdk::storage::stable_save(stable).unwrap();
     });
 }
 

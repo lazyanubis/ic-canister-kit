@@ -65,7 +65,6 @@ fn initial(arg: Option<CanisterInitialArg>) {
 #[ic_cdk::post_upgrade]
 fn post_upgrade() {
     STATE.with(|state| {
-        // restore data
         let memory = ic_canister_kit::stable::get_upgrades_memory();
         let mut memory = ReadUpgradeMemory::new(&memory);
 
@@ -74,6 +73,7 @@ fn post_upgrade() {
         let length = memory.read_u64() as usize; // restore heap data length
         let mut bytes = vec![0; length];
         memory.read(&mut bytes);
+
         // 利用版本号恢复升级前的版本
         let mut last_state = State::from_version(version);
         last_state.heap_from_bytes(&bytes); // 恢复数据
@@ -84,7 +84,7 @@ fn post_upgrade() {
         state.borrow_mut().init(CanisterInitialArg { schedule }); // ! 升级到最新版本后, 需要执行初始化操作
         state.borrow_mut().schedule_reload(); // * 重置定时任务
 
-        let version = state.borrow().version();
+        let version = state.borrow().version(); // 先不可变借用取出版本号
         state
             .borrow_mut()
             .record_update(record_id, format!("Next version: {}", version));
