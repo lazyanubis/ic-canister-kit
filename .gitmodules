@@ -1,0 +1,12 @@
+[submodule "examples/template"]
+	path = examples/template
+	url = git@github.com:lazyanubis/ic-canister-template.git
+[submodule "examples/service"]
+	path = examples/service
+	url = git@github.com:lazyanubis/ic-canister-service.git
+[submodule "examples/assets"]
+	path = examples/assets
+	url = git@github.com:lazyanubis/ic-canister-assets.git
+[submodule "examples/storage"]
+	path = examples/storage
+	url = git@github.com:lazyanubis/ic-canister-storage.git
