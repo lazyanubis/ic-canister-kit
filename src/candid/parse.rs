@@ -277,7 +277,7 @@ impl CandidBuilder {
         self.remove_char('=')?;
         // 下面应该是正常的 candid 类型
         let candid_type = self.read_inner_candid_type()?;
-        println!("read inner type -> {} : {:?}", name, candid_type);
+        // println!("read inner type -> {} : {:?}", name, candid_type);
         self.inner_types.insert(name, candid_type);
         Ok(())
     }

@@ -116,8 +116,10 @@ pub type Icrc1Subaccount = Subaccount; // ! 修改为安全的参数
 /// icrc1 账户对象
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct Icrc1Account {
-    owner: UserId,
-    subaccount: Option<Icrc1Subaccount>,
+    /// 所有者
+    pub owner: UserId,
+    /// 子账户
+    pub subaccount: Option<Icrc1Subaccount>,
 }
 /// 余额
 pub type Icrc1Balance = candid::Nat;
@@ -197,7 +199,7 @@ pub struct Icrc1TransferArgs {
     pub created_at_time: Option<u64>,
 }
 /// 转账可能出现的错误
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub enum Icrc1TransferError {
     /// 通用错误
     GenericError {
