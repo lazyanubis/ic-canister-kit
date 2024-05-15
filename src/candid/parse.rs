@@ -1,5 +1,6 @@
-use super::super::types::*;
 use std::collections::HashMap;
+
+use super::types::*;
 
 #[derive(Clone, Debug)]
 enum InnerCandidType {
@@ -88,6 +89,13 @@ struct CandidBuilder {
 
 impl CandidBuilder {
     fn new(candid: &str) -> Self {
+        // 需要移除注释
+        let candid = candid
+            .split('\n')
+            .map(|s| s.to_string())
+            .filter(|s| !s.trim().starts_with("//"))
+            .collect::<Vec<_>>()
+            .join("\n");
         CandidBuilder {
             codes: candid.chars().collect(),
             cursor: 0,
@@ -254,7 +262,7 @@ impl CandidBuilder {
         println!("read inner done");
         builder.read_service()?;
         println!("read service done");
-        builder.service.ok_or_else(|| "can not parse".into())
+        builder.service.ok_or("can not parse".to_string())
     }
     // 读取所有的类型
     fn read_inner_types(&mut self) -> Result<(), String> {
@@ -465,6 +473,15 @@ impl CandidBuilder {
         if self.is_next(&['(']) {
             self.remove_char('(')?;
             while !self.is_next(&[')']) {
+                // 尝试移除命名变量
+                let c = self.cursor;
+                let _name = self.read_name();
+                self.trim_start(&['\r', '\n']);
+                if self.is_next(&[':']) {
+                    self.trim_start(&[':']);
+                } else {
+                    self.cursor = c;
+                }
                 let mut rec_record = RecRecord::new();
                 let wrapped = self.read_wrapped_candid_type(&mut rec_record)?;
                 self.trim_start(&[',']);
@@ -2948,5 +2965,167 @@ mod tests {
         print_candid("./tmp/candid33.tmp", &format!("{}", wrapped3.to_text()));
 
         println!("\n ======= candid3 done =======\n");
+
+        let candid4 = r##"type Tokens = nat;
+
+        type InitArg = record {
+            ledger_id: principal;
+        };
+        
+        type UpgradeArg = record {
+            ledger_id: opt principal;
+        };
+        
+        type IndexArg = variant {
+            Init: InitArg;
+            Upgrade: UpgradeArg;
+        };
+        
+        type GetBlocksRequest = record {
+            start : nat;
+            length : nat;
+        };
+        
+        type Value = variant {
+            Blob : blob;
+            Text : text;
+            Nat : nat;
+            Nat64: nat64;
+            Int : int;
+            Array : vec Value;
+            Map : Map;
+        };
+        
+        type Map = vec record { text; Value };
+        
+        type Block = Value;
+        
+        type GetBlocksResponse = record {
+            chain_length: nat64;
+            blocks: vec Block;
+        };
+        
+        type BlockIndex = nat;
+        
+        type SubAccount = blob;
+        
+        type Account = record { owner : principal; subaccount : opt SubAccount };
+        
+        type Transaction = record {
+          burn : opt Burn;
+          kind : text;
+          mint : opt Mint;
+          approve : opt Approve;
+          timestamp : nat64;
+          transfer : opt Transfer;
+        };
+        
+        type Approve = record {
+          fee : opt nat;
+          from : Account;
+          memo : opt vec nat8;
+          created_at_time : opt nat64;
+          amount : nat;
+          expected_allowance : opt nat;
+          expires_at : opt nat64;
+          spender : Account;
+        };
+        
+        type Burn = record {
+          from : Account;
+          memo : opt vec nat8;
+          created_at_time : opt nat64;
+          amount : nat;
+          spender : opt Account;
+        };
+        
+        type Mint = record {
+          to : Account;
+          memo : opt vec nat8;
+          created_at_time : opt nat64;
+          amount : nat;
+        };
+        
+        type Transfer = record {
+          to : Account;
+          fee : opt nat;
+          from : Account;
+          memo : opt vec nat8;
+          created_at_time : opt nat64;
+          amount : nat;
+          spender : opt Account;
+        };
+        
+        type GetAccountTransactionsArgs = record {
+            account : Account;
+            // The txid of the last transaction seen by the client.
+            // If None then the results will start from the most recent
+            // txid.
+            start : opt BlockIndex;
+            // Maximum number of transactions to fetch.
+            max_results : nat;
+        };
+        
+        type TransactionWithId = record {
+          id : BlockIndex;
+          transaction : Transaction;
+        };
+        
+        type GetTransactions = record {
+          balance : Tokens;
+          transactions : vec TransactionWithId;
+          // The txid of the oldest transaction the account has
+          oldest_tx_id : opt BlockIndex;
+        };
+        
+        type GetTransactionsErr = record {
+          message : text;
+        };
+        
+        type GetTransactionsResult = variant {
+          Ok : GetTransactions;
+          Err : GetTransactionsErr;
+        };
+        
+        type ListSubaccountsArgs = record {
+            owner: principal;
+            start: opt SubAccount;
+        };
+        
+        type Status = record {
+            num_blocks_synced : BlockIndex;
+        };
+        
+        type FeeCollectorRanges = record {
+            ranges : vec  record { Account; vec record { BlockIndex; BlockIndex } };
+        }
+        
+        service : (index_arg: opt IndexArg) -> {
+            get_account_transactions : (GetAccountTransactionsArgs) -> (GetTransactionsResult) query;
+            get_blocks : (GetBlocksRequest) -> (GetBlocksResponse) query;
+            get_fee_collectors_ranges : () -> (FeeCollectorRanges) query;
+            icrc1_balance_of : (Account) -> (Tokens) query;
+            ledger_id : () -> (principal) query;
+            list_subaccounts : (ListSubaccountsArgs) -> (vec SubAccount) query;
+            status : () -> (Status) query;
+        }        
+   "##;
+
+        let wrapped4 = CandidBuilder::parse(candid4).unwrap();
+
+        // println!("wrapped4: {:#?}", wrapped4);
+
+        assert_ne!(
+            wrapped4,
+            WrappedCandidType::Service {
+                args: vec![],
+                methods: vec![]
+            }
+        );
+
+        print_candid("./tmp/candid4.tmp", &format!("{:#?}", wrapped4));
+        print_candid("./tmp/candid44.tmp", &format!("{}", wrapped4.to_text()));
+
+        println!("\n ======= candid4 done =======\n");
     }
 }

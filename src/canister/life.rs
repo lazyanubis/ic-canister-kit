@@ -2,7 +2,7 @@ use crate::identity::CanisterId;
 
 // ========================= 创建罐子 =========================
 
-/// 启动罐子
+/// 创建罐子
 /// ! Only the controllers of the canister
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-create_canister
 pub async fn create_canister(

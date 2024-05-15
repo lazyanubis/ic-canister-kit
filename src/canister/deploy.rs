@@ -1,6 +1,6 @@
 /// 和 罐子 的 部署 相关
 
-// 部署罐子
+/// 部署罐子
 pub async fn deploy_canister(
     settings: Option<ic_cdk::api::management_canister::main::CanisterSettings>,
     initial_cycles: u128,
