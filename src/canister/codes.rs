@@ -38,10 +38,11 @@ pub async fn upgrade_code(
     canister_id: CanisterId,
     wasm_module: CanisterCodeWasm,
     arg: Option<CanisterInitArg>,
+    pre_upgrade: Option<ic_cdk::api::management_canister::main::SkipPreUpgrade>,
 ) -> super::types::CanisterCallResult<()> {
     let call_result = ic_cdk::api::management_canister::main::install_code(
         ic_cdk::api::management_canister::main::InstallCodeArgument {
-            mode: ic_cdk::api::management_canister::main::CanisterInstallMode::Upgrade,
+            mode: ic_cdk::api::management_canister::main::CanisterInstallMode::Upgrade(pre_upgrade),
             canister_id,
             wasm_module,
             arg: arg.unwrap_or_default(),
