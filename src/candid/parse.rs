@@ -94,7 +94,7 @@ impl CandidBuilder {
             .split('\n')
             .map(|s| s.to_string())
             .filter(|s| !s.trim().starts_with("//"))
-            .map(|s| s.split("//").next().unwrap().to_string())
+            .map(|s| s.split("//").next().unwrap_or_default().to_string())
             .collect::<Vec<_>>()
             .join("\n");
         CandidBuilder {
