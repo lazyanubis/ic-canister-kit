@@ -94,6 +94,7 @@ impl CandidBuilder {
             .split('\n')
             .map(|s| s.to_string())
             .filter(|s| !s.trim().starts_with("//"))
+            .map(|s| s.split("//").next().unwrap().to_string())
             .collect::<Vec<_>>()
             .join("\n");
         CandidBuilder {
@@ -686,7 +687,16 @@ impl CandidBuilder {
                     methods: self.sort_list(methods),
                 }
             }
-            _ => self.read_wrapped_candid_type_by_name(rec_record, candid_type)?,
+            _ => match self.read_wrapped_candid_type_by_name(rec_record, candid_type) {
+                Ok(candid_type) => candid_type,
+                Err(err) => {
+                    if !err.starts_with("can not find type") {
+                        return Err(err);
+                    }
+                    self.trim_start(&[':']);
+                    self.read_wrapped_candid_type(rec_record)?
+                }
+            },
         };
         self.trim_start(&[';']);
         Ok(candid_type)

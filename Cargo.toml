@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "1.0.9"
+version = "1.0.10"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -86,4 +86,4 @@ base32 = { version = "0.4", optional = true } # base32 加密解密
 
 serde = { version = "1", optional = true, features = ["derive"] } # 序列化/反序列化框架
 serde_json = { version = "1", optional = true }                   # json
-ciborium = { version = " 0.2", optional = true }                  # 序列化/反序列化
+ciborium = { version = "0.2", optional = true }                   # 序列化/反序列化
