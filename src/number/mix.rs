@@ -28,7 +28,7 @@ pub fn encode_index_code(salt: &[u8], index: u64, random: Option<&[u8]>) -> Vec<
 #[inline]
 pub fn encode_index_code_with_base32(salt: &[u8], index: u64, random: Option<&[u8]>) -> String {
     let show = encode_index_code(salt, index, random);
-    base32::encode(base32::Alphabet::RFC4648 { padding: false }, &show)
+    base32::encode(base32::Alphabet::Rfc4648 { padding: false }, &show)
 }
 
 /// 混淆错误
@@ -81,7 +81,7 @@ pub fn decode_index_code(salt: &[u8], show: &[u8]) -> Result<u64, MixNumberDecod
 }
 /// 根据加密字符串解析回序号
 pub fn decode_index_code_by_base32(salt: &[u8], code: &str) -> Result<u64, MixNumberDecodeError> {
-    let show = base32::decode(base32::Alphabet::RFC4648 { padding: false }, code)
+    let show = base32::decode(base32::Alphabet::Rfc4648 { padding: false }, code)
         .ok_or(MixNumberDecodeError::Base32DecodeError)?;
     decode_index_code(salt, &show)
 }
