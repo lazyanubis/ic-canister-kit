@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::types::*;
+use super::{error::ParsedCandidError, types::*};
 
 #[derive(Debug, Clone)]
 struct InnerCandidTypeFunction {
@@ -65,24 +65,24 @@ impl RecRecord {
     fn push(&mut self, name: String) {
         self.names.push(name)
     }
-    fn pop(&mut self) -> Result<String, String> {
-        self.names.pop().ok_or_else(|| "names is empty".into())
+    fn pop(&mut self) -> Result<String, ParsedCandidError> {
+        self.names.pop().ok_or(ParsedCandidError::EmptyRecRecords)
     }
     fn id(&self, name: &String) -> Option<u32> {
         self.records.get(name).copied()
     }
-    fn insert(&mut self, name: String) -> Result<u32, String> {
+    fn insert(&mut self, name: String) -> Result<u32, ParsedCandidError> {
         if self.records.contains_key(&name) {
-            return Err(format!("already recorded: {name}"));
+            return Err(ParsedCandidError::RecRecordRepeated(name));
         }
         let id = self.records.len() as u32;
         self.records.insert(name, id);
         Ok(id)
     }
-    fn remove(&mut self, name: &String) -> Result<u32, String> {
+    fn remove(&mut self, name: &String) -> Result<u32, ParsedCandidError> {
         self.records
             .remove(name)
-            .ok_or_else(|| format!("not exist: {}", name))
+            .ok_or_else(|| ParsedCandidError::RecRecordNotExist(name.clone()))
     }
 }
 
@@ -130,7 +130,7 @@ impl CandidBuilder {
     fn remain(&self, cursor: Option<usize>) -> String {
         let cursor = cursor.unwrap_or(self.cursor);
         let chars = &self.chars[cursor..];
-        chars.into_iter().map(|c| *c).collect()
+        chars.iter().copied().collect()
     }
     // 下个字段是否是指定的字符序列
     fn is_next(&self, types: &[char]) -> bool {
@@ -166,14 +166,16 @@ impl CandidBuilder {
     }
 
     // 跳过无效字符 和 注释
-    fn trim_start_blank_or_chars(&mut self, chars: &[char]) -> Result<(), String> {
+    fn trim_start_blank_or_chars(&mut self, chars: &[char]) -> Result<(), ParsedCandidError> {
         self.inner_trim_start_blank_or_chars(chars);
         loop {
             if self.is_next(&['/', '*']) {
                 self.cursor += 2;
                 while !self.is_next(&['*', '/']) {
                     if !self.has(1) {
-                        return Err("Can not find */ for end comment".into());
+                        return Err(ParsedCandidError::WrongComment(
+                            "Can not find */ for end comment".into(),
+                        ));
                     }
                     self.cursor += 1;
                 }
@@ -189,27 +191,27 @@ impl CandidBuilder {
         Ok(())
     }
 
-    fn trim_start_blank(&mut self) -> Result<(), String> {
+    fn trim_start_blank(&mut self) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_chars(&[])
     }
-    fn trim_start_blank_or_semicolon(&mut self) -> Result<(), String> {
+    fn trim_start_blank_or_semicolon(&mut self) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_chars(&[';'])
     }
-    fn trim_start_blank_or_colon(&mut self) -> Result<(), String> {
+    fn trim_start_blank_or_colon(&mut self) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_chars(&[':'])
     }
-    fn trim_start_blank_or_comma(&mut self) -> Result<(), String> {
+    fn trim_start_blank_or_comma(&mut self) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_chars(&[','])
     }
-    fn trim_start_blank_or_newline_semicolon(&mut self) -> Result<(), String> {
+    fn trim_start_blank_or_newline_semicolon(&mut self) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_chars(&['\r', '\n', ';'])
     }
-    fn trim_start_blank_or_newline(&mut self) -> Result<(), String> {
+    fn trim_start_blank_or_newline(&mut self) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_chars(&['\r', '\n'])
     }
 
     // 读取下一个标识符
-    fn read_name(&mut self) -> Result<String, String> {
+    fn read_name(&mut self) -> Result<String, ParsedCandidError> {
         self.trim_start_blank()?;
         let cursor = self.cursor;
         let mark = self.is_next(&['"']); // 是否双引号标识
@@ -226,10 +228,10 @@ impl CandidBuilder {
                 match current {
                     '\\' => {
                         if !self.has(2) {
-                            return Err(format!(
+                            return Err(ParsedCandidError::ParsedError(format!(
                                 "1. can not read string at: {}",
                                 self.remain(Some(cursor))
-                            ));
+                            )));
                         }
                         let current2 = self.chars[self.cursor + 1];
                         self.cursor += 2;
@@ -255,15 +257,15 @@ impl CandidBuilder {
             }
         }
         if name.is_empty() {
-            return Err(format!(
+            return Err(ParsedCandidError::ParsedError(format!(
                 "2. can not read string at: {}",
                 self.remain(Some(cursor))
-            ));
+            )));
         }
         Ok(name)
     }
     // 检查并移除 'type '
-    fn trim_type(&mut self) -> Result<bool, String> {
+    fn trim_type(&mut self) -> Result<bool, ParsedCandidError> {
         self.trim_start_blank_or_newline_semicolon()?;
         if !self.is_next(&['t', 'y', 'p', 'e', ' ']) {
             return Ok(false);
@@ -272,7 +274,7 @@ impl CandidBuilder {
         Ok(true)
     }
     // 检查并移除 'query'
-    fn trim_query(&mut self) -> Result<bool, String> {
+    fn trim_query(&mut self) -> Result<bool, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         if !self.is_next(&['q', 'u', 'e', 'r', 'y']) {
             return Ok(false);
@@ -281,7 +283,7 @@ impl CandidBuilder {
         Ok(true)
     }
     // 检查并移除 'oneway'
-    fn trim_oneway(&mut self) -> Result<bool, String> {
+    fn trim_oneway(&mut self) -> Result<bool, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         if !self.is_next(&['o', 'n', 'e', 'w', 'a', 'y']) {
             return Ok(false);
@@ -290,7 +292,7 @@ impl CandidBuilder {
         Ok(true)
     }
     // 检查并移除 'service'
-    fn trim_service(&mut self) -> Result<bool, String> {
+    fn trim_service(&mut self) -> Result<bool, ParsedCandidError> {
         self.trim_start_blank_or_semicolon()?;
         if !self.is_next(&['s', 'e', 'r', 'v', 'i', 'c', 'e']) {
             return Ok(false);
@@ -299,10 +301,14 @@ impl CandidBuilder {
         Ok(true)
     }
     // 检查并移除指定字符
-    fn remove_char(&mut self, ch: char) -> Result<(), String> {
+    fn remove_char(&mut self, ch: char) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         if !self.has(1) || self.chars[self.cursor] != ch {
-            return Err(format!("next char must be {} at {}", ch, self.remain(None)));
+            return Err(ParsedCandidError::ParsedError(format!(
+                "next char must be {} at {}",
+                ch,
+                self.remain(None)
+            )));
         }
         self.cursor += 1;
         Ok(())
@@ -312,31 +318,35 @@ impl CandidBuilder {
         self.wrapped_types.insert(name, candid_type);
     }
 
-    pub(super) fn parse_service_candid(candid: &str) -> Result<WrappedCandidTypeService, String> {
+    pub(super) fn parse_service_candid(
+        candid: &str,
+    ) -> Result<WrappedCandidTypeService, ParsedCandidError> {
         let mut builder = Self::new(candid);
         builder.read_inner_types()?;
         // println!("read inner done");
         builder.read_service()?;
         // println!("read service done");
-        builder.service.ok_or("can not parse".to_string())
+        builder
+            .service
+            .ok_or_else(|| ParsedCandidError::Common("can not parse".to_string()))
     }
 
     // 读取所有的类型
-    fn read_inner_types(&mut self) -> Result<(), String> {
+    fn read_inner_types(&mut self) -> Result<(), ParsedCandidError> {
         while self.trim_type()? {
             self.read_inner_type()?;
         }
         Ok(())
     }
     // 读取下一个类型
-    fn read_inner_type(&mut self) -> Result<(), String> {
+    fn read_inner_type(&mut self) -> Result<(), ParsedCandidError> {
         let name = self.read_name()?;
         if self.inner_types.contains_key(&name) {
-            return Err(format!(
+            return Err(ParsedCandidError::ParsedError(format!(
                 "candid type: {} is repeated. at: {}",
                 name,
                 self.remain(None)
-            ));
+            )));
         }
         // 成功读取到类型名称 下面应该是 =
         self.remove_char('=')?;
@@ -346,7 +356,7 @@ impl CandidBuilder {
         self.inner_types.insert(name, candid_type);
         Ok(())
     }
-    fn read_inner_candid_type(&mut self) -> Result<InnerCandidType, String> {
+    fn read_inner_candid_type(&mut self) -> Result<InnerCandidType, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let candid_type = self.read_name()?;
         let candid_type = match &candid_type[..] {
@@ -477,7 +487,7 @@ impl CandidBuilder {
         self.trim_start_blank_or_semicolon()?;
         Ok(candid_type)
     }
-    fn read_inner_func(&mut self) -> Result<InnerCandidTypeFunction, String> {
+    fn read_inner_func(&mut self) -> Result<InnerCandidTypeFunction, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let mut args: Vec<InnerCandidType> = Vec::new();
         self.remove_char('(')?;
@@ -516,12 +526,12 @@ impl CandidBuilder {
     }
 
     // 读取 Service
-    fn read_service(&mut self) -> Result<(), String> {
+    fn read_service(&mut self) -> Result<(), ParsedCandidError> {
         if !self.trim_service()? {
-            return Err(format!(
+            return Err(ParsedCandidError::ParsedError(format!(
                 "next chars must be 'service' at {}",
                 self.remain(None)
-            ));
+            )));
         }
 
         self.trim_start_blank_or_colon()?;
@@ -576,7 +586,7 @@ impl CandidBuilder {
     fn read_wrapped_func(
         &mut self,
         rec_record: &mut RecRecord,
-    ) -> Result<WrappedCandidTypeFunction, String> {
+    ) -> Result<WrappedCandidTypeFunction, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let mut args: Vec<WrappedCandidType> = Vec::new();
         self.remove_char('(')?;
@@ -617,7 +627,7 @@ impl CandidBuilder {
     fn read_wrapped_candid_type(
         &mut self,
         rec_record: &mut RecRecord,
-    ) -> Result<WrappedCandidType, String> {
+    ) -> Result<WrappedCandidType, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let candid_type = self.read_name()?;
         let candid_type = match &candid_type[..] {
@@ -746,7 +756,7 @@ impl CandidBuilder {
             _ => match self.read_wrapped_candid_type_by_name(rec_record, candid_type) {
                 Ok(candid_type) => candid_type,
                 Err(err) => {
-                    if !err.starts_with("can not find type") {
+                    if !matches!(err, ParsedCandidError::MissingType(_)) {
                         return Err(err);
                     }
                     self.trim_start_blank_or_colon()?;
@@ -762,7 +772,7 @@ impl CandidBuilder {
         &mut self,
         rec_record: &mut RecRecord,
         name: String,
-    ) -> Result<WrappedCandidType, String> {
+    ) -> Result<WrappedCandidType, ParsedCandidError> {
         // 如果已经有了
         if let Some(candid_type) = self.wrapped_types.get(&name) {
             return Ok(candid_type.clone());
@@ -770,7 +780,7 @@ impl CandidBuilder {
         // 如果没有
         let inner = self.inner_types.get(&name);
         let inner = inner
-            .ok_or_else(|| format!("can not find type: {}", name))?
+            .ok_or_else(|| ParsedCandidError::MissingType(name.clone()))?
             .clone();
         rec_record.push(name.clone());
         let mut wrapped = self.read_wrapped_candid_type_by_inner(rec_record, &inner)?;
@@ -791,7 +801,7 @@ impl CandidBuilder {
         &mut self,
         rec_record: &mut RecRecord,
         inner: &InnerCandidType,
-    ) -> Result<WrappedCandidType, String> {
+    ) -> Result<WrappedCandidType, ParsedCandidError> {
         // 如果没有
         let wrapped = match inner {
             InnerCandidType::Bool => WrappedCandidType::Bool,
