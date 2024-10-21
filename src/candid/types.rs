@@ -253,7 +253,7 @@ pub enum WrappedCandidType {
     /// text
     /// text type: Motoko Text / Rust String or &str / JavaScript string
     /// https://internetcomputer.org/docs/current/references/candid-ref/#type-text
-    #[serde(rename = "test")]
+    #[serde(rename = "text")]
     Text,
     /// principal
     /// principal type: like "zwigo-aiaaa-aaaaa-qaa3a-cai" Motoko Principal / candid::Principal / JavaScript Principal.fromText("aaaaa-aa")
