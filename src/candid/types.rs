@@ -317,7 +317,7 @@ pub enum WrappedCandidType {
     Service(WrappedCandidTypeService),
     /// rec
     /// object type: some subtype or subitem is recursion
-    #[serde(rename = "rev")]
+    #[serde(rename = "rec")]
     Rec(WrappedCandidTypeRecursion), // 循环类型中的主类型
     /// ref
     #[serde(rename = "ref")]
