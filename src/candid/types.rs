@@ -176,6 +176,26 @@ impl WrappedCandidTypeRecursion {
     }
 }
 
+/// 循环 结构体
+#[derive(Debug, Clone, CandidType, Serialize, Deserialize, Eq, PartialEq)]
+pub struct WrappedCandidTypeReference {
+    /// 分配的序号
+    #[serde(rename = "id")]
+    pub id: u32,
+    /// 有时候有名字
+    #[serde(rename = "name", skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+impl WrappedCandidTypeReference {
+    /// 文本
+    pub fn to_text(&self) -> String {
+        let Self { id, .. } = self;
+
+        format!("rec_{}", id,)
+    }
+}
+
 /// 自定义的包装 Candid 类型
 #[derive(Debug, Clone, CandidType, Serialize, Deserialize, Eq, PartialEq)]
 pub enum WrappedCandidType {
@@ -321,7 +341,7 @@ pub enum WrappedCandidType {
     Rec(WrappedCandidTypeRecursion), // 循环类型中的主类型
     /// ref
     #[serde(rename = "ref")]
-    Reference(u32), // 循环类型中的引用类型
+    Reference(WrappedCandidTypeReference), // 循环类型中的引用类型
 }
 
 impl WrappedCandidType {
@@ -386,7 +406,7 @@ impl WrappedCandidType {
             Self::Func(func) => func.to_text(),
             Self::Service(service) => service.to_text(),
             Self::Rec(recursion) => recursion.to_text(),
-            Self::Reference(id) => format!("rec_{}", id),
+            Self::Reference(reference) => reference.to_text(),
         }
     }
 }

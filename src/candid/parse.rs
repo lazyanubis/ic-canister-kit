@@ -913,10 +913,16 @@ impl CandidBuilder {
             InnerCandidType::Reference(name) => {
                 let id = rec_record.id(name);
                 if let Some(id) = id {
-                    WrappedCandidType::Reference(id)
+                    WrappedCandidType::Reference(WrappedCandidTypeReference {
+                        id,
+                        name: Some(name.clone()),
+                    })
                 } else if rec_record.contains(name) {
                     let id = rec_record.insert(name.clone())?;
-                    WrappedCandidType::Reference(id)
+                    WrappedCandidType::Reference(WrappedCandidTypeReference {
+                        id,
+                        name: Some(name.clone()),
+                    })
                 } else {
                     self.read_wrapped_candid_type_by_name(rec_record, name.clone())?
                 }
