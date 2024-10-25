@@ -7,41 +7,45 @@ struct InnerCandidTypeFunction {
     args: Vec<InnerCandidType>,
     rets: Vec<InnerCandidType>,
     annotation: Option<FunctionAnnotation>,
+
+    name: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 struct InnerCandidTypeService {
     args: Vec<InnerCandidType>,
     methods: Vec<(String, InnerCandidTypeFunction)>,
+
+    name: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 enum InnerCandidType {
-    Bool,
-    Nat,
-    Int,
-    Nat8,
-    Nat16,
-    Nat32,
-    Nat64,
-    Int8,
-    Int16,
-    Int32,
-    Int64,
-    Float32,
-    Float64,
-    Null,
-    Text,
-    Principal,
-    Blob,
-    Vec(Box<InnerCandidType>),
-    Opt(Box<InnerCandidType>),
-    Record(Vec<(String, InnerCandidType)>),
-    Variant(Vec<(String, Option<InnerCandidType>)>),
-    Tuple(Vec<InnerCandidType>),
-    Unknown,
-    Empty,
-    Reserved,
+    Bool(Option<String>),
+    Nat(Option<String>),
+    Int(Option<String>),
+    Nat8(Option<String>),
+    Nat16(Option<String>),
+    Nat32(Option<String>),
+    Nat64(Option<String>),
+    Int8(Option<String>),
+    Int16(Option<String>),
+    Int32(Option<String>),
+    Int64(Option<String>),
+    Float32(Option<String>),
+    Float64(Option<String>),
+    Null(Option<String>),
+    Text(Option<String>),
+    Principal(Option<String>),
+    Blob(Option<String>),
+    Vec(Box<InnerCandidType>, Option<String>),
+    Opt(Box<InnerCandidType>, Option<String>),
+    Record(Vec<(String, InnerCandidType)>, Option<String>),
+    Variant(Vec<(String, Option<InnerCandidType>)>, Option<String>),
+    Tuple(Vec<InnerCandidType>, Option<String>),
+    Unknown(Option<String>),
+    Empty(Option<String>),
+    Reserved(Option<String>),
     Func(InnerCandidTypeFunction),
     Service(InnerCandidTypeService),
     Reference(String), // 循环类型中的引用类型
@@ -351,46 +355,49 @@ impl CandidBuilder {
         // 成功读取到类型名称 下面应该是 =
         self.remove_char('=')?;
         // 下面应该是正常的 candid 类型
-        let candid_type = self.read_inner_candid_type()?;
+        let candid_type = self.read_inner_candid_type(Some(name.clone()))?;
         // println!("read inner type -> {} : {:?}", name, candid_type);
         self.inner_types.insert(name, candid_type);
         Ok(())
     }
-    fn read_inner_candid_type(&mut self) -> Result<InnerCandidType, ParsedCandidError> {
+    fn read_inner_candid_type(
+        &mut self,
+        name: Option<String>,
+    ) -> Result<InnerCandidType, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let candid_type = self.read_name()?;
         let candid_type = match &candid_type[..] {
-            "bool" => InnerCandidType::Bool,
-            "nat" => InnerCandidType::Nat,
-            "int" => InnerCandidType::Int,
-            "nat8" => InnerCandidType::Nat8,
-            "nat16" => InnerCandidType::Nat16,
-            "nat32" => InnerCandidType::Nat32,
-            "nat64" => InnerCandidType::Nat64,
-            "int8" => InnerCandidType::Int8,
-            "int16" => InnerCandidType::Int16,
-            "int32" => InnerCandidType::Int32,
-            "int64" => InnerCandidType::Int64,
-            "float32" => InnerCandidType::Float32,
-            "float64" => InnerCandidType::Float64,
-            "null" => InnerCandidType::Null,
-            "text" => InnerCandidType::Text,
-            "principal" => InnerCandidType::Principal,
-            "blob" => InnerCandidType::Blob,
+            "bool" => InnerCandidType::Bool(name),
+            "nat" => InnerCandidType::Nat(name),
+            "int" => InnerCandidType::Int(name),
+            "nat8" => InnerCandidType::Nat8(name),
+            "nat16" => InnerCandidType::Nat16(name),
+            "nat32" => InnerCandidType::Nat32(name),
+            "nat64" => InnerCandidType::Nat64(name),
+            "int8" => InnerCandidType::Int8(name),
+            "int16" => InnerCandidType::Int16(name),
+            "int32" => InnerCandidType::Int32(name),
+            "int64" => InnerCandidType::Int64(name),
+            "float32" => InnerCandidType::Float32(name),
+            "float64" => InnerCandidType::Float64(name),
+            "null" => InnerCandidType::Null(name),
+            "text" => InnerCandidType::Text(name),
+            "principal" => InnerCandidType::Principal(name),
+            "blob" => InnerCandidType::Blob(name),
             "vec" => {
-                let inner = self.read_inner_candid_type()?;
-                InnerCandidType::Vec(Box::new(inner))
+                let inner = self.read_inner_candid_type(None)?;
+                InnerCandidType::Vec(Box::new(inner), name)
             }
             "opt" => {
-                let inner = self.read_inner_candid_type()?;
-                InnerCandidType::Opt(Box::new(inner))
+                let inner = self.read_inner_candid_type(None)?;
+                InnerCandidType::Opt(Box::new(inner), name)
             }
             "record" => {
                 self.remove_char('{')?;
                 self.trim_start_blank_or_newline()?;
                 if self.is_next(&['}']) {
                     self.remove_char('}')?;
-                    InnerCandidType::Record(Vec::new())
+                    InnerCandidType::Record(Vec::new(), name)
                 } else {
                     let cursor = self.cursor;
                     self.read_name()?;
@@ -402,25 +409,25 @@ impl CandidBuilder {
                             let name = self.read_name()?;
                             self.trim_start_blank_or_newline()?;
                             self.remove_char(':')?;
-                            let inner = self.read_inner_candid_type()?;
+                            let inner = self.read_inner_candid_type(None)?;
                             self.trim_start_blank_or_semicolon()?;
                             list.push((name, inner));
                             self.trim_start_blank_or_newline()?;
                         }
                         self.remove_char('}')?;
-                        InnerCandidType::Record(self.sort_list(list))
+                        InnerCandidType::Record(self.sort_list(list), name)
                     } else {
                         // tuple 也在里面
                         self.cursor = cursor;
                         let mut list: Vec<InnerCandidType> = Vec::new();
                         while !self.is_next(&['}']) {
-                            let inner = self.read_inner_candid_type()?;
+                            let inner = self.read_inner_candid_type(None)?;
                             self.trim_start_blank_or_semicolon()?;
                             list.push(inner);
                             self.trim_start_blank_or_newline()?;
                         }
                         self.remove_char('}')?;
-                        InnerCandidType::Tuple(list)
+                        InnerCandidType::Tuple(list, name)
                     }
                 }
             }
@@ -434,19 +441,19 @@ impl CandidBuilder {
                     self.trim_start_blank_or_newline()?;
                     if self.is_next(&[':']) {
                         self.remove_char(':')?;
-                        inner = Some(self.read_inner_candid_type()?);
+                        inner = Some(self.read_inner_candid_type(None)?);
                     }
                     self.trim_start_blank_or_semicolon()?;
                     list.push((name, inner));
                     self.trim_start_blank_or_newline()?;
                 }
                 self.remove_char('}')?;
-                InnerCandidType::Variant(self.sort_list(list))
+                InnerCandidType::Variant(self.sort_list(list), name)
             }
-            "unknown" => InnerCandidType::Unknown,
-            "empty" => InnerCandidType::Empty,
-            "reserved" => InnerCandidType::Reserved,
-            "func" => InnerCandidType::Func(self.read_inner_func()?),
+            "unknown" => InnerCandidType::Unknown(name),
+            "empty" => InnerCandidType::Empty(name),
+            "reserved" => InnerCandidType::Reserved(name),
+            "func" => InnerCandidType::Func(self.read_inner_func(name)?),
             "service" => {
                 self.trim_start_blank_or_colon()?;
                 self.trim_start_blank_or_newline()?;
@@ -454,7 +461,7 @@ impl CandidBuilder {
                 if self.is_next(&['(']) {
                     self.remove_char('(')?;
                     while !self.is_next(&[')']) {
-                        let inner = self.read_inner_candid_type()?;
+                        let inner = self.read_inner_candid_type(None)?;
                         self.trim_start_blank_or_comma()?;
                         args.push(inner);
                         self.trim_start_blank_or_newline()?;
@@ -471,7 +478,7 @@ impl CandidBuilder {
                     let name = self.read_name()?;
                     self.trim_start_blank_or_newline()?;
                     self.remove_char(':')?;
-                    let inner = self.read_inner_func()?;
+                    let inner = self.read_inner_func(None)?;
                     self.trim_start_blank_or_semicolon()?;
                     methods.push((name, inner));
                     self.trim_start_blank_or_newline()?;
@@ -480,6 +487,7 @@ impl CandidBuilder {
                 InnerCandidType::Service(InnerCandidTypeService {
                     args,
                     methods: self.sort_list(methods),
+                    name,
                 })
             }
             _ => InnerCandidType::Reference(candid_type),
@@ -487,12 +495,15 @@ impl CandidBuilder {
         self.trim_start_blank_or_semicolon()?;
         Ok(candid_type)
     }
-    fn read_inner_func(&mut self) -> Result<InnerCandidTypeFunction, ParsedCandidError> {
+    fn read_inner_func(
+        &mut self,
+        name: Option<String>,
+    ) -> Result<InnerCandidTypeFunction, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let mut args: Vec<InnerCandidType> = Vec::new();
         self.remove_char('(')?;
         while !self.is_next(&[')']) {
-            let inner = self.read_inner_candid_type()?;
+            let inner = self.read_inner_candid_type(None)?;
             self.trim_start_blank_or_comma()?;
             args.push(inner);
             self.trim_start_blank_or_newline()?;
@@ -505,7 +516,7 @@ impl CandidBuilder {
         let mut rets: Vec<InnerCandidType> = Vec::new();
         self.remove_char('(')?;
         while !self.is_next(&[')']) {
-            let inner = self.read_inner_candid_type()?;
+            let inner = self.read_inner_candid_type(None)?;
             self.trim_start_blank_or_comma()?;
             rets.push(inner);
             self.trim_start_blank_or_newline()?;
@@ -522,6 +533,7 @@ impl CandidBuilder {
             args,
             rets,
             annotation,
+            name,
         })
     }
 
@@ -550,7 +562,7 @@ impl CandidBuilder {
                     self.cursor = c;
                 }
                 let mut rec_record = RecRecord::new();
-                let wrapped = self.read_wrapped_candid_type(&mut rec_record)?;
+                let wrapped = self.read_wrapped_candid_type(&mut rec_record, None)?;
                 self.trim_start_blank_or_comma()?;
                 args.push(wrapped);
                 self.trim_start_blank_or_newline()?;
@@ -569,7 +581,7 @@ impl CandidBuilder {
             self.trim_start_blank_or_newline()?;
             self.remove_char(':')?;
             let mut rec_record = RecRecord::new();
-            let wrapped = self.read_wrapped_func(&mut rec_record)?;
+            let wrapped = self.read_wrapped_func(&mut rec_record, None)?;
             self.trim_start_blank_or_semicolon()?;
             methods.push((name, wrapped));
             self.trim_start_blank_or_newline()?;
@@ -578,6 +590,7 @@ impl CandidBuilder {
         self.service = Some(WrappedCandidTypeService {
             args,
             methods: self.sort_list(methods),
+            name: None,
         });
 
         Ok(())
@@ -586,12 +599,13 @@ impl CandidBuilder {
     fn read_wrapped_func(
         &mut self,
         rec_record: &mut RecRecord,
+        name: Option<String>,
     ) -> Result<WrappedCandidTypeFunction, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let mut args: Vec<WrappedCandidType> = Vec::new();
         self.remove_char('(')?;
         while !self.is_next(&[')']) {
-            let wrapped = self.read_wrapped_candid_type(rec_record)?;
+            let wrapped = self.read_wrapped_candid_type(rec_record, None)?;
             self.trim_start_blank_or_comma()?;
             args.push(wrapped);
             self.trim_start_blank_or_newline()?;
@@ -604,7 +618,7 @@ impl CandidBuilder {
         let mut rets: Vec<WrappedCandidType> = Vec::new();
         self.remove_char('(')?;
         while !self.is_next(&[')']) {
-            let wrapped = self.read_wrapped_candid_type(rec_record)?;
+            let wrapped = self.read_wrapped_candid_type(rec_record, None)?;
             self.trim_start_blank_or_comma()?;
             rets.push(wrapped);
             self.trim_start_blank_or_newline()?;
@@ -621,50 +635,64 @@ impl CandidBuilder {
             args,
             rets,
             annotation,
+            name,
         })
     }
 
     fn read_wrapped_candid_type(
         &mut self,
         rec_record: &mut RecRecord,
+        name: Option<String>,
     ) -> Result<WrappedCandidType, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let candid_type = self.read_name()?;
         let candid_type = match &candid_type[..] {
-            "bool" => WrappedCandidType::Bool,
-            "nat" => WrappedCandidType::Nat,
-            "int" => WrappedCandidType::Int,
-            "nat8" => WrappedCandidType::Nat8,
-            "nat16" => WrappedCandidType::Nat16,
-            "nat32" => WrappedCandidType::Nat32,
-            "nat64" => WrappedCandidType::Nat64,
-            "int8" => WrappedCandidType::Int8,
-            "int16" => WrappedCandidType::Int16,
-            "int32" => WrappedCandidType::Int32,
-            "int64" => WrappedCandidType::Int64,
-            "float32" => WrappedCandidType::Float32,
-            "float64" => WrappedCandidType::Float64,
-            "null" => WrappedCandidType::Null,
-            "text" => WrappedCandidType::Text,
-            "principal" => WrappedCandidType::Principal,
-            "blob" => WrappedCandidType::Vec(Box::new(WrappedCandidType::Nat8)),
-            "unknown" => WrappedCandidType::Unknown,
-            "empty" => WrappedCandidType::Empty,
-            "reserved" => WrappedCandidType::Reserved,
+            "bool" => WrappedCandidType::Bool(WrappedCandidTypeName::from(name)),
+            "nat" => WrappedCandidType::Nat(WrappedCandidTypeName::from(name)),
+            "int" => WrappedCandidType::Int(WrappedCandidTypeName::from(name)),
+            "nat8" => WrappedCandidType::Nat8(WrappedCandidTypeName::from(name)),
+            "nat16" => WrappedCandidType::Nat16(WrappedCandidTypeName::from(name)),
+            "nat32" => WrappedCandidType::Nat32(WrappedCandidTypeName::from(name)),
+            "nat64" => WrappedCandidType::Nat64(WrappedCandidTypeName::from(name)),
+            "int8" => WrappedCandidType::Int8(WrappedCandidTypeName::from(name)),
+            "int16" => WrappedCandidType::Int16(WrappedCandidTypeName::from(name)),
+            "int32" => WrappedCandidType::Int32(WrappedCandidTypeName::from(name)),
+            "int64" => WrappedCandidType::Int64(WrappedCandidTypeName::from(name)),
+            "float32" => WrappedCandidType::Float32(WrappedCandidTypeName::from(name)),
+            "float64" => WrappedCandidType::Float64(WrappedCandidTypeName::from(name)),
+            "null" => WrappedCandidType::Null(WrappedCandidTypeName::from(name)),
+            "text" => WrappedCandidType::Text(WrappedCandidTypeName::from(name)),
+            "principal" => WrappedCandidType::Principal(WrappedCandidTypeName::from(name)),
+            "blob" => WrappedCandidType::Vec(WrappedCandidTypeSubtype {
+                subtype: Box::new(WrappedCandidType::Nat8(WrappedCandidTypeName::default())),
+                name,
+            }),
+            "unknown" => WrappedCandidType::Unknown(WrappedCandidTypeName::from(name)),
+            "empty" => WrappedCandidType::Empty(WrappedCandidTypeName::from(name)),
+            "reserved" => WrappedCandidType::Reserved(WrappedCandidTypeName::from(name)),
             "vec" => {
-                let wrapped = self.read_wrapped_candid_type(rec_record)?;
-                WrappedCandidType::Vec(Box::new(wrapped))
+                let wrapped = self.read_wrapped_candid_type(rec_record, None)?;
+                WrappedCandidType::Vec(WrappedCandidTypeSubtype {
+                    subtype: Box::new(wrapped),
+                    name,
+                })
             }
             "opt" => {
-                let wrapped = self.read_wrapped_candid_type(rec_record)?;
-                WrappedCandidType::Opt(Box::new(wrapped))
+                let wrapped = self.read_wrapped_candid_type(rec_record, None)?;
+                WrappedCandidType::Opt(WrappedCandidTypeSubtype {
+                    subtype: Box::new(wrapped),
+                    name,
+                })
             }
             "record" => {
                 self.remove_char('{')?;
                 self.trim_start_blank_or_newline()?;
                 if self.is_next(&['}']) {
                     self.remove_char('}')?;
-                    WrappedCandidType::Record(Vec::new())
+                    WrappedCandidType::Record(WrappedCandidTypeRecord {
+                        subitems: Vec::new(),
+                        name,
+                    })
                 } else {
                     let cursor = self.cursor;
                     self.read_name()?;
@@ -676,25 +704,31 @@ impl CandidBuilder {
                             let name = self.read_name()?;
                             self.trim_start_blank_or_newline()?;
                             self.remove_char(':')?;
-                            let wrapped = self.read_wrapped_candid_type(rec_record)?;
+                            let wrapped = self.read_wrapped_candid_type(rec_record, None)?;
                             self.trim_start_blank_or_semicolon()?;
                             list.push((name, wrapped));
                             self.trim_start_blank_or_newline()?;
                         }
                         self.remove_char('}')?;
-                        WrappedCandidType::Record(self.sort_list(list))
+                        WrappedCandidType::Record(WrappedCandidTypeRecord {
+                            subitems: self.sort_list(list),
+                            name,
+                        })
                     } else {
                         // tuple 也在里面
                         self.cursor = cursor;
                         let mut list: Vec<WrappedCandidType> = Vec::new();
                         while !self.is_next(&['}']) {
-                            let wrapped = self.read_wrapped_candid_type(rec_record)?;
+                            let wrapped = self.read_wrapped_candid_type(rec_record, None)?;
                             self.trim_start_blank_or_semicolon()?;
                             list.push(wrapped);
                             self.trim_start_blank_or_newline()?;
                         }
                         self.remove_char('}')?;
-                        WrappedCandidType::Tuple(list)
+                        WrappedCandidType::Tuple(WrappedCandidTypeTuple {
+                            subitems: list,
+                            name,
+                        })
                     }
                 }
             }
@@ -708,16 +742,19 @@ impl CandidBuilder {
                     self.trim_start_blank_or_newline()?;
                     if self.is_next(&[':']) {
                         self.remove_char(':')?;
-                        wrapped = Some(self.read_wrapped_candid_type(rec_record)?);
+                        wrapped = Some(self.read_wrapped_candid_type(rec_record, None)?);
                     }
                     self.trim_start_blank_or_semicolon()?;
                     list.push((name, wrapped));
                     self.trim_start_blank_or_newline()?;
                 }
                 self.remove_char('}')?;
-                WrappedCandidType::Variant(self.sort_list(list))
+                WrappedCandidType::Variant(WrappedCandidTypeVariant {
+                    subitems: self.sort_list(list),
+                    name,
+                })
             }
-            "func" => WrappedCandidType::Func(self.read_wrapped_func(rec_record)?),
+            "func" => WrappedCandidType::Func(self.read_wrapped_func(rec_record, name)?),
             "service" => {
                 self.trim_start_blank_or_colon()?;
                 self.trim_start_blank_or_newline()?;
@@ -725,7 +762,7 @@ impl CandidBuilder {
                 if self.is_next(&['(']) {
                     self.remove_char('(')?;
                     while !self.is_next(&[')']) {
-                        let wrapped = self.read_wrapped_candid_type(rec_record)?;
+                        let wrapped = self.read_wrapped_candid_type(rec_record, None)?;
                         self.trim_start_blank_or_comma()?;
                         args.push(wrapped);
                         self.trim_start_blank_or_newline()?;
@@ -742,7 +779,7 @@ impl CandidBuilder {
                     let name = self.read_name()?;
                     self.trim_start_blank_or_newline()?;
                     self.remove_char(':')?;
-                    let wrapped_func = self.read_wrapped_func(rec_record)?;
+                    let wrapped_func = self.read_wrapped_func(rec_record, None)?;
                     self.trim_start_blank_or_semicolon()?;
                     methods.push((name, wrapped_func));
                     self.trim_start_blank_or_newline()?;
@@ -751,16 +788,17 @@ impl CandidBuilder {
                 WrappedCandidType::Service(WrappedCandidTypeService {
                     args,
                     methods: self.sort_list(methods),
+                    name,
                 })
             }
-            _ => match self.read_wrapped_candid_type_by_name(rec_record, candid_type) {
+            _ => match self.read_wrapped_candid_type_by_name(rec_record, candid_type.clone()) {
                 Ok(candid_type) => candid_type,
                 Err(err) => {
                     if !matches!(err, ParsedCandidError::MissingType(_)) {
                         return Err(err);
                     }
                     self.trim_start_blank_or_colon()?;
-                    self.read_wrapped_candid_type(rec_record)?
+                    self.read_wrapped_candid_type(rec_record, Some(candid_type))?
                 }
             },
         };
@@ -803,85 +841,140 @@ impl CandidBuilder {
         inner: &InnerCandidType,
     ) -> Result<WrappedCandidType, ParsedCandidError> {
         // 如果没有
-        let wrapped = match inner {
-            InnerCandidType::Bool => WrappedCandidType::Bool,
-            InnerCandidType::Nat => WrappedCandidType::Nat,
-            InnerCandidType::Int => WrappedCandidType::Int,
-            InnerCandidType::Nat8 => WrappedCandidType::Nat8,
-            InnerCandidType::Nat16 => WrappedCandidType::Nat16,
-            InnerCandidType::Nat32 => WrappedCandidType::Nat32,
-            InnerCandidType::Nat64 => WrappedCandidType::Nat64,
-            InnerCandidType::Int8 => WrappedCandidType::Int8,
-            InnerCandidType::Int16 => WrappedCandidType::Int16,
-            InnerCandidType::Int32 => WrappedCandidType::Int32,
-            InnerCandidType::Int64 => WrappedCandidType::Int64,
-            InnerCandidType::Float32 => WrappedCandidType::Float32,
-            InnerCandidType::Float64 => WrappedCandidType::Float64,
-            InnerCandidType::Null => WrappedCandidType::Null,
-            InnerCandidType::Text => WrappedCandidType::Text,
-            InnerCandidType::Principal => WrappedCandidType::Principal,
-            InnerCandidType::Blob => WrappedCandidType::Vec(Box::new(WrappedCandidType::Nat8)),
-            InnerCandidType::Vec(inner) => WrappedCandidType::Vec(Box::new(
-                self.read_wrapped_candid_type_by_inner(rec_record, inner)?,
-            )),
-            InnerCandidType::Opt(inner) => WrappedCandidType::Opt(Box::new(
-                self.read_wrapped_candid_type_by_inner(rec_record, inner)?,
-            )),
-            InnerCandidType::Record(inners) => {
+        let wrapped = match inner.clone() {
+            InnerCandidType::Bool(name) => {
+                WrappedCandidType::Bool(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Nat(name) => WrappedCandidType::Nat(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Int(name) => WrappedCandidType::Int(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Nat8(name) => {
+                WrappedCandidType::Nat8(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Nat16(name) => {
+                WrappedCandidType::Nat16(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Nat32(name) => {
+                WrappedCandidType::Nat32(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Nat64(name) => {
+                WrappedCandidType::Nat64(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Int8(name) => {
+                WrappedCandidType::Int8(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Int16(name) => {
+                WrappedCandidType::Int16(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Int32(name) => {
+                WrappedCandidType::Int32(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Int64(name) => {
+                WrappedCandidType::Int64(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Float32(name) => {
+                WrappedCandidType::Float32(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Float64(name) => {
+                WrappedCandidType::Float64(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Null(name) => {
+                WrappedCandidType::Null(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Text(name) => {
+                WrappedCandidType::Text(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Principal(name) => {
+                WrappedCandidType::Principal(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Blob(name) => WrappedCandidType::Vec(WrappedCandidTypeSubtype {
+                subtype: Box::new(WrappedCandidType::Nat8(WrappedCandidTypeName::default())),
+                name,
+            }),
+            InnerCandidType::Vec(inner, name) => WrappedCandidType::Vec(WrappedCandidTypeSubtype {
+                subtype: Box::new(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?),
+                name,
+            }),
+            InnerCandidType::Opt(inner, name) => WrappedCandidType::Opt(WrappedCandidTypeSubtype {
+                subtype: Box::new(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?),
+                name,
+            }),
+            InnerCandidType::Record(inners, name) => {
                 let mut list = Vec::new();
                 for (name, inner) in inners {
                     list.push((
                         name.clone(),
-                        self.read_wrapped_candid_type_by_inner(rec_record, inner)?,
+                        self.read_wrapped_candid_type_by_inner(rec_record, &inner)?,
                     ))
                 }
-                WrappedCandidType::Record(list)
+                WrappedCandidType::Record(WrappedCandidTypeRecord {
+                    subitems: list,
+                    name,
+                })
             }
-            InnerCandidType::Variant(inners) => {
+            InnerCandidType::Variant(inners, name) => {
                 let mut list = Vec::new();
                 for (name, inner) in inners {
                     let mut inner_type = None;
                     if let Some(inner) = inner {
                         inner_type =
-                            Some(self.read_wrapped_candid_type_by_inner(rec_record, inner)?);
+                            Some(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?);
                     }
                     list.push((name.clone(), inner_type))
                 }
-                WrappedCandidType::Variant(list)
+                WrappedCandidType::Variant(WrappedCandidTypeVariant {
+                    subitems: list,
+                    name,
+                })
             }
-            InnerCandidType::Tuple(inners) => {
+            InnerCandidType::Tuple(inners, name) => {
                 let mut list = Vec::new();
                 for inner in inners {
-                    list.push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
+                    list.push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
                 }
-                WrappedCandidType::Tuple(list)
+                WrappedCandidType::Tuple(WrappedCandidTypeTuple {
+                    subitems: list,
+                    name,
+                })
             }
-            InnerCandidType::Unknown => WrappedCandidType::Unknown,
-            InnerCandidType::Empty => WrappedCandidType::Empty,
-            InnerCandidType::Reserved => WrappedCandidType::Reserved,
+            InnerCandidType::Unknown(name) => {
+                WrappedCandidType::Unknown(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Empty(name) => {
+                WrappedCandidType::Empty(WrappedCandidTypeName::from(name))
+            }
+            InnerCandidType::Reserved(name) => {
+                WrappedCandidType::Reserved(WrappedCandidTypeName::from(name))
+            }
             InnerCandidType::Func(InnerCandidTypeFunction {
                 args,
                 rets,
                 annotation,
+                name,
             }) => {
                 let mut wrapped_args = Vec::new();
                 for inner in args {
-                    wrapped_args.push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
+                    wrapped_args.push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
                 }
                 let mut wrapped_results = Vec::new();
                 for inner in rets {
-                    wrapped_results.push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
+                    wrapped_results
+                        .push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
                 }
                 WrappedCandidType::Func(WrappedCandidTypeFunction {
                     args: wrapped_args,
                     rets: wrapped_results,
-                    annotation: *annotation,
+                    annotation,
+                    name,
                 })
             }
-            InnerCandidType::Service(InnerCandidTypeService { args, methods }) => {
+            InnerCandidType::Service(InnerCandidTypeService {
+                args,
+                methods,
+                name,
+            }) => {
                 let mut wrapped_args = Vec::new();
                 for inner in args {
-                    wrapped_args.push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
+                    wrapped_args.push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
                 }
                 let mut wrapped_methods = Vec::new();
                 for (name, inner) in methods {
@@ -902,22 +995,24 @@ impl CandidBuilder {
                             args: wrapped_args,
                             rets: wrapped_results,
                             annotation: inner.annotation,
+                            name: None,
                         },
                     ))
                 }
                 WrappedCandidType::Service(WrappedCandidTypeService {
                     args: wrapped_args,
                     methods: wrapped_methods,
+                    name,
                 })
             }
             InnerCandidType::Reference(name) => {
-                let id = rec_record.id(name);
+                let id = rec_record.id(&name);
                 if let Some(id) = id {
                     WrappedCandidType::Reference(WrappedCandidTypeReference {
                         id,
                         name: Some(name.clone()),
                     })
-                } else if rec_record.contains(name) {
+                } else if rec_record.contains(&name) {
                     let id = rec_record.insert(name.clone())?;
                     WrappedCandidType::Reference(WrappedCandidTypeReference {
                         id,
