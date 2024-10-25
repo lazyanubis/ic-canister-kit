@@ -794,11 +794,22 @@ impl CandidBuilder {
             _ => match self.read_wrapped_candid_type_by_name(rec_record, candid_type.clone()) {
                 Ok(candid_type) => candid_type,
                 Err(err) => {
-                    if !matches!(err, ParsedCandidError::MissingType(_)) {
-                        return Err(err);
+                    match err {
+                        ParsedCandidError::MissingType(n) if n == candid_type => {}
+                        err => return Err(err),
                     }
                     self.trim_start_blank_or_colon()?;
-                    self.read_wrapped_candid_type(rec_record, Some(candid_type))?
+                    match self.read_wrapped_candid_type(rec_record, Some(candid_type.clone())) {
+                        Ok(candid_type) => candid_type,
+                        Err(err) => {
+                            if let ParsedCandidError::ParsedError(err) = &err {
+                                if err.contains("can not read string") {
+                                    return Err(ParsedCandidError::MissingType(candid_type));
+                                }
+                            }
+                            return Err(err);
+                        }
+                    }
                 }
             },
         };
