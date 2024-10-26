@@ -3402,8 +3402,12 @@ type Command = variant {
   MakeProposal : Proposal;
 };
 
+type WrappedPropoasl = record {
+      proposal: opt Proposal
+};
+
 service : {
-  claim_gtc_neurons : (Proposal) -> ();
+  claim_gtc_neurons : (Proposal) -> (WrappedPropoasl);
 }
 "##;
         test_single_candid(candid7, "candid7");

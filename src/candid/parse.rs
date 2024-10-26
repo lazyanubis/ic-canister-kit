@@ -840,9 +840,8 @@ impl CandidBuilder {
                 name: Some(name.clone()),
             });
             rec_record.remove(&name)?;
-        } else {
-            self.known_type(name, wrapped.clone());
         }
+        self.known_type(name, wrapped.clone());
         rec_record.pop()?;
         Ok(wrapped)
     }
