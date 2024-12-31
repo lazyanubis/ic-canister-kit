@@ -2,6 +2,8 @@
   "cSpell.words": [
     "aaccount",
     "Atid",
+    "cdylib",
+    "codegen",
     "hasher",
     "icrc",
     "Millisatoshi",
@@ -13,6 +15,7 @@
     "rustdoc",
     "Satoshi",
     "Schedulable",
+    "serde",
     "subaccount",
     "subaccounts",
     "Utxo",

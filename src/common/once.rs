@@ -1,7 +1,7 @@
 use std::{borrow::BorrowMut, cell::RefCell};
 
 thread_local! {
-    static CALL_ONCE: RefCell<bool> = RefCell::new(false);
+    static CALL_ONCE: RefCell<bool> = const { RefCell::new(false) };
 }
 
 /// 拦截对象
