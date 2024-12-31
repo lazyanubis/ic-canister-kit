@@ -1,6 +1,7 @@
+//! 和 罐子 的 Cycles 相关
+
 use crate::identity::CanisterId;
 
-/// 和 罐子 的 Cycles 相关
 /*
 
 引入包后, 直接使用如下方法即可增加查询和接收 cycles 的接口

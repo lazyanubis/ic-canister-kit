@@ -1,4 +1,4 @@
-/// 更新罐子设置
+//! 更新罐子设置
 
 /// 更新罐子设置
 /// ! Only the controllers of the canister

@@ -47,7 +47,7 @@ pub fn self_canister_cycles() -> u128 {
 pub fn self_canister_stable_memory_size() -> u128 {
     #[cfg(target_arch = "wasm32")]
     {
-        (ic_cdk::api::stable::stable64_size() as u128) * WASM_PAGE_SIZE as u128
+        (ic_cdk::api::stable::stable_size() as u128) * WASM_PAGE_SIZE as u128
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

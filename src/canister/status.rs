@@ -1,6 +1,6 @@
-use crate::identity::CanisterId;
+//! 和 罐子 的 状态 相关
 
-/// 和 罐子 的 状态 相关
+use crate::identity::CanisterId;
 
 /*
 

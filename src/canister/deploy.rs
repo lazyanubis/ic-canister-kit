@@ -1,4 +1,4 @@
-/// 和 罐子 的 部署 相关
+//! 和 罐子 的 部署 相关
 
 /// 部署罐子
 pub async fn deploy_canister(

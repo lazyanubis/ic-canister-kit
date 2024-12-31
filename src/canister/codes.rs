@@ -1,6 +1,6 @@
-use crate::identity::CanisterId;
+//! 罐子代码
 
-/// 罐子代码
+use crate::identity::CanisterId;
 
 /// 部署罐子代码
 pub type CanisterCodeWasm = Vec<u8>;
