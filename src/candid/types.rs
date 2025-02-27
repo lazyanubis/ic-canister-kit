@@ -35,6 +35,7 @@ fn wrapped_key_word(name: &str) -> String {
         "rec" => true, // 可能是关键字
         _ => false,
     } || name.contains(' ')
+        || name.contains('-')
         || name.contains('\\')
     {
         format!("\"{}\"", name)
