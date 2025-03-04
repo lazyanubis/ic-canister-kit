@@ -87,6 +87,10 @@ impl WrappedCandidTypeRecord {
     pub fn to_text(&self) -> String {
         let Self { subitems, .. } = self;
 
+        if subitems.is_empty() {
+            return "record {}".to_string();
+        }
+
         format!(
             "record {{ {} }}",
             subitems
@@ -118,6 +122,10 @@ impl WrappedCandidTypeVariant {
     /// 文本
     pub fn to_text(&self) -> String {
         let Self { subitems, .. } = self;
+
+        if subitems.is_empty() {
+            return "variant {}".to_string();
+        }
 
         format!(
             "variant {{ {} }}",
@@ -153,6 +161,10 @@ impl WrappedCandidTypeTuple {
     pub fn to_text(&self) -> String {
         let Self { subitems, .. } = self;
 
+        if subitems.is_empty() {
+            return "record {}".to_string();
+        }
+
         format!(
             "record {{ {} }}",
             subitems
@@ -179,10 +191,18 @@ pub enum FunctionAnnotation {
 #[derive(Debug, Clone, CandidType, Serialize, Deserialize, Eq, PartialEq)]
 pub struct WrappedCandidTypeFunction {
     /// args
-    #[serde(rename = "args", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "args",
+        skip_serializing_if = "Vec::is_empty",
+        default = "Vec::new"
+    )]
     pub args: Vec<WrappedCandidType>,
     /// results
-    #[serde(rename = "rets", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "rets",
+        skip_serializing_if = "Vec::is_empty",
+        default = "Vec::new"
+    )]
     pub rets: Vec<WrappedCandidType>,
     /// annotation update query
     #[serde(rename = "annotation", skip_serializing_if = "Option::is_none")]
@@ -228,10 +248,18 @@ impl WrappedCandidTypeFunction {
 #[derive(Debug, Clone, CandidType, Serialize, Deserialize, Eq, PartialEq)]
 pub struct WrappedCandidTypeService {
     /// args
-    #[serde(rename = "args", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "args",
+        skip_serializing_if = "Vec::is_empty",
+        default = "Vec::new"
+    )]
     pub args: Vec<WrappedCandidType>,
     /// methods
-    #[serde(rename = "methods", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "methods",
+        skip_serializing_if = "Vec::is_empty",
+        default = "Vec::new"
+    )]
     pub methods: Vec<(String, WrappedCandidTypeFunction)>,
 
     /// 有时候有名字
@@ -257,15 +285,22 @@ impl WrappedCandidTypeService {
                         .join(", ")
                 )
             },
-            methods
-                .iter()
-                .map(|(name, func)| format!(
-                    "    {} : {};",
-                    wrapped_key_word(name),
-                    func.to_text().trim_start_matches("func ")
-                ))
-                .collect::<Vec<_>>()
-                .join("\n"),
+            if methods.is_empty() {
+                "".to_string()
+            } else {
+                format!(
+                    "\n{}\n",
+                    methods
+                        .iter()
+                        .map(|(name, func)| format!(
+                            "    {} : {};",
+                            wrapped_key_word(name),
+                            func.to_text().trim_start_matches("func ")
+                        ))
+                        .collect::<Vec<_>>()
+                        .join("\n")
+                )
+            }
         )
     }
 
