@@ -259,7 +259,11 @@ impl WrappedCandidTypeService {
             },
             methods
                 .iter()
-                .map(|(name, func)| format!("    {} : {};", wrapped_key_word(name), func.to_text()))
+                .map(|(name, func)| format!(
+                    "    {} : {};",
+                    wrapped_key_word(name),
+                    func.to_text().trim_start_matches("func ")
+                ))
                 .collect::<Vec<_>>()
                 .join("\n"),
         )

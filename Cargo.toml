@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "1.0.17"
+version = "1.0.18"
 edition = "2021"
 license = "Apache-2.0"
 readme = "README.md"
@@ -91,7 +91,7 @@ all = [
 
 
 [dependencies]
-candid = { version = "0.10.11", optional = true }
+candid = { version = "0.10.13", optional = true }
 ic-cdk = { version = "0.17.1", optional = true, features = [
     "transform-closure",
 ] }
@@ -105,8 +105,8 @@ hex = { version = "0.4", optional = true }       # 16进制
 
 base32 = { version = "0.5", optional = true } # base32 加密解密
 
-serde = { version = "1.0.217", optional = true, features = [
+serde = { version = "1.0.218", optional = true, features = [
     "derive",
 ] } # 序列化/反序列化框架
-serde_json = { version = "1.0.134", optional = true } # json
+serde_json = { version = "1.0.140", optional = true } # json
 ciborium = { version = "0.2", optional = true } # 序列化/反序列化
