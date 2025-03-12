@@ -195,9 +195,6 @@ impl CandidBuilder {
         Ok(())
     }
 
-    fn trim_start_blank(&mut self) -> Result<(), ParsedCandidError> {
-        self.trim_start_blank_or_chars(&[])
-    }
     fn trim_start_blank_or_semicolon(&mut self) -> Result<(), ParsedCandidError> {
         self.trim_start_blank_or_chars(&[';'])
     }
@@ -216,7 +213,7 @@ impl CandidBuilder {
 
     // 读取下一个标识符
     fn read_name(&mut self) -> Result<String, ParsedCandidError> {
-        self.trim_start_blank()?;
+        self.trim_start_blank_or_chars(&['\n'])?;
         let cursor = self.cursor;
         let mark = self.is_next(&['"']); // 是否双引号标识
         if mark {
@@ -546,8 +543,17 @@ impl CandidBuilder {
             )));
         }
 
-        self.trim_start_blank_or_colon()?;
         self.trim_start_blank_or_newline()?;
+        if !self.is_next(&[':']) {
+            return Err(ParsedCandidError::ParsedError(format!(
+                "next chars must be ':' after 'service' at {}",
+                self.remain(None)
+            )));
+        }
+        self.trim_start_blank_or_colon()?; // remove :
+
+        self.trim_start_blank_or_newline()?;
+
         let mut args: Vec<WrappedCandidType> = Vec::new();
         if self.is_next(&['(']) {
             self.remove_char('(')?;
@@ -572,7 +578,66 @@ impl CandidBuilder {
             self.remove_char('-')?;
             self.remove_char('>')?;
         }
+
         self.trim_start_blank_or_newline()?;
+
+        if !self.is_next(&['{']) {
+            let name = self.read_name()?;
+            if let Some(InnerCandidType::Service(InnerCandidTypeService {
+                args,
+                methods,
+                name,
+            })) = &self.inner_types.get(&name).cloned()
+            {
+                let mut rec_record = RecRecord::new();
+                let mut wrapped_args = Vec::new();
+                for inner in args {
+                    wrapped_args
+                        .push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
+                }
+                let mut wrapped_methods = Vec::new();
+                for (name, inner) in methods {
+                    let mut wrapped_args = Vec::new();
+                    for inner in &inner.args {
+                        wrapped_args
+                            .push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
+                    }
+                    let mut wrapped_results = Vec::new();
+                    for inner in &inner.rets {
+                        wrapped_results
+                            .push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
+                    }
+
+                    wrapped_methods.push((
+                        name.clone(),
+                        WrappedCandidTypeFunction {
+                            args: wrapped_args,
+                            rets: wrapped_results,
+                            annotation: inner.annotation,
+                            name: None,
+                        },
+                    ))
+                }
+
+                self.service = Some(WrappedCandidTypeService {
+                    args: wrapped_args,
+                    methods: wrapped_methods,
+                    name: name.clone(),
+                });
+                return Ok(());
+            }
+            let ty = self.wrapped_types.get(&name).ok_or_else(|| {
+                ParsedCandidError::ParsedError(format!("can not find service type: {name}"))
+            })?;
+            if let WrappedCandidType::Service(service) = ty {
+                self.service = Some(service.clone());
+                return Ok(());
+            }
+            return Err(ParsedCandidError::ParsedError(format!(
+                "type: {name} is not service"
+            )));
+        }
+
         self.remove_char('{')?;
         self.trim_start_blank_or_newline()?;
         let mut methods: Vec<(String, WrappedCandidTypeFunction)> = Vec::new();
@@ -587,6 +652,7 @@ impl CandidBuilder {
             self.trim_start_blank_or_newline()?;
         }
         self.remove_char('}')?;
+
         self.service = Some(WrappedCandidTypeService {
             args,
             methods: self.sort_list(methods),

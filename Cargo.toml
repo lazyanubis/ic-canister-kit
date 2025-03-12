@@ -1,7 +1,7 @@
 [package]
 name = "ic-canister-kit"
-version = "1.0.19"
-edition = "2021"
+version = "1.0.20"
+edition = "2024"
 license = "Apache-2.0"
 readme = "README.md"
 include = ["src", "Cargo.toml", "LICENSE", "README.md"]
@@ -30,7 +30,7 @@ codegen-units = 1 # 指定一个包会被分隔为多少个代码生成单元。
 
 [features]
 default = [
-    "common",
+    # "common",
     # "times",
     # "identity",
     # "canister",
@@ -62,7 +62,7 @@ schedule = ["functions", "times"] # 定时任务
 stable = ["functions", "ic-stable-structures"] # 稳定内存
 
 # candid 类型
-canister-did = ["serde"]
+canister-did = ["serde", "candid"]
 
 # # NFT相关
 # nft = ["identity"]   # NFT
