@@ -1,22 +1,22 @@
 pub use super::initial::Initial;
 
-pub use super::upgrade::Upgrade;
+pub use super::upgrade::{StateUpgrade, Upgrade};
 
 pub use super::pausable::{
-    basic::{Pause, PauseReason},
     Pausable, Reasonable,
+    basic::{Pause, PauseReason},
 };
 
-pub use super::schedule::{basic::Schedule, Schedulable, TimerId};
+pub use super::schedule::{Schedulable, TimerId, basic::Schedule};
 
 pub use super::permission::{
-    basic::{Permission, Permissions},
     Permissable, PermissionUpdatedArg, PermissionUpdatedError,
+    basic::{Permission, Permissions},
 };
 
 pub use super::record::{
-    basic::{Record, RecordSearch, RecordSearchArg, RecordTopic, Records},
     MigratedRecords, RecordId, Recordable, Searchable,
+    basic::{Record, RecordSearch, RecordSearchArg, RecordTopic, Records},
 };
 
 pub use super::stable::StableHeap;
