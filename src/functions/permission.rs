@@ -438,4 +438,44 @@ pub mod basic {
             })
         }
     }
+
+    // ================= 工具方法 =================
+
+    /// 解析所有权限
+    pub fn parse_all_permissions<'a, F, E>(
+        actions: &[&'a str],
+        parse: F,
+    ) -> Result<HashSet<Permission>, E>
+    where
+        F: Fn(&'a str) -> Result<Permission, E>,
+    {
+        let mut permissions = HashSet::with_capacity(actions.len());
+        for name in actions {
+            permissions.insert(parse(name)?);
+        }
+        Ok(permissions)
+    }
+
+    /// 维护者获取所有授权权限
+    pub fn permitted_permissions(permissions: &HashSet<Permission>) -> HashSet<Permission> {
+        permissions
+            .iter()
+            .filter(|p| p.is_permit())
+            .cloned()
+            .collect()
+    }
+
+    /// 维护者获取所有权限
+    pub fn maintainer_updated(
+        maintainers: &[UserId],
+        permissions: &HashSet<Permission>,
+    ) -> Vec<PermissionUpdatedArg<Permission>> {
+        let permitted: HashSet<Permission> = permitted_permissions(permissions);
+        maintainers
+            .iter()
+            .map(|maintainer| {
+                PermissionUpdatedArg::UpdateUserPermission(*maintainer, Some(permitted.clone()))
+            })
+            .collect()
+    }
 }
