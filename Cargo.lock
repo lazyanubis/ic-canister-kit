@@ -338,7 +338,7 @@ dependencies = [
 
 [[package]]
 name = "ic-canister-kit"
-version = "1.0.24"
+version = "1.0.25"
 dependencies = [
  "base32 0.5.1",
  "candid",
