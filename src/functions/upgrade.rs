@@ -3,7 +3,7 @@
 // ================== 功能 ==================
 
 /// 版本升级
-pub trait Upgrade {
+pub trait Upgrade<T> {
     /// 当前版本
     fn version(&self) -> u32;
 
@@ -11,5 +11,5 @@ pub trait Upgrade {
     fn from_version(version: u32) -> Self;
 
     /// 进行升级
-    fn upgrade(&mut self);
+    fn upgrade(&mut self, arg: T);
 }
