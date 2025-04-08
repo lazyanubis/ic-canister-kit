@@ -7,8 +7,7 @@ pub use crate::times::{DurationNanos, TimestampNanos};
 #[cfg(feature = "identity")]
 pub use crate::identity::{
     AccountIdentifier, AccountIdentifierHex, CallerId, CallerIdText, CanisterId, CanisterIdText,
-    CollectionId, CollectionIdText, FromHexError, FromVecError, Subaccount, SubaccountHex, UserId,
-    UserIdText,
+    CollectionId, CollectionIdText, Subaccount, SubaccountHex, UserId, UserIdText,
 };
 
 #[cfg(feature = "canister")]

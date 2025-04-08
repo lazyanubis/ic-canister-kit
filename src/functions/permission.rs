@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{common::option::display_option_by, identity::UserId};
 
-/// 权限管理
+// 权限管理
 
 /// 权限修改参数
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
@@ -57,9 +57,9 @@ pub trait Permissable<Permission: Eq + Hash> {
     /// 某用户被授权的角色
     fn permission_user_roles(&self, user_id: &UserId) -> Option<&HashSet<String>>;
 
-    /// 综合直接授权和角色间接授权的情况
-    /// 若权限是默认没有的(Permitted)，任意路径包含则有该权限，fallback 是 无
-    /// 若权限是默认拥有的(Forbidden)，任意路径包含则无该权限，fallback 是 有
+    // 综合直接授权和角色间接授权的情况
+    // 若权限是默认没有的(Permitted)，任意路径包含则有该权限，fallback 是 无
+    // 若权限是默认拥有的(Forbidden)，任意路径包含则无该权限，fallback 是 有
 
     /// 判断用户是否拥有某权限
     fn permission_has(&self, user_id: &UserId, permission: &Permission) -> bool;

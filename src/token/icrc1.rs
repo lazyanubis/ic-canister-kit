@@ -1,3 +1,6 @@
+//! ICRC1 标准接口
+//! https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1
+
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
@@ -5,9 +8,6 @@ use crate::{
     canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
     identity::{CanisterId, Subaccount, UserId},
 };
-
-/// ICRC1 标准接口
-/// https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1
 
 // ICRC1 标准
 // icrc1_supported_standards : () -> (vec StandardRecord) query;
@@ -178,68 +178,71 @@ pub async fn icrc1_fee(canister_id: CanisterId) -> CanisterCallResult<Icrc1Fee> 
 //     InsufficientFunds : record { balance : nat };
 // };
 
-/// 转账 memo
-/// 长度不限制
-pub type Icrc1Memo = Vec<u8>;
+// /// 转账 memo
+// /// 长度不限制
+// pub type Icrc1Memo = Vec<u8>;
 
 /// 转账参数
-#[derive(CandidType, Deserialize, Debug, Clone)]
-pub struct Icrc1TransferArgs {
-    /// 调用者指定的使用的子账户地址
-    pub from_subaccount: Option<Icrc1Subaccount>,
-    /// 目标地址
-    pub to: Icrc1Account,
-    /// 想要转给目标地址的数量
-    pub amount: candid::Nat,
-    /// 交易费
-    pub fee: Option<candid::Nat>,
-    /// 交易标识码
-    pub memo: Option<Icrc1Memo>,
-    /// 请求的时间节点
-    pub created_at_time: Option<u64>,
-}
+pub type Icrc1TransferArgs = icrc_ledger_types::icrc1::transfer::TransferArg;
+// #[derive(CandidType, Deserialize, Debug, Clone)]
+// pub struct Icrc1TransferArgs {
+//     /// 调用者指定的使用的子账户地址
+//     pub from_subaccount: Option<Icrc1Subaccount>,
+//     /// 目标地址
+//     pub to: Icrc1Account,
+//     /// 想要转给目标地址的数量
+//     pub amount: candid::Nat,
+//     /// 交易费
+//     pub fee: Option<candid::Nat>,
+//     /// 交易标识码
+//     pub memo: Option<Icrc1Memo>,
+//     /// 请求的时间节点
+//     pub created_at_time: Option<u64>,
+// }
 /// 转账可能出现的错误
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
-pub enum Icrc1TransferError {
-    /// 通用错误
-    GenericError {
-        /// 错误码
-        error_code: candid::Nat,
-        /// 错误消息
-        message: String,
-    },
-    /// 临时不可用
-    TemporarilyUnavailable,
-    /// 错误的燃烧数量
-    BadBurn {
-        /// 最小的燃烧数量
-        min_burn_amount: candid::Nat,
-    },
-    /// 交易重复
-    Duplicate {
-        /// 重复的交易
-        duplicate_of: candid::Nat,
-    },
-    /// 错误的费用
-    BadFee {
-        /// 期望的费用
-        expected_fee: candid::Nat,
-    },
-    /// 未来的转账
-    CreatedInFuture {
-        /// 当前账本时间
-        ledger_time: u64,
-    },
-    /// 订单太老
-    TooOld,
-    /// 余额不足
-    InsufficientFunds {
-        /// 当前余额
-        balance: candid::Nat,
-    },
-}
+pub type Icrc1TransferError = icrc_ledger_types::icrc1::transfer::TransferError;
+// #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+// pub enum Icrc1TransferError {
+//     /// 通用错误
+//     GenericError {
+//         /// 错误码
+//         error_code: candid::Nat,
+//         /// 错误消息
+//         message: String,
+//     },
+//     /// 临时不可用
+//     TemporarilyUnavailable,
+//     /// 错误的燃烧数量
+//     BadBurn {
+//         /// 最小的燃烧数量
+//         min_burn_amount: candid::Nat,
+//     },
+//     /// 交易重复
+//     Duplicate {
+//         /// 重复的交易
+//         duplicate_of: candid::Nat,
+//     },
+//     /// 错误的费用
+//     BadFee {
+//         /// 期望的费用
+//         expected_fee: candid::Nat,
+//     },
+//     /// 未来的转账
+//     CreatedInFuture {
+//         /// 当前账本时间
+//         ledger_time: u64,
+//     },
+//     /// 订单太老
+//     TooOld,
+//     /// 余额不足
+//     InsufficientFunds {
+//         /// 当前余额
+//         balance: candid::Nat,
+//     },
+// }
 /// 转账结果
-pub type Icrc1TransferResult = Result<candid::Nat, Icrc1TransferError>;
+pub type Icrc1TransferResult =
+    Result<candid::Nat, icrc_ledger_types::icrc1::transfer::TransferError>;
 /// 进行转账
 #[allow(unused)]
 pub async fn icrc1_transfer(
@@ -262,7 +265,10 @@ pub async fn icrc1_transfer_by(
         canister_id,
         Icrc1TransferArgs {
             from_subaccount: None,
-            to: Icrc1Account { owner, subaccount },
+            to: icrc_ledger_types::icrc1::account::Account {
+                owner,
+                subaccount: subaccount.map(|s| s.0),
+            },
             amount,
             fee: None,
             memo: None,

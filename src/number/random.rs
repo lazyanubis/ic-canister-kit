@@ -1,9 +1,9 @@
+//! 生成随机数
+
 use crate::canister::{fetch_and_wrap_call_result, types::CanisterCallResult};
 
-/// 生成随机数
-
-// 得到随机数
-// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-raw_rand
+/// 得到随机数
+/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-raw_rand
 #[inline]
 pub async fn random() -> CanisterCallResult<[u8; 32]> {
     let call_result = ic_cdk::api::management_canister::main::raw_rand().await;

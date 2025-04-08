@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 // ============= 分页查询 =============
 
 /// 分页对象
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, CandidType)]
 pub struct QueryPage {
     /// 当前页码 1 开始计数
     pub page: u64,
@@ -15,7 +15,7 @@ pub struct QueryPage {
 }
 
 /// 分页查询错误
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, CandidType)]
 pub enum QueryPageError {
     /// 错误的页码，不能为 0
     WrongPage, // page can not be 0
@@ -45,7 +45,7 @@ impl std::fmt::Display for QueryPageError {
 impl std::error::Error for QueryPageError {}
 
 /// 分页查询结果
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, CandidType)]
 pub struct PageData<T> {
     /// 请求的页码
     pub page: u64,

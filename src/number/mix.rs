@@ -1,9 +1,9 @@
+//! 混合数字, 利用随机数进行数字混淆, 不容易猜中原数字
+
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
-/// 混合数字, 利用随机数进行数字混淆, 不容易猜中原数字
-
-// 根据指定序号生成一个加密字符串
+/// 根据指定序号生成一个加密字符串
 #[inline]
 pub fn encode_index_code(salt: &[u8], index: u64, random: Option<&[u8]>) -> Vec<u8> {
     let trimmed = trim_index(index); // 去除前置 0

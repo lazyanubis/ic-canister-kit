@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// motoko 结果
 
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, CandidType)]
 pub enum MotokoResult<T, E> {
     /// 正常
     #[serde(rename = "ok")]

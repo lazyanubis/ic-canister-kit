@@ -1,15 +1,15 @@
 use std::cell::RefCell;
 
-use ic_stable_structures::{memory_manager::MemoryManager, DefaultMemoryImpl};
+use ic_stable_structures::{DefaultMemoryImpl, memory_manager::MemoryManager};
 
 /// 简化虚拟内存
 pub type VirtualMemory =
     ic_stable_structures::memory_manager::VirtualMemory<ic_stable_structures::DefaultMemoryImpl>;
+pub use ic_stable_structures::Memory;
+pub use ic_stable_structures::Storable;
 pub use ic_stable_structures::memory_manager::MemoryId;
 pub use ic_stable_structures::storable::Bound;
 pub use ic_stable_structures::writer::Writer;
-pub use ic_stable_structures::Memory;
-pub use ic_stable_structures::Storable;
 pub use std::borrow::Cow;
 
 /// 稳定对象
@@ -18,7 +18,7 @@ pub type StableCell<T> = ic_stable_structures::Cell<T, VirtualMemory>;
 /// 稳定列表
 /// ! 存储有限长度数据，若不固定长度，则按照最大长度存储，不均匀的数据使用空间浪费比较严重
 /// ! push 和 pop 没有任意位置删除的功能
-/// ! 若不在乎顺序，则移动末尾元素到被删除的位置可实现任意删除。结合 StableBTreeMap 存储双向的缩影数据，可实现任意位置删除。
+/// ! 若不在乎顺序，则移动末尾元素到被删除的位置可实现任意删除。结合 StableBTreeMap 存储双向的索引数据，可实现任意位置删除。
 /// ! 最大的问题还是数据长度问题，任意删除功能不是核心难题。
 pub type StableVec<T> = ic_stable_structures::Vec<T, VirtualMemory>;
 /// 稳定映射

@@ -1,3 +1,5 @@
+//! icp 类的账本罐子接口
+
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
@@ -5,8 +7,6 @@ use crate::{
     canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
     identity::{AccountIdentifier, CanisterId, Subaccount},
 };
-
-/// icp 类的账本罐子接口
 
 // Ledger 标准
 // name : () -> (Name) query;
@@ -97,17 +97,19 @@ pub async fn ledger_decimals_by(canister_id: CanisterId) -> CanisterCallResult<u
 // type Tokens = record { e8s : nat64 };
 
 /// 查询余额参数
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
-pub struct LedgerBinaryAccountBalanceArgs {
-    /// 账户识别
-    pub account: LedgerAccountIdentifier,
-}
+pub type LedgerBinaryAccountBalanceArgs = ic_ledger_types::AccountBalanceArgs;
+// #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+// pub struct LedgerBinaryAccountBalanceArgs {
+//     /// 账户识别
+//     pub account: LedgerAccountIdentifier,
+// }
 /// 余额
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
-pub struct LedgerTokens {
-    ///  ICP 接口指定 8 位精度的数值
-    pub e8s: u64,
-}
+pub type LedgerTokens = ic_ledger_types::Tokens;
+// #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+// pub struct LedgerTokens {
+//     ///  ICP 接口指定 8 位精度的数值
+//     pub e8s: u64,
+// }
 /// 查询余额
 #[allow(unused)]
 pub async fn ledger_account_balance(
@@ -126,7 +128,7 @@ pub async fn ledger_account_balance_by(
 ) -> CanisterCallResult<u64> {
     ledger_account_balance(canister_id, LedgerBinaryAccountBalanceArgs { account })
         .await
-        .map(|b| b.e8s)
+        .map(|b| b.e8s())
 }
 
 //  ============== 查询转账费用 ==============
@@ -166,7 +168,7 @@ pub async fn ledger_transfer_fee_by(canister_id: CanisterId) -> CanisterCallResu
         // LedgerTransferFeeArg {}
     )
     .await
-    .map(|f| f.transfer_fee.e8s)
+    .map(|f| f.transfer_fee.e8s())
 }
 
 //  ============== 转账 ==============
@@ -212,67 +214,69 @@ pub type LedgerAccountIdentifier = AccountIdentifier; // ! 修改为安全的参
 pub type LedgerSubaccount = Subaccount; // ! 修改为安全的参数
 
 /// 转账参数
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
-pub struct LedgerTransferArgs {
-    /// 调用者指定的使用的子账户地址
-    /// 如果没有, 则默认全 0 的子账户
-    /// The subaccount from which the caller wants to transfer funds.
-    /// If null, the ledger uses the default (all zeros) subaccount to compute the source address.
-    pub from_subaccount: Option<LedgerSubaccount>,
-    /// 目标地址, 长度为 32 的byte数组, 转账成功, 目标地址的余额会增加 amount 的数量
-    /// The destination account. If the transfer is successful, the balance of this address increases by `amount`.
-    pub to: LedgerAccountIdentifier,
-    /// 想要转给目标地址的数量
-    pub amount: LedgerTokens,
-    /// 调用者必须支付的交易费, 必须是 10000 e8s
-    /// The amount that the caller pays for the transaction. Must be 10000 e8s.
-    pub fee: LedgerTokens,
-    /// 交易标识码 u64的数字
-    pub memo: LedgerMemo,
-    /// 请求的时间节点, 如果是空, 则默认 IC 系统当前时间
-    /// The point in time when the caller created this request. If null, the ledger uses current IC time as the timestamp.
-    pub created_at_time: Option<LedgerTimestamp>,
-}
+pub type LedgerTransferArgs = ic_ledger_types::TransferArgs;
+// #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+// pub struct LedgerTransferArgs {
+//     /// 调用者指定的使用的子账户地址
+//     /// 如果没有, 则默认全 0 的子账户
+//     /// The subaccount from which the caller wants to transfer funds.
+//     /// If null, the ledger uses the default (all zeros) subaccount to compute the source address.
+//     pub from_subaccount: Option<LedgerSubaccount>,
+//     /// 目标地址, 长度为 32 的byte数组, 转账成功, 目标地址的余额会增加 amount 的数量
+//     /// The destination account. If the transfer is successful, the balance of this address increases by `amount`.
+//     pub to: LedgerAccountIdentifier,
+//     /// 想要转给目标地址的数量
+//     pub amount: LedgerTokens,
+//     /// 调用者必须支付的交易费, 必须是 10000 e8s
+//     /// The amount that the caller pays for the transaction. Must be 10000 e8s.
+//     pub fee: LedgerTokens,
+//     /// 交易标识码 u64的数字
+//     pub memo: LedgerMemo,
+//     /// 请求的时间节点, 如果是空, 则默认 IC 系统当前时间
+//     /// The point in time when the caller created this request. If null, the ledger uses current IC time as the timestamp.
+//     pub created_at_time: Option<LedgerTimestamp>,
+// }
 
 ///  转账成功后返回的交易高度
 pub type LedgerBlockIndex = u64;
 
 /// 转账可能出现的错误
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
-pub enum LedgerTransferError {
-    /// 手续费不正确
-    /// The fee that the caller specified in the transfer request was not the one that ledger expects.
-    /// The caller can change the transfer fee to the `expected_fee` and retry the request.
-    BadFee {
-        /// 期望的手续费
-        expected_fee: LedgerTokens,
-    },
-    /// 余额不足
-    /// The account specified by the caller doesn't have enough funds.
-    InsufficientFunds {
-        /// 余额不足
-        balance: LedgerTokens,
-    },
-    /// 交易过期了, 请求时间太早了, 距离 IC 系统当前时间 24 小时内的请求可以被接受
-    /// The request is too old.
-    /// The ledger only accepts requests created within 24 hours window.
-    /// This is a non-recoverable error.
-    TxTooOld {
-        /// 允许的时间窗口
-        allowed_window_nanos: u64,
-    },
-    /// 未来的交易, 指定交易时间在未来
-    /// The caller specified `created_at_time` that is too far in future.
-    /// The caller can retry the request later.
-    TxCreatedInFuture,
-    /// 重复交易 // ! 猜测是通过交易请求时间判断是否重复的
-    /// The ledger has already executed the request.
-    /// `duplicate_of` field is equal to the index of the block containing the original transaction.
-    TxDuplicate {
-        /// 重复的交易
-        duplicate_of: LedgerBlockIndex,
-    },
-}
+pub type LedgerTransferError = ic_ledger_types::TransferError;
+// #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+// pub enum LedgerTransferError {
+//     /// 手续费不正确
+//     /// The fee that the caller specified in the transfer request was not the one that ledger expects.
+//     /// The caller can change the transfer fee to the `expected_fee` and retry the request.
+//     BadFee {
+//         /// 期望的手续费
+//         expected_fee: LedgerTokens,
+//     },
+//     /// 余额不足
+//     /// The account specified by the caller doesn't have enough funds.
+//     InsufficientFunds {
+//         /// 余额不足
+//         balance: LedgerTokens,
+//     },
+//     /// 交易过期了, 请求时间太早了, 距离 IC 系统当前时间 24 小时内的请求可以被接受
+//     /// The request is too old.
+//     /// The ledger only accepts requests created within 24 hours window.
+//     /// This is a non-recoverable error.
+//     TxTooOld {
+//         /// 允许的时间窗口
+//         allowed_window_nanos: u64,
+//     },
+//     /// 未来的交易, 指定交易时间在未来
+//     /// The caller specified `created_at_time` that is too far in future.
+//     /// The caller can retry the request later.
+//     TxCreatedInFuture,
+//     /// 重复交易 // ! 猜测是通过交易请求时间判断是否重复的
+//     /// The ledger has already executed the request.
+//     /// `duplicate_of` field is equal to the index of the block containing the original transaction.
+//     TxDuplicate {
+//         /// 重复的交易
+//         duplicate_of: LedgerBlockIndex,
+//     },
+// }
 /// 转账结果
 pub type LedgerTransferResult = Result<LedgerBlockIndex, LedgerTransferError>;
 
@@ -300,9 +304,9 @@ pub async fn ledger_transfer_by(
         LedgerTransferArgs {
             from_subaccount: None,
             to,
-            amount: LedgerTokens { e8s: amount },
-            fee: LedgerTokens { e8s: fee },
-            memo,
+            amount: LedgerTokens::from_e8s(amount),
+            fee: LedgerTokens::from_e8s(fee),
+            memo: ic_ledger_types::Memo(memo),
             created_at_time: None,
         },
     )
