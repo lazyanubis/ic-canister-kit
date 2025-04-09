@@ -32,7 +32,7 @@ pub type CallerId = candid::Principal; // 类型别名
 pub type CallerIdText = String; // ? 字符串格式
 
 /// 子账户
-pub type Subaccount = ic_ledger_types::Subaccount; // 长度必须是 32 长度
+pub type Subaccount = icrc_ledger_types::icrc1::account::Subaccount; // 长度必须是 32 长度
 /// 字符串格式的 子账户
 pub type SubaccountHex = String; // ? 16 进制文本
 
@@ -48,7 +48,7 @@ pub type AccountIdentifierHex = String; // ? 16 进制文本
 pub fn u64_to_subaccount(value: u64) -> Subaccount {
     let mut subaccount: [u8; 32] = [0; 32];
     subaccount[24..].copy_from_slice(&value.to_be_bytes());
-    ic_ledger_types::Subaccount(subaccount)
+    subaccount
 }
 
 /// 获取调用者 principal id

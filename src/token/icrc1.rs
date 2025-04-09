@@ -265,10 +265,7 @@ pub async fn icrc1_transfer_by(
         canister_id,
         Icrc1TransferArgs {
             from_subaccount: None,
-            to: icrc_ledger_types::icrc1::account::Account {
-                owner,
-                subaccount: subaccount.map(|s| s.0),
-            },
+            to: icrc_ledger_types::icrc1::account::Account { owner, subaccount },
             amount,
             fee: None,
             memo: None,
