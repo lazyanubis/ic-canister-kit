@@ -1,6 +1,6 @@
 /// 拆箱
 /// ! 可能中止程序
-pub fn trap<T, E>(result: Result<T, E>) -> T
+pub fn trap_string<T, E>(result: Result<T, E>) -> T
 where
     E: Into<String>,
 {
@@ -12,7 +12,7 @@ where
 
 /// 拆箱
 /// ! 可能中止程序
-pub fn trap2<T, E: std::fmt::Display>(result: Result<T, E>) -> T {
+pub fn trap<T, E: std::fmt::Display>(result: Result<T, E>) -> T {
     match result {
         Ok(value) => value,
         Err(err) => ic_cdk::trap(&err.to_string()),

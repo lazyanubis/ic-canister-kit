@@ -10,14 +10,14 @@ use crate::identity::CanisterId;
 async fn canister_status() -> ic_cdk::api::management_canister::main::CanisterStatusResponse {
     use ic_canister_kit::{canister::status::canister_status, identity::self_canister_id};
     let response = canister_status(self_canister_id()).await;
-    ic_canister_kit::common::trap::trap(response.map_err(|err| err.to_string()))
+    ic_canister_kit::common::trap(response)
 }
 
 #[ic_cdk::update]
 async fn canister_info(num_requested_changes: Option<u64>) -> ic_cdk::api::management_canister::main::CanisterInfoResponse {
     use ic_canister_kit::{canister::status::canister_info, identity::self_canister_id};
     let response = canister_info(self_canister_id(), num_requested_changes).await;
-    ic_canister_kit::common::trap::trap(response.map_err(|err| err.to_string()))
+    ic_canister_kit::common::trap(response)
 }
 
 */
