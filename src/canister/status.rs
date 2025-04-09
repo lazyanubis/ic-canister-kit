@@ -8,14 +8,20 @@ use crate::identity::CanisterId;
 
 #[ic_cdk::update]
 async fn canister_status() -> ic_cdk::api::management_canister::main::CanisterStatusResponse {
-    #[allow(clippy::unwrap_used)] // ! SAFETY
-    ic_canister_kit::canister::status::canister_status(ic_canister_kit::identity::self_canister_id()).await.unwrap()
+    use ic_canister_kit::{canister::status::canister_status, identity::self_canister_id};
+    match canister_status(self_canister_id()).await {
+        Ok(response) => response,
+        Err(err) => ic_cdk::trap(&err.to_string()),
+    }
 }
 
 #[ic_cdk::update]
 async fn canister_info(num_requested_changes: Option<u64>) -> ic_cdk::api::management_canister::main::CanisterInfoResponse {
-    #[allow(clippy::unwrap_used)] // ! SAFETY
-    ic_canister_kit::canister::status::canister_info(ic_canister_kit::identity::self_canister_id(), num_requested_changes).await.unwrap()
+    use ic_canister_kit::{canister::status::canister_info, identity::self_canister_id};
+    match canister_info(self_canister_id(), num_requested_changes).await {
+        Ok(response) => response,
+        Err(err) => ic_cdk::trap(&err.to_string()),
+    }
 }
 
 */

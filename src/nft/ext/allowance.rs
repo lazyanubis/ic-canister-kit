@@ -65,7 +65,6 @@ impl ExtAllowance for NftStorage {
     // 2. approve 授权额度
     // ? 标准接口返回值应该是 () 但是有人需要以布尔值表示授权成功或失败，因此修改
     fn approve(&mut self, args: ExtApproveArgs) -> bool {
-        #[allow(clippy::unwrap_used)] // ! SAFETY
         let index =
             super::utils::parse_token_index_with_self_canister(&args.token).unwrap() as usize; // token 标识的正确性也要检查
 

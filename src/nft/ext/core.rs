@@ -239,6 +239,5 @@ pub async fn notify_transfer_message(
         );
         return Err(err);
     }
-    #[allow::clippy(unwrap_used)] // ? SAFETY
     Ok(call_result.unwrap().0)
 }
