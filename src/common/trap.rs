@@ -9,3 +9,12 @@ where
         Err(err) => ic_cdk::trap(&err.into()),
     }
 }
+
+/// 拆箱
+/// ! 可能中止程序
+pub fn trap2<T, E: std::fmt::Display>(result: Result<T, E>) -> T {
+    match result {
+        Ok(value) => value,
+        Err(err) => ic_cdk::trap(&err.to_string()),
+    }
+}

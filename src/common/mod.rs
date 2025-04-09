@@ -15,4 +15,5 @@ pub mod once;
 pub mod types;
 
 /// 拆箱
-pub mod trap;
+mod trap;
+pub use trap::*;
