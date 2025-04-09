@@ -108,7 +108,7 @@ impl ExtCustom for NftStorage {
             let index = index as usize;
             return self.get_nft_rarity(index);
         }
-        panic!("Wrong token_id for nft: {}", token_id);
+        ic_cdk::trap("Wrong token_id for nft: {}", token_id); // ! 中止执行
     }
     fn get_nft_metadata_by_token_identifier(
         &self,
@@ -120,6 +120,6 @@ impl ExtCustom for NftStorage {
             let index = index as usize;
             return self.get_nft_metadata(index, no);
         }
-        panic!("Wrong token_id for nft: {}", token_id);
+        ic_cdk::trap("Wrong token_id for nft: {}", token_id); // ! 中止执行
     }
 }

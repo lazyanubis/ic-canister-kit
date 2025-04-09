@@ -17,10 +17,7 @@ impl Drop for CallOnceGuard {
 #[inline]
 pub fn call_once_guard() -> CallOnceGuard {
     if CALL_ONCE.with(|o| *o.borrow()) {
-        #[allow(clippy::panic)] // ? SAFETY
-        {
-            panic!("Too many request.")
-        }
+        ic_cdk::trap("Too many request."); // ! 中止执行
     }
 
     CALL_ONCE.with_borrow_mut(|o| *o.borrow_mut() = true);

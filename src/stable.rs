@@ -62,7 +62,6 @@ pub fn init_vec_data<T: Storable>(memory_id: MemoryId) -> StableVec<T> {
 pub fn init_map_data<K: Storable + Ord + Clone, V: Storable>(
     memory_id: MemoryId,
 ) -> StableBTreeMap<K, V> {
-    #[allow(clippy::expect_used)] // ? SAFETY
     StableBTreeMap::init(get_virtual_memory(memory_id))
 }
 /// 初始化内存

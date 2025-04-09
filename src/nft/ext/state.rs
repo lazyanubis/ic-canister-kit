@@ -26,6 +26,7 @@ impl ExtState for NftStorage {
     }
 
     fn get_allowances(&self) -> Vec<(ExtTokenIndex, UserId)> {
+        #[allow::clippy(unwrap_used)] // ? SAFETY
         self.nfts
             .iter()
             .filter(|n| n.approved.is_some())
@@ -67,6 +68,7 @@ impl ExtState for NftStorage {
         &self,
         token_ids: Vec<ExtTokenIndex>,
     ) -> Vec<(ExtTokenIndex, ExtTokenMetadata)> {
+        #[allow::clippy(unwrap_used)] // ? SAFETY
         token_ids
             .iter()
             .map(|_id| match self.nfts.get(*_id as usize) {

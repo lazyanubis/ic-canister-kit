@@ -56,7 +56,7 @@ impl NftStorage {
                     } else if no == length {
                         nft.metadata.push(media);
                     } else {
-                        panic!("Wrong token_id for setting metadata of nft");
+                        ic_cdk::trap("Wrong token_id for setting metadata of nft"); // ! 中止执行
                     }
                 }
                 None => {
@@ -64,7 +64,7 @@ impl NftStorage {
                     if no < length {
                         nft.metadata.remove(no);
                     } else {
-                        panic!("Wrong token_id for removing metadata of nft");
+                        ic_cdk::trap("Wrong token_id for removing metadata of nft"); // ! 中止执行
                     }
                 }
             }
@@ -84,13 +84,13 @@ impl NftStorage {
         if let Some(nft) = self.nfts.get(index) {
             return nft.rarity.clone();
         }
-        panic!("Wrong token_id for nft");
+        ic_cdk::trap("Wrong token_id for nft"); // ! 中止执行
     }
     pub fn get_nft_metadata(&self, index: usize, no: usize) -> Option<MediaData> {
         if let Some(nft) = self.nfts.get(index) {
             return nft.metadata.get(no).and_then(|m| Some(m.clone()));
         }
-        panic!("Wrong token_id for nft");
+        ic_cdk::trap("Wrong token_id for nft"); // ! 中止执行
     }
     pub fn get_nft_all(&self) -> Vec<NftView> {
         self.nfts

@@ -1,4 +1,4 @@
-use crate::identity::{self_canister_id, CanisterId, UserId};
+use crate::identity::{CanisterId, UserId, self_canister_id};
 
 use super::types::*;
 
@@ -19,6 +19,7 @@ pub fn parse_token_identifier(canister_id: CanisterId, index: ExtTokenIndex) -> 
 
     // ic_cdk::println!("calc_token_identifier {:?}", array);
 
+    #[allow::clippy(unwrap_used)] // ? SAFETY
     candid::Principal::try_from_slice(&array).unwrap().to_text() // 不会转换失败的
 }
 
@@ -43,6 +44,7 @@ pub fn parse_token_index(
 
 // 解析 token 标识
 fn _parse_token_identifier(_token_identifier: &ExtTokenIdentifier) -> (Vec<u8>, ExtTokenIndex) {
+    #[allow::clippy(unwrap_used)] // ? SAFETY
     let array = UserId::from_text(_token_identifier)
         .unwrap()
         .as_slice()

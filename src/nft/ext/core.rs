@@ -122,7 +122,7 @@ impl ExtCore for NftStorage {
                 return (
                     MotokoResult::Err(ExtTransferError::InvalidToken(args.token)),
                     None,
-                )
+                );
             }
         };
 
@@ -237,8 +237,8 @@ pub async fn notify_transfer_message(
             err.0,
             err.1
         );
-        // panic!("{}", err);
         return Err(err);
     }
+    #[allow::clippy(unwrap_used)] // ? SAFETY
     Ok(call_result.unwrap().0)
 }
