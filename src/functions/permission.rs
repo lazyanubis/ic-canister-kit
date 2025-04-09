@@ -456,7 +456,7 @@ pub mod basic {
         Ok(permissions)
     }
 
-    /// 维护者获取所有授权权限
+    /// 超级管理员获取所有授权权限
     pub fn permitted_permissions(permissions: &HashSet<Permission>) -> HashSet<Permission> {
         permissions
             .iter()
@@ -465,17 +465,15 @@ pub mod basic {
             .collect()
     }
 
-    /// 维护者获取所有权限
-    pub fn maintainer_updated(
-        maintainers: &[UserId],
+    /// 超级管理员获取所有权限
+    pub fn supers_updated(
+        supers: &[UserId],
         permissions: &HashSet<Permission>,
     ) -> Vec<PermissionUpdatedArg<Permission>> {
         let permitted: HashSet<Permission> = permitted_permissions(permissions);
-        maintainers
+        supers
             .iter()
-            .map(|maintainer| {
-                PermissionUpdatedArg::UpdateUserPermission(*maintainer, Some(permitted.clone()))
-            })
+            .map(|su| PermissionUpdatedArg::UpdateUserPermission(*su, Some(permitted.clone())))
             .collect()
     }
 }
