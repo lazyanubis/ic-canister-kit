@@ -13,3 +13,6 @@ pub mod once;
 
 /// 类型
 pub mod types;
+
+/// 拆箱
+pub mod trap;

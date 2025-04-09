@@ -445,13 +445,13 @@ pub mod basic {
     pub fn parse_all_permissions<'a, F, E>(
         actions: &[&'a str],
         parse: F,
-    ) -> Result<HashSet<Permission>, E>
+    ) -> Result<Vec<Permission>, E>
     where
         F: Fn(&'a str) -> Result<Permission, E>,
     {
-        let mut permissions = HashSet::with_capacity(actions.len());
+        let mut permissions = Vec::with_capacity(actions.len());
         for name in actions {
-            permissions.insert(parse(name)?);
+            permissions.push(parse(name)?);
         }
         Ok(permissions)
     }
