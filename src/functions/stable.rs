@@ -14,15 +14,16 @@ pub trait StableHeap {
 // ================== 工具方法 ==================
 
 /// 序列化
-pub fn to_bytes<T: ?Sized + serde::Serialize>(value: &T) -> Vec<u8> {
+pub fn to_bytes<T: ?Sized + serde::Serialize>(value: &T) -> Result<Vec<u8>, &'static str> {
     let mut bytes = vec![];
-    #[allow(clippy::unwrap_used)] // ? SAFETY
-    ciborium::ser::into_writer(value, &mut bytes).unwrap();
-    bytes
+    ciborium::ser::into_writer(value, &mut bytes).map_err(|e| match e {
+        ciborium::ser::Error::Io(_) => "write bytes failed.",
+        ciborium::ser::Error::Value(_) => "serialize failed.",
+    })?;
+    Ok(bytes)
 }
 
 /// 序列化
-pub fn from_bytes<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> T {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    ciborium::de::from_reader(bytes).expect("deserialization must succeed.")
+pub fn from_bytes<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, &'static str> {
+    ciborium::de::from_reader(bytes).map_err(|_| "deserialize failed.")
 }

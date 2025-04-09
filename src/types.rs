@@ -43,8 +43,8 @@ pub use crate::functions::types::*;
 
 #[cfg(feature = "stable")]
 pub use crate::stable::{
-    Bound, Cow, Memory, MemoryId, ReadUpgradeMemory, StableBTreeMap, StableCell, StableLog,
-    StablePriorityQueue, StableVec, Storable, VirtualMemory, WriteUpgradeMemory, Writer,
+    Bound, Cow, GrowFailed, Memory, MemoryId, ReadUpgradeMemory, StableBTreeMap, StableCell,
+    StableLog, StablePriorityQueue, StableVec, Storable, VirtualMemory, WriteUpgradeMemory, Writer,
 };
 
 // #[cfg(feature = "nft")]

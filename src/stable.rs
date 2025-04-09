@@ -5,6 +5,7 @@ use ic_stable_structures::{DefaultMemoryImpl, memory_manager::MemoryManager};
 /// 简化虚拟内存
 pub type VirtualMemory =
     ic_stable_structures::memory_manager::VirtualMemory<ic_stable_structures::DefaultMemoryImpl>;
+pub use ic_stable_structures::GrowFailed;
 pub use ic_stable_structures::Memory;
 pub use ic_stable_structures::Storable;
 pub use ic_stable_structures::memory_manager::MemoryId;
@@ -50,13 +51,17 @@ pub fn get_upgrades_memory() -> VirtualMemory {
 
 /// 初始化内存
 pub fn init_cell_data<T: Storable>(memory_id: MemoryId, default: T) -> StableCell<T> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StableCell::init(get_virtual_memory(memory_id), default).expect("failed to initialize")
+    match StableCell::init(get_virtual_memory(memory_id), default) {
+        Ok(data) => data,
+        Err(_) => ic_cdk::trap("failed to initialize"),
+    }
 }
 /// 初始化内存
 pub fn init_vec_data<T: Storable>(memory_id: MemoryId) -> StableVec<T> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StableVec::init(get_virtual_memory(memory_id)).expect("failed to initialize")
+    match StableVec::init(get_virtual_memory(memory_id)) {
+        Ok(data) => data,
+        Err(_) => ic_cdk::trap("failed to initialize"),
+    }
 }
 /// 初始化内存
 pub fn init_map_data<K: Storable + Ord + Clone, V: Storable>(
@@ -69,19 +74,22 @@ pub fn init_log_data<T: Storable>(
     id_memory_id: MemoryId,
     data_memory_id: MemoryId,
 ) -> StableLog<T> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StableLog::init(
+    match StableLog::init(
         get_virtual_memory(id_memory_id),
         get_virtual_memory(data_memory_id),
-    )
-    .expect("failed to initialize")
+    ) {
+        Ok(data) => data,
+        Err(_) => ic_cdk::trap("failed to initialize"),
+    }
 }
 /// 初始化内存
 pub fn init_priority_queue_data<T: Storable + PartialOrd>(
     memory_id: MemoryId,
 ) -> StablePriorityQueue<T> {
-    #[allow(clippy::expect_used)] // ? SAFETY
-    StablePriorityQueue::init(get_virtual_memory(memory_id)).expect("failed to initialize")
+    match StablePriorityQueue::init(get_virtual_memory(memory_id)) {
+        Ok(data) => data,
+        Err(_) => ic_cdk::trap("failed to initialize"),
+    }
 }
 
 /// 包装升级内存
@@ -104,25 +112,22 @@ impl<'a, M: Memory> WriteUpgradeMemory<'a, M> {
     }
 
     /// 写入升级数据
-    pub fn write(&mut self, bytes: &[u8]) {
-        #[allow(clippy::expect_used)] // ? SAFETY
-        self.writer
-            .write(bytes)
-            .expect("failed to write to upgrade memory");
+    pub fn write(&mut self, bytes: &[u8]) -> Result<(), GrowFailed> {
+        self.writer.write(bytes)
     }
 
     /// 写入 u32
-    pub fn write_u32(&mut self, value: u32) {
+    pub fn write_u32(&mut self, value: u32) -> Result<(), GrowFailed> {
         let mut bytes = Vec::with_capacity(4);
         common::u32_to_bytes(&mut bytes, value);
-        self.write(&bytes);
+        self.write(&bytes)
     }
 
     /// 写入 u64
-    pub fn write_u64(&mut self, value: u64) {
+    pub fn write_u64(&mut self, value: u64) -> Result<(), GrowFailed> {
         let mut bytes = Vec::with_capacity(8);
         common::u64_to_bytes(&mut bytes, value);
-        self.write(&bytes);
+        self.write(&bytes)
     }
 }
 
