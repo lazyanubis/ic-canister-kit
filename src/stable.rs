@@ -35,6 +35,9 @@ thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
 }
 
+// 最大支持 255 个内存片段
+// 这里将第 254 号用作保存堆内存序列化存档数据的内存，业务数据等不应该使用 254 号
+// https://github.com/dfinity/stable-structures/blob/bb9f819cc47669fcf07d4e72516dd715d0624ac8/src/memory_manager.rs#L55
 const MEMORY_ID_UPGRADED: MemoryId = MemoryId::new(254);
 
 /// 获取虚拟内存
@@ -71,11 +74,11 @@ pub fn init_map_data<K: Storable + Ord + Clone, V: Storable>(
 }
 /// 初始化内存
 pub fn init_log_data<T: Storable>(
-    id_memory_id: MemoryId,
+    index_memory_id: MemoryId,
     data_memory_id: MemoryId,
 ) -> StableLog<T> {
     match StableLog::init(
-        get_virtual_memory(id_memory_id),
+        get_virtual_memory(index_memory_id),
         get_virtual_memory(data_memory_id),
     ) {
         Ok(data) => data,
