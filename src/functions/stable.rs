@@ -13,17 +13,29 @@ pub trait StableHeap {
 
 // ================== 工具方法 ==================
 
+#[inline]
+fn type_key<T: ?Sized + 'static>() -> String {
+    use std::any::TypeId;
+    format!("{:?}", TypeId::of::<T>())
+}
+
 /// 序列化
-pub fn to_bytes<T: ?Sized + serde::Serialize>(value: &T) -> Result<Vec<u8>, &'static str> {
+pub fn to_bytes<T: 'static + serde::Serialize>(value: &T) -> Result<Vec<u8>, String> {
     let mut bytes = vec![];
-    ciborium::ser::into_writer(value, &mut bytes).map_err(|e| match e {
-        ciborium::ser::Error::Io(_) => "write bytes failed.",
-        ciborium::ser::Error::Value(_) => "serialize failed.",
+    ciborium::ser::into_writer(value, &mut bytes).map_err(|e| {
+        format!(
+            "{}: {}",
+            match e {
+                ciborium::ser::Error::Io(_) => "write bytes failed.",
+                ciborium::ser::Error::Value(_) => "serialize failed.",
+            },
+            type_key::<T>()
+        )
     })?;
     Ok(bytes)
 }
 
 /// 序列化
-pub fn from_bytes<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, &'static str> {
-    ciborium::de::from_reader(bytes).map_err(|_| "deserialize failed.")
+pub fn from_bytes<T: 'static + serde::de::DeserializeOwned>(bytes: &[u8]) -> Result<T, String> {
+    ciborium::de::from_reader(bytes).map_err(|_| format!("deserialize failed: {}", type_key::<T>()))
 }
