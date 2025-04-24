@@ -4,7 +4,7 @@ use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
+    canister::{call::call_canister, types::CanisterCallResult},
     identity::{AccountIdentifier, CanisterId, Subaccount},
 };
 
@@ -37,9 +37,7 @@ pub struct LedgerName {
 /// 查询名称
 #[allow(unused)]
 pub async fn ledger_name(canister_id: CanisterId) -> CanisterCallResult<LedgerName> {
-    call_canister::<_, (LedgerName,)>(canister_id, "name", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, LedgerName>(canister_id, "name", ()).await
 }
 /// 查询名称
 #[allow(unused)]
@@ -59,9 +57,7 @@ pub struct LedgerSymbol {
 /// 查询 symbol
 #[allow(unused)]
 pub async fn ledger_symbol(canister_id: CanisterId) -> CanisterCallResult<LedgerSymbol> {
-    call_canister::<_, (LedgerSymbol,)>(canister_id, "symbol", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, LedgerSymbol>(canister_id, "symbol", ()).await
 }
 /// 查询 symbol
 #[allow(unused)]
@@ -81,9 +77,7 @@ pub struct LedgerDecimals {
 /// 查询精度
 #[allow(unused)]
 pub async fn ledger_decimals(canister_id: CanisterId) -> CanisterCallResult<LedgerDecimals> {
-    call_canister::<_, (LedgerDecimals,)>(canister_id, "decimals", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, LedgerDecimals>(canister_id, "decimals", ()).await
 }
 /// 查询精度
 #[allow(unused)]
@@ -116,9 +110,7 @@ pub async fn ledger_account_balance(
     canister_id: CanisterId,
     args: LedgerBinaryAccountBalanceArgs,
 ) -> CanisterCallResult<LedgerTokens> {
-    call_canister::<_, (LedgerTokens,)>(canister_id, "account_balance", (args,))
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, LedgerTokens>(canister_id, "account_balance", (args,)).await
 }
 /// 查询余额
 #[allow(unused)]
@@ -151,14 +143,13 @@ pub async fn ledger_transfer_fee(
     canister_id: CanisterId,
     // args: LedgerTransferFeeArg,
 ) -> CanisterCallResult<LedgerTransferFee> {
-    call_canister::<_, (LedgerTransferFee,)>(
+    call_canister::<_, LedgerTransferFee>(
         canister_id,
         "transfer_fee",
         // (args,),
         (LedgerTransferFeeArg {},),
     )
     .await
-    .map(fetch_tuple0)
 }
 /// 查询转账费用, 简化参数
 #[allow(unused)]
@@ -286,9 +277,7 @@ pub async fn ledger_transfer(
     canister_id: CanisterId,
     args: LedgerTransferArgs,
 ) -> CanisterCallResult<LedgerTransferResult> {
-    call_canister::<_, (LedgerTransferResult,)>(canister_id, "transfer", (args,))
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, LedgerTransferResult>(canister_id, "transfer", (args,)).await
 }
 /// 进行转账
 #[allow(unused)]

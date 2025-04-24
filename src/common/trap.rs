@@ -3,7 +3,7 @@
 pub fn trap<T, E: std::fmt::Display>(result: Result<T, E>) -> T {
     match result {
         Ok(value) => value,
-        Err(err) => ic_cdk::trap(&err.to_string()),
+        Err(err) => ic_cdk::trap(err.to_string()),
     }
 }
 
@@ -15,7 +15,7 @@ where
 {
     match result {
         Ok(value) => value,
-        Err(err) => ic_cdk::trap(&err.into()),
+        Err(err) => ic_cdk::trap(err.into()),
     }
 }
 
@@ -24,6 +24,6 @@ where
 pub fn trap_debug<T, E: std::fmt::Debug>(result: Result<T, E>) -> T {
     match result {
         Ok(value) => value,
-        Err(err) => ic_cdk::trap(&format!("{err:?}")),
+        Err(err) => ic_cdk::trap(format!("{err:?}")),
     }
 }

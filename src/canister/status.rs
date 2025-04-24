@@ -28,13 +28,14 @@ async fn canister_info(num_requested_changes: Option<u64>) -> ic_cdk::api::manag
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-canister_status
 pub async fn canister_status(
     canister_id: CanisterId,
-) -> super::types::CanisterCallResult<ic_cdk::api::management_canister::main::CanisterStatusResponse>
-{
-    let call_result = ic_cdk::api::management_canister::main::canister_status(
-        ic_cdk::api::management_canister::main::CanisterIdRecord { canister_id },
+) -> super::types::CanisterCallResult<ic_cdk::management_canister::CanisterStatusResult> {
+    let call_result = ic_cdk::management_canister::canister_status(
+        &ic_cdk::management_canister::CanisterStatusArgs { canister_id },
     )
     .await;
-    super::fetch_and_wrap_call_result(canister_id, "ic#canister_status", call_result)
+    call_result.map_err(|err| {
+        crate::canister::types::CanisterCallError::new(canister_id, "ic#canister_status", err)
+    })
 }
 
 /// 查询罐子信息
@@ -43,45 +44,38 @@ pub async fn canister_status(
 pub async fn canister_info(
     canister_id: CanisterId,
     num_requested_changes: Option<u64>,
-) -> super::types::CanisterCallResult<ic_cdk::api::management_canister::main::CanisterInfoResponse>
-{
-    let call_result = ic_cdk::api::management_canister::main::canister_info(
-        ic_cdk::api::management_canister::main::CanisterInfoRequest {
+) -> super::types::CanisterCallResult<ic_cdk::management_canister::CanisterInfoResult> {
+    let call_result = ic_cdk::management_canister::canister_info(
+        &ic_cdk::management_canister::CanisterInfoArgs {
             canister_id,
             num_requested_changes,
         },
     )
     .await;
-    super::fetch_and_wrap_call_result(canister_id, "ic#canister_info", call_result)
+    call_result.map_err(|err| {
+        crate::canister::types::CanisterCallError::new(canister_id, "ic#canister_status", err)
+    })
 }
 
 // ========================= 自定义接口调用 =========================
 
 /// 查询罐子状态
-/// ! 必须实现 canister_status : () -> (CanisterStatusResponse) 接口
+/// ! 必须实现 canister_status : () -> (CanisterStatusResult) 接口
 pub async fn call_canister_status(
     canister_id: CanisterId,
-) -> super::types::CanisterCallResult<ic_cdk::api::management_canister::main::CanisterStatusResponse>
-{
-    let call_result = ic_cdk::api::call::call::<
-        (),
-        (ic_cdk::api::management_canister::main::CanisterStatusResponse,),
-    >(canister_id, "canister_status", ())
-    .await;
+) -> super::types::CanisterCallResult<ic_cdk::management_canister::CanisterStatusResult> {
+    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, "canister_status").await;
     super::fetch_and_wrap_call_result(canister_id, "canister_status", call_result)
 }
 
 /// 查询罐子信息
-/// ! 必须实现 canister_info : () -> (CanisterInfoResponse) 接口
+/// ! 必须实现 canister_info : () -> (CanisterInfoResult) 接口
 pub async fn call_canister_info(
     canister_id: CanisterId,
     num_requested_changes: Option<u64>,
-) -> super::types::CanisterCallResult<ic_cdk::api::management_canister::main::CanisterInfoResponse>
-{
-    let call_result = ic_cdk::api::call::call::<
-        (Option<u64>,),
-        (ic_cdk::api::management_canister::main::CanisterInfoResponse,),
-    >(canister_id, "canister_info", (num_requested_changes,))
-    .await;
+) -> super::types::CanisterCallResult<ic_cdk::management_canister::CanisterInfoResult> {
+    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, "canister_info")
+        .with_arg(num_requested_changes)
+        .await;
     super::fetch_and_wrap_call_result(canister_id, "canister_info", call_result)
 }

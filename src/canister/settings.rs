@@ -5,14 +5,18 @@
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-update_settings
 pub async fn update_settings(
     canister_id: crate::identity::CanisterId,
-    settings: ic_cdk::api::management_canister::main::CanisterSettings,
+    settings: ic_cdk::management_canister::CanisterSettings,
 ) -> super::types::CanisterCallResult<()> {
-    let call_result = ic_cdk::api::management_canister::main::update_settings(
-        ic_cdk::api::management_canister::main::UpdateSettingsArgument {
+    let call_result = ic_cdk::management_canister::update_settings(
+        &ic_cdk::management_canister::UpdateSettingsArgs {
             canister_id,
             settings,
         },
     )
     .await;
-    super::wrap_call_result(canister_id, "ic#update_settings", call_result)
+    call_result.map_err(|err| crate::canister::types::CanisterCallError {
+        canister_id,
+        method: "ic#update_settings".to_string(),
+        message: err.to_string(),
+    })
 }

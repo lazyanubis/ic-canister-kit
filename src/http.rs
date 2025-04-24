@@ -3,15 +3,11 @@ use std::collections::HashMap;
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
-pub use ic_cdk::api::management_canister::http_request::{
-    CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse, TransformArgs,
-    TransformContext,
+pub use ic_management_canister_types::{
+    HttpHeader, HttpMethod, HttpRequestArgs, HttpRequestResult, TransformArgs, TransformContext,
 };
 
-use crate::{
-    canister::{fetch_tuple0, types::CanisterCallError},
-    identity::CanisterId,
-};
+use crate::{canister::types::CanisterCallError, identity::CanisterId};
 
 // ========================= HTTP 相关结构体 =========================
 
@@ -105,7 +101,7 @@ pub struct CustomHttpResponse {
 // ====================== http 请求 ======================
 
 /// 可以调用罐子自身的 query 方法解析响应体
-pub fn http_transform(response: TransformArgs) -> HttpResponse {
+pub fn http_transform(response: TransformArgs) -> HttpRequestResult {
     let mut t = response.response;
     t.headers = vec![];
     t
@@ -115,38 +111,46 @@ pub fn http_transform(response: TransformArgs) -> HttpResponse {
 
 /// http 请求
 pub async fn do_http_request(
-    arg: CanisterHttpRequestArgument,
+    arg: HttpRequestArgs,
     cycles: u128,
-) -> super::types::CanisterCallResult<HttpResponse> {
-    ic_cdk::api::management_canister::http_request::http_request(arg, cycles)
-        .await
-        .map(fetch_tuple0)
-        .map_err(|(rejection_code, message)| CanisterCallError {
+) -> super::types::CanisterCallResult<HttpRequestResult> {
+    let cost = ic_cdk::management_canister::cost_http_request(&arg);
+    if cycles < cost {
+        return Err(CanisterCallError {
             canister_id: CanisterId::anonymous(),
             method: "ic#http_request".to_string(),
-            rejection_code,
-            message,
+            message: "Insufficient cycles".to_string(),
+        });
+    }
+    ic_cdk::management_canister::http_request(&arg)
+        .await
+        .map_err(|err| CanisterCallError {
+            canister_id: CanisterId::anonymous(),
+            method: "ic#http_request".to_string(),
+            message: err.to_string(),
         })
 }
 
 /// 带有转换函数的 http 请求
 #[allow(clippy::future_not_send)]
 pub async fn do_http_request_with_closure(
-    arg: CanisterHttpRequestArgument,
+    arg: HttpRequestArgs,
     cycles: u128,
-    transform_func: impl FnOnce(HttpResponse) -> HttpResponse + 'static,
-) -> super::types::CanisterCallResult<HttpResponse> {
-    ic_cdk::api::management_canister::http_request::http_request_with_closure(
-        arg,
-        cycles,
-        transform_func,
-    )
-    .await
-    .map(fetch_tuple0)
-    .map_err(|(rejection_code, message)| CanisterCallError {
-        canister_id: CanisterId::anonymous(),
-        method: "ic#http_request".to_string(),
-        rejection_code,
-        message,
-    })
+    transform_func: impl FnOnce(HttpRequestResult) -> HttpRequestResult + 'static,
+) -> super::types::CanisterCallResult<HttpRequestResult> {
+    let cost = ic_cdk::management_canister::cost_http_request(&arg);
+    if cycles < cost {
+        return Err(CanisterCallError {
+            canister_id: CanisterId::anonymous(),
+            method: "ic#http_request".to_string(),
+            message: "Insufficient cycles".to_string(),
+        });
+    }
+    ic_cdk::management_canister::http_request_with_closure(&arg, transform_func)
+        .await
+        .map_err(|err| CanisterCallError {
+            canister_id: CanisterId::anonymous(),
+            method: "ic#http_request".to_string(),
+            message: err.to_string(),
+        })
 }

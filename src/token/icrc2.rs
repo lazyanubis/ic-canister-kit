@@ -2,7 +2,7 @@
 //! https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-2
 
 use crate::{
-    canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
+    canister::{call::call_canister, types::CanisterCallResult},
     identity::CanisterId,
 };
 
@@ -47,9 +47,7 @@ pub async fn icrc2_allowance(
     canister_id: CanisterId,
     args: Icrc2AllowanceArgs,
 ) -> CanisterCallResult<Icrc2Allowance> {
-    call_canister::<_, (Icrc2Allowance,)>(canister_id, "icrc2_allowance", (args,))
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc2Allowance>(canister_id, "icrc2_allowance", (args,)).await
 }
 
 //  ============== 进行授权 ==============
@@ -159,9 +157,7 @@ pub async fn icrc2_approve(
     canister_id: CanisterId,
     args: Icrc2ApproveArgs,
 ) -> CanisterCallResult<Icrc2ApproveResult> {
-    call_canister::<_, (Icrc2ApproveResult,)>(canister_id, "icrc2_approve", (args,))
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc2ApproveResult>(canister_id, "icrc2_approve", (args,)).await
 }
 
 //  ============== 转账 ==============
@@ -255,7 +251,5 @@ pub async fn icrc2_transfer_from(
     canister_id: CanisterId,
     args: Icrc2TransferFromArgs,
 ) -> CanisterCallResult<Icrc1TransferFromResult> {
-    call_canister::<_, (Icrc1TransferFromResult,)>(canister_id, "icrc2_transfer_from", (args,))
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc1TransferFromResult>(canister_id, "icrc2_transfer_from", (args,)).await
 }

@@ -1,18 +1,18 @@
 //! 生成随机数
 
-use crate::canister::{fetch_and_wrap_call_result, types::CanisterCallResult};
+use crate::canister::types::CanisterCallResult;
 
 /// 得到随机数
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-raw_rand
 #[inline]
 pub async fn random() -> CanisterCallResult<[u8; 32]> {
-    let call_result = ic_cdk::api::management_canister::main::raw_rand().await;
+    let call_result = ic_cdk::management_canister::raw_rand().await;
 
-    let random = fetch_and_wrap_call_result(
-        crate::identity::CanisterId::anonymous(),
-        "ic#raw_rand",
-        call_result,
-    )?;
+    let random = call_result.map_err(|err| crate::canister::types::CanisterCallError {
+        canister_id: crate::identity::CanisterId::anonymous(),
+        method: "ic#raw_rand".to_string(),
+        message: err.to_string(),
+    })?;
 
     let mut data = [0; 32];
 

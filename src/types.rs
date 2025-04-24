@@ -21,21 +21,21 @@ pub use crate::token::types::*;
 
 #[cfg(feature = "http")]
 pub use crate::http::{
-    CanisterHttpRequestArgument, CustomHttpRequest, CustomHttpResponse, HttpHeader, HttpMethod,
-    HttpRequestStreamingCallback, HttpResponse, StreamingCallbackHttpResponse,
+    CustomHttpRequest, CustomHttpResponse, HttpHeader, HttpMethod, HttpRequestArgs,
+    HttpRequestResult, HttpRequestStreamingCallback, StreamingCallbackHttpResponse,
     StreamingCallbackToken, StreamingStrategy, TransformArgs, TransformContext,
 };
 
 #[cfg(feature = "ecdsa")]
 pub use crate::ecdsa::{
-    EcdsaCurve, EcdsaDerivationPath, EcdsaIdentity, EcdsaKeyId, EcdsaPublicKeyResponse,
-    MessageHash, MessageHashError, SignWithEcdsaResponse,
+    EcdsaCurve, EcdsaDerivationPath, EcdsaIdentity, EcdsaKeyId, EcdsaPublicKeyResult, MessageHash,
+    MessageHashError, SignWithEcdsaResult,
 };
 
 #[cfg(feature = "bitcoin")]
 pub use crate::bitcoin::{
     BitcoinAddress, BitcoinNetwork, BlockHash, GetUtxosResponse, MillisatoshiPerByte, Satoshi,
-    Utxo, UtxoFilter,
+    Utxo, UtxosFilter,
 };
 
 #[cfg(feature = "functions")]

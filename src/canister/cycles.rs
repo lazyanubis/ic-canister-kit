@@ -31,14 +31,14 @@ where
     F: FnOnce(u128),
 {
     // 获取调用者转入的可接受的 cycles 数量
-    let available = ic_cdk::api::call::msg_cycles_available128(); // Cycles.available();
+    let available = ic_cdk::api::msg_cycles_available(); // Cycles.available();
 
     if available == 0 {
         return candid::Nat::from(0_u128);
     }
 
     // 接受所有的转入
-    let accepted = ic_cdk::api::call::msg_cycles_accept128(available); // Cycles.accept(available)
+    let accepted = ic_cdk::api::msg_cycles_accept(available); // Cycles.accept(available)
 
     // ! 判断是否接受成功，不成功就要报错
     assert!(accepted == available);
@@ -58,8 +58,8 @@ pub async fn deposit_cycles(
     canister_id: CanisterId,
     cycles: u128,
 ) -> Result<(), super::types::CanisterCallError> {
-    let call_result = ic_cdk::api::management_canister::main::deposit_cycles(
-        ic_cdk::api::management_canister::provisional::CanisterIdRecord { canister_id },
+    let call_result = ic_cdk::management_canister::deposit_cycles(
+        &ic_cdk::management_canister::DepositCyclesArgs { canister_id },
         cycles,
     )
     .await;
@@ -73,8 +73,7 @@ pub async fn deposit_cycles(
 pub async fn call_wallet_balance(
     canister_id: CanisterId,
 ) -> super::types::CanisterCallResult<candid::Nat> {
-    let call_result =
-        ic_cdk::api::call::call::<_, (candid::Nat,)>(canister_id, "wallet_balance", ()).await;
+    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, "wallet_balance").await;
     super::fetch_and_wrap_call_result(canister_id, "deposit_cycles", call_result)
 }
 
@@ -84,12 +83,8 @@ pub async fn call_wallet_receive(
     canister_id: CanisterId,
     cycles: u64,
 ) -> super::types::CanisterCallResult<candid::Nat> {
-    let call_result = ic_cdk::api::call::call_with_payment::<_, (candid::Nat,)>(
-        canister_id,
-        "wallet_receive",
-        (),
-        cycles,
-    )
-    .await;
+    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, "wallet_receive")
+        .with_cycles(cycles as u128)
+        .await;
     super::fetch_and_wrap_call_result(canister_id, "wallet_receive", call_result)
 }

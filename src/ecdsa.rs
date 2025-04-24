@@ -1,12 +1,12 @@
 use candid::CandidType;
-use ic_cdk::api::management_canister::ecdsa::{EcdsaPublicKeyArgument, SignWithEcdsaArgument};
+use ic_cdk::management_canister::{EcdsaPublicKeyArgs, SignWithEcdsaArgs};
 use serde::{Deserialize, Serialize};
 
-pub use ic_cdk::api::management_canister::ecdsa::{
-    EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyResponse, SignWithEcdsaResponse,
+pub use ic_cdk::management_canister::{
+    EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyResult, SignWithEcdsaResult,
 };
 
-use crate::{canister::fetch_tuple0, identity::CanisterId, types::CanisterCallError};
+use crate::{identity::CanisterId, types::CanisterCallError};
 
 /// 私钥派生路径
 /// 不知道有没有长度要求的
@@ -85,20 +85,18 @@ impl TryFrom<Vec<u8>> for MessageHash {
 pub async fn ecdsa_public_key(
     canister_id: Option<CanisterId>, // 不写则是自身 id
     identity: EcdsaIdentity,
-) -> super::types::CanisterCallResult<EcdsaPublicKeyResponse> {
-    ic_cdk::api::management_canister::ecdsa::ecdsa_public_key(EcdsaPublicKeyArgument {
+) -> super::types::CanisterCallResult<EcdsaPublicKeyResult> {
+    ic_cdk::management_canister::ecdsa_public_key(&EcdsaPublicKeyArgs {
         canister_id,
         // derivation_path: identity.derivation_path.0,
         derivation_path: identity.derivation_path,
         key_id: identity.key_id,
     })
     .await
-    .map(fetch_tuple0)
-    .map_err(|(rejection_code, message)| CanisterCallError {
+    .map_err(|err| CanisterCallError {
         canister_id: crate::identity::CanisterId::anonymous(),
         method: "ic#ecdsa_public_key".to_string(),
-        rejection_code,
-        message,
+        message: err.to_string(),
     })
 }
 
@@ -107,18 +105,16 @@ pub async fn ecdsa_public_key(
 pub async fn ecdsa_sign(
     identity: EcdsaIdentity,
     message_hash: MessageHash,
-) -> super::types::CanisterCallResult<SignWithEcdsaResponse> {
-    ic_cdk::api::management_canister::ecdsa::sign_with_ecdsa(SignWithEcdsaArgument {
+) -> super::types::CanisterCallResult<SignWithEcdsaResult> {
+    ic_cdk::management_canister::sign_with_ecdsa(&SignWithEcdsaArgs {
         message_hash: message_hash.0,
         derivation_path: identity.derivation_path,
         key_id: identity.key_id,
     })
     .await
-    .map(fetch_tuple0)
-    .map_err(|(rejection_code, message)| CanisterCallError {
+    .map_err(|err| CanisterCallError {
         canister_id: crate::identity::CanisterId::anonymous(),
         method: "ic#sign_with_ecdsa".to_string(),
-        rejection_code,
-        message,
+        message: err.to_string(),
     })
 }

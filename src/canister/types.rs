@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use candid::CandidType;
 use serde::Deserialize;
 
@@ -12,9 +14,6 @@ pub struct CanisterCallError {
     /// 调用的方法
     pub method: String,
 
-    /// 错误码
-    pub rejection_code: ic_cdk::api::call::RejectionCode,
-
     /// 错误消息
     pub message: std::string::String,
 }
@@ -22,15 +21,38 @@ impl std::fmt::Display for CanisterCallError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Canister({}) call({}) failed. {:?} ({})",
+            "Canister({}) call({}) failed: {}",
             self.canister_id.to_text(),
             self.method,
-            self.rejection_code,
             self.message
         )
     }
 }
 impl std::error::Error for CanisterCallError {}
+
+impl CanisterCallError {
+    /// 新建
+    pub fn new<E: Display>(
+        canister_id: crate::identity::CanisterId,
+        method: impl Into<String>,
+        err: E,
+    ) -> Self {
+        Self {
+            canister_id,
+            method: method.into(),
+            message: err.to_string(),
+        }
+    }
+
+    /// 管理调用
+    pub fn from<E: Display>(method: impl Into<String>, err: E) -> Self {
+        Self {
+            canister_id: crate::identity::CanisterId::management_canister(),
+            method: method.into(),
+            message: err.to_string(),
+        }
+    }
+}
 
 /// 罐子调用结果
 pub type CanisterCallResult<T> = Result<T, CanisterCallError>;

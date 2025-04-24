@@ -54,11 +54,11 @@ pub fn u64_to_subaccount(value: u64) -> Subaccount {
 /// 获取调用者 principal id
 #[inline]
 pub fn caller() -> CallerId {
-    ic_cdk::api::caller()
+    ic_cdk::api::msg_caller()
 }
 
 /// 获取本罐子的 principal id
 #[inline]
 pub fn self_canister_id() -> CanisterId {
-    ic_cdk::api::id()
+    ic_cdk::api::canister_self()
 }

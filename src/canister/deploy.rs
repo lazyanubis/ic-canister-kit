@@ -2,7 +2,7 @@
 
 /// 部署罐子
 pub async fn deploy_canister(
-    settings: Option<ic_cdk::api::management_canister::main::CanisterSettings>,
+    settings: Option<ic_cdk::management_canister::CanisterSettings>,
     initial_cycles: u128,
     wasm_module: super::codes::CanisterCodeWasm,
     arg: super::codes::CanisterInitArg,
@@ -10,14 +10,7 @@ pub async fn deploy_canister(
     // 1. 创建一个新的罐子
     let canister_id = crate::canister::life::create_canister(settings, initial_cycles)
         .await
-        .map_err(
-            |(rejection_code, message)| crate::canister::types::CanisterCallError {
-                canister_id: crate::identity::CanisterId::anonymous(),
-                method: "".into(),
-                rejection_code,
-                message,
-            },
-        )?;
+        .map_err(|err| crate::canister::types::CanisterCallError::from("", err))?;
     ic_cdk::println!("new canister id: {:?}", canister_id.to_text());
 
     // 2. 安装代码

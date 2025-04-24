@@ -5,7 +5,7 @@ use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    canister::{call::call_canister, fetch_tuple0, types::CanisterCallResult},
+    canister::{call::call_canister, types::CanisterCallResult},
     identity::{CanisterId, Subaccount, UserId},
 };
 
@@ -44,9 +44,7 @@ pub type Icrc1SupportedStandards = Vec<Icrc1SupportedStandard>;
 pub async fn icrc1_supported_standards(
     canister_id: CanisterId,
 ) -> CanisterCallResult<Icrc1SupportedStandards> {
-    call_canister::<_, (Icrc1SupportedStandards,)>(canister_id, "icrc1_supported_standards", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc1SupportedStandards>(canister_id, "icrc1_supported_standards", ()).await
 }
 /// 查询支持的标准
 #[allow(unused)]
@@ -64,9 +62,7 @@ pub async fn icrc1_supported_standards_by(
 /// 查询名称
 #[allow(unused)]
 pub async fn icrc1_name(canister_id: CanisterId) -> CanisterCallResult<String> {
-    call_canister::<_, (String,)>(canister_id, "icrc1_name", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, String>(canister_id, "icrc1_name", ()).await
 }
 
 //  ============== 查询符号 ==============
@@ -75,9 +71,7 @@ pub async fn icrc1_name(canister_id: CanisterId) -> CanisterCallResult<String> {
 /// 查询 symbol
 #[allow(unused)]
 pub async fn icrc1_symbol(canister_id: CanisterId) -> CanisterCallResult<String> {
-    call_canister::<_, (String,)>(canister_id, "icrc1_symbol", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, String>(canister_id, "icrc1_symbol", ()).await
 }
 
 //  ============== 查询精度 ==============
@@ -86,9 +80,7 @@ pub async fn icrc1_symbol(canister_id: CanisterId) -> CanisterCallResult<String>
 ///  查询精度
 #[allow(unused)]
 pub async fn icrc1_decimals(canister_id: CanisterId) -> CanisterCallResult<u8> {
-    call_canister::<_, (u8,)>(canister_id, "icrc1_decimals", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, u8>(canister_id, "icrc1_decimals", ()).await
 }
 
 //  ============== 查询总供应量 ==============
@@ -100,9 +92,7 @@ pub type Icrc1TotalSupply = candid::Nat;
 /// 查询总供应量
 #[allow(unused)]
 pub async fn icrc1_total_supply(canister_id: CanisterId) -> CanisterCallResult<Icrc1TotalSupply> {
-    call_canister::<_, (Icrc1TotalSupply,)>(canister_id, "icrc1_total_supply", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc1TotalSupply>(canister_id, "icrc1_total_supply", ()).await
 }
 
 //  ============== 查询余额 ==============
@@ -129,9 +119,7 @@ pub async fn icrc1_balance_of(
     canister_id: CanisterId,
     account: Icrc1Account,
 ) -> CanisterCallResult<Icrc1Balance> {
-    call_canister::<_, (Icrc1Balance,)>(canister_id, "icrc1_balance_of", (account,))
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc1Balance>(canister_id, "icrc1_balance_of", (account,)).await
 }
 /// 查询余额
 #[allow(unused)]
@@ -151,9 +139,7 @@ pub type Icrc1Fee = candid::Nat;
 /// 查询手续费
 #[allow(unused)]
 pub async fn icrc1_fee(canister_id: CanisterId) -> CanisterCallResult<Icrc1Fee> {
-    call_canister::<_, (Icrc1Fee,)>(canister_id, "icrc1_fee", ())
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc1Fee>(canister_id, "icrc1_fee", ()).await
 }
 
 //  ============== 转账 ==============
@@ -249,9 +235,7 @@ pub async fn icrc1_transfer(
     canister_id: CanisterId,
     args: Icrc1TransferArgs,
 ) -> CanisterCallResult<Icrc1TransferResult> {
-    call_canister::<_, (Icrc1TransferResult,)>(canister_id, "icrc1_transfer", (args,))
-        .await
-        .map(fetch_tuple0)
+    call_canister::<_, Icrc1TransferResult>(canister_id, "icrc1_transfer", (args,)).await
 }
 /// 进行转账
 #[allow(unused)]

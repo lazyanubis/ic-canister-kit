@@ -27,7 +27,12 @@ pub mod types;
 
 // ========================= 基本方法 =========================
 
-pub use ic_cdk::api::stable::WASM_PAGE_SIZE_IN_BYTES as WASM_PAGE_SIZE;
+use std::fmt::Display;
+
+use candid::CandidType;
+use ic_cdk::call::Response;
+pub use ic_cdk::stable::WASM_PAGE_SIZE_IN_BYTES as WASM_PAGE_SIZE;
+use serde::Deserialize;
 
 /// 罐子自身的 cycles
 #[inline]
@@ -81,39 +86,24 @@ pub fn self_canister_current_memory_size() -> u128 {
 // 调用结果
 #[allow(unused)]
 #[inline]
-pub(crate) fn fetch_and_wrap_call_result<R>(
+pub(crate) fn fetch_and_wrap_call_result<R: CandidType + for<'de> Deserialize<'de>, E: Display>(
     canister_id: crate::identity::CanisterId,
     method: &str,
-    call_result: Result<(R,), (ic_cdk::api::call::RejectionCode, String)>,
+    call_result: Result<Response, E>,
 ) -> types::CanisterCallResult<R> {
     call_result
-        .map(fetch_tuple0)
-        .map_err(|(rejection_code, message)| types::CanisterCallError {
-            canister_id,
-            method: method.to_string(),
-            rejection_code,
-            message,
-        })
+        .map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, method, err))?
+        .candid()
+        .map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, method, err))
 }
 
 #[allow(unused)]
 #[inline]
-fn wrap_call_result(
+fn wrap_call_result<E: Display>(
     canister_id: crate::identity::CanisterId,
     method: &str,
-    call_result: Result<(), (ic_cdk::api::call::RejectionCode, String)>,
+    call_result: Result<(), E>,
 ) -> types::CanisterCallResult<()> {
-    call_result.map_err(|(rejection_code, message)| types::CanisterCallError {
-        canister_id,
-        method: method.to_string(),
-        rejection_code,
-        message,
-    })
-}
-
-/// 取出元组的第一个元素
-#[allow(unused)]
-#[inline]
-pub(crate) fn fetch_tuple0<T>(args: (T,)) -> T {
-    args.0
+    call_result
+        .map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, method, err))
 }
