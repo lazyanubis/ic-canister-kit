@@ -3,8 +3,7 @@ use std::cell::RefCell;
 use ic_stable_structures::{DefaultMemoryImpl, memory_manager::MemoryManager};
 
 /// 简化虚拟内存
-pub type VirtualMemory =
-    ic_stable_structures::memory_manager::VirtualMemory<ic_stable_structures::DefaultMemoryImpl>;
+pub type VirtualMemory = ic_stable_structures::memory_manager::VirtualMemory<ic_stable_structures::DefaultMemoryImpl>;
 pub use ic_stable_structures::GrowFailed;
 pub use ic_stable_structures::Memory;
 pub use ic_stable_structures::Storable;
@@ -54,45 +53,23 @@ pub fn get_upgrades_memory() -> VirtualMemory {
 
 /// 初始化内存
 pub fn init_cell_data<T: Storable>(memory_id: MemoryId, default: T) -> StableCell<T> {
-    match StableCell::init(get_virtual_memory(memory_id), default) {
-        Ok(data) => data,
-        Err(_) => ic_cdk::trap("failed to initialize"),
-    }
+    StableCell::init(get_virtual_memory(memory_id), default)
 }
 /// 初始化内存
 pub fn init_vec_data<T: Storable>(memory_id: MemoryId) -> StableVec<T> {
-    match StableVec::init(get_virtual_memory(memory_id)) {
-        Ok(data) => data,
-        Err(_) => ic_cdk::trap("failed to initialize"),
-    }
+    StableVec::init(get_virtual_memory(memory_id))
 }
 /// 初始化内存
-pub fn init_map_data<K: Storable + Ord + Clone, V: Storable>(
-    memory_id: MemoryId,
-) -> StableBTreeMap<K, V> {
+pub fn init_map_data<K: Storable + Ord + Clone, V: Storable>(memory_id: MemoryId) -> StableBTreeMap<K, V> {
     StableBTreeMap::init(get_virtual_memory(memory_id))
 }
 /// 初始化内存
-pub fn init_log_data<T: Storable>(
-    index_memory_id: MemoryId,
-    data_memory_id: MemoryId,
-) -> StableLog<T> {
-    match StableLog::init(
-        get_virtual_memory(index_memory_id),
-        get_virtual_memory(data_memory_id),
-    ) {
-        Ok(data) => data,
-        Err(_) => ic_cdk::trap("failed to initialize"),
-    }
+pub fn init_log_data<T: Storable>(index_memory_id: MemoryId, data_memory_id: MemoryId) -> StableLog<T> {
+    StableLog::init(get_virtual_memory(index_memory_id), get_virtual_memory(data_memory_id))
 }
 /// 初始化内存
-pub fn init_priority_queue_data<T: Storable + PartialOrd>(
-    memory_id: MemoryId,
-) -> StablePriorityQueue<T> {
-    match StablePriorityQueue::init(get_virtual_memory(memory_id)) {
-        Ok(data) => data,
-        Err(_) => ic_cdk::trap("failed to initialize"),
-    }
+pub fn init_priority_queue_data<T: Storable + PartialOrd>(memory_id: MemoryId) -> StablePriorityQueue<T> {
+    StablePriorityQueue::init(get_virtual_memory(memory_id))
 }
 
 /// 包装升级内存

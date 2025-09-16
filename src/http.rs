@@ -111,9 +111,9 @@ pub fn http_transform(response: TransformArgs) -> HttpRequestResult {
 
 /// http 请求
 pub async fn do_http_request(
-    arg: HttpRequestArgs,
+    arg: ic_cdk::management_canister::HttpRequestArgs,
     cycles: u128,
-) -> super::types::CanisterCallResult<HttpRequestResult> {
+) -> super::types::CanisterCallResult<ic_cdk::management_canister::HttpRequestResult> {
     let cost = ic_cdk::management_canister::cost_http_request(&arg);
     if cycles < cost {
         return Err(CanisterCallError {
@@ -134,10 +134,13 @@ pub async fn do_http_request(
 /// 带有转换函数的 http 请求
 #[allow(clippy::future_not_send)]
 pub async fn do_http_request_with_closure(
-    arg: HttpRequestArgs,
+    arg: ic_cdk::management_canister::HttpRequestArgs,
     cycles: u128,
-    transform_func: impl FnOnce(HttpRequestResult) -> HttpRequestResult + 'static,
-) -> super::types::CanisterCallResult<HttpRequestResult> {
+    transform_func: impl FnOnce(
+        ic_cdk::management_canister::HttpRequestResult,
+    ) -> ic_cdk::management_canister::HttpRequestResult
+    + 'static,
+) -> super::types::CanisterCallResult<ic_cdk::management_canister::HttpRequestResult> {
     let cost = ic_cdk::management_canister::cost_http_request(&arg);
     if cycles < cost {
         return Err(CanisterCallError {
