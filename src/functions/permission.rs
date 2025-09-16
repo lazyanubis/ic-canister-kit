@@ -85,11 +85,7 @@ impl Display for PermissionUpdatedArg<String> {
                 user_id.to_text(),
                 display_option_by(permissions, |permissions| format!(
                     "[{}]",
-                    permissions
-                        .iter()
-                        .map(|p| p.to_string())
-                        .collect::<Vec<_>>()
-                        .join(",")
+                    permissions.iter().map(|p| p.to_string()).collect::<Vec<_>>().join(",")
                 ))
             )),
             Self::UpdateRolePermission(role, permissions) => f.write_str(&format!(
@@ -97,11 +93,7 @@ impl Display for PermissionUpdatedArg<String> {
                 role,
                 display_option_by(permissions, |permissions| format!(
                     "[{}]",
-                    permissions
-                        .iter()
-                        .map(|p| p.to_string())
-                        .collect::<Vec<_>>()
-                        .join(",")
+                    permissions.iter().map(|p| p.to_string()).collect::<Vec<_>>().join(",")
                 ))
             )),
             Self::UpdateUserRole(user_id, roles) => f.write_str(&format!(
@@ -199,9 +191,7 @@ pub mod basic {
             if let Some(permissions) = permissions {
                 for permission in permissions {
                     if !self.permissions.contains(permission) {
-                        return Err(PermissionUpdatedError::InvalidPermission(
-                            permission.clone(),
-                        ));
+                        return Err(PermissionUpdatedError::InvalidPermission(permission.clone()));
                     }
                 }
             }
@@ -209,10 +199,7 @@ pub mod basic {
             Ok(())
         }
         // 检查一定存在角色
-        fn assure_role_exist(
-            &self,
-            roles: &Option<HashSet<String>>,
-        ) -> Result<(), PermissionUpdatedError<Permission>> {
+        fn assure_role_exist(&self, roles: &Option<HashSet<String>>) -> Result<(), PermissionUpdatedError<Permission>> {
             if let Some(roles) = roles {
                 for role in roles {
                     if !self.role_permissions.contains_key(role) {
@@ -247,24 +234,24 @@ pub mod basic {
 
         fn permission_has(&self, user_id: &UserId, permission: &Permission) -> bool {
             // 单独指定
-            if let Some(permissions) = self.user_permissions.get(user_id) {
-                if permissions.contains(permission) {
-                    return match permission {
-                        Permission::Permitted(_) => true,
-                        Permission::Forbidden(_) => false,
-                    };
-                }
+            if let Some(permissions) = self.user_permissions.get(user_id)
+                && permissions.contains(permission)
+            {
+                return match permission {
+                    Permission::Permitted(_) => true,
+                    Permission::Forbidden(_) => false,
+                };
             }
             // 角色自定
             if let Some(roles) = self.user_roles.get(user_id) {
                 for role in roles {
-                    if let Some(permissions) = self.role_permissions.get(role) {
-                        if permissions.contains(permission) {
-                            return match permission {
-                                Permission::Permitted(_) => true,
-                                Permission::Forbidden(_) => false,
-                            };
-                        }
+                    if let Some(permissions) = self.role_permissions.get(role)
+                        && permissions.contains(permission)
+                    {
+                        return match permission {
+                            Permission::Permitted(_) => true,
+                            Permission::Forbidden(_) => false,
+                        };
                     }
                 }
             }
@@ -285,32 +272,28 @@ pub mod basic {
         fn permission_reset(&mut self, permissions: HashSet<Permission>) {
             self.permissions = permissions;
             // 核对其他数据中的权限是否正确
-            self.role_permissions
-                .iter_mut()
-                .for_each(|(_, permissions)| {
-                    let mut removed = Vec::new();
-                    for permission in permissions.iter() {
-                        if !self.permissions.contains(permission) {
-                            removed.push(permission.clone());
-                        }
+            self.role_permissions.iter_mut().for_each(|(_, permissions)| {
+                let mut removed = Vec::new();
+                for permission in permissions.iter() {
+                    if !self.permissions.contains(permission) {
+                        removed.push(permission.clone());
                     }
-                    for permission in removed {
-                        permissions.remove(&permission);
+                }
+                for permission in removed {
+                    permissions.remove(&permission);
+                }
+            });
+            self.user_permissions.iter_mut().for_each(|(_, permissions)| {
+                let mut removed = Vec::new();
+                for permission in permissions.iter() {
+                    if !self.permissions.contains(permission) {
+                        removed.push(permission.clone());
                     }
-                });
-            self.user_permissions
-                .iter_mut()
-                .for_each(|(_, permissions)| {
-                    let mut removed = Vec::new();
-                    for permission in permissions.iter() {
-                        if !self.permissions.contains(permission) {
-                            removed.push(permission.clone());
-                        }
-                    }
-                    for permission in removed {
-                        permissions.remove(&permission);
-                    }
-                });
+                }
+                for permission in removed {
+                    permissions.remove(&permission);
+                }
+            });
         }
         fn permission_update(
             &mut self,
@@ -324,10 +307,10 @@ pub mod basic {
 
                         let exist = self.user_permissions.get(user_id);
                         if let Some(permissions) = &permissions {
-                            if let Some(exist) = exist {
-                                if exist == permissions {
-                                    continue;
-                                }
+                            if let Some(exist) = exist
+                                && exist == permissions
+                            {
+                                continue;
                             }
                         } else if exist.is_none() {
                             continue;
@@ -344,17 +327,16 @@ pub mod basic {
 
                         let exist = self.role_permissions.get(role);
                         if let Some(permissions) = permissions {
-                            if let Some(exist) = exist {
-                                if exist == permissions {
-                                    continue;
-                                }
+                            if let Some(exist) = exist
+                                && exist == permissions
+                            {
+                                continue;
                             }
                         } else if exist.is_none() {
                             continue;
                         }
                         if let Some(permissions) = permissions {
-                            self.role_permissions
-                                .insert(role.clone(), permissions.clone());
+                            self.role_permissions.insert(role.clone(), permissions.clone());
                         } else {
                             self.role_permissions.remove(role);
                             // 移除要检查用户角色数据对不对
@@ -377,10 +359,10 @@ pub mod basic {
 
                         let exist = self.user_roles.get(user_id);
                         if let Some(roles) = &roles {
-                            if let Some(exist) = exist {
-                                if exist == roles {
-                                    continue;
-                                }
+                            if let Some(exist) = exist
+                                && exist == roles
+                            {
+                                continue;
                             }
                         } else if exist.is_none() {
                             continue;
@@ -412,11 +394,7 @@ pub mod basic {
                     PermissionUpdatedArg::UpdateUserPermission(
                         user_id,
                         permissions
-                            .map(|ps| {
-                                ps.into_iter()
-                                    .map(|p| f(&p))
-                                    .collect::<Result<HashSet<_>, _>>()
-                            })
+                            .map(|ps| ps.into_iter().map(|p| f(&p)).collect::<Result<HashSet<_>, _>>())
                             .transpose()?,
                     )
                 }
@@ -424,11 +402,7 @@ pub mod basic {
                     PermissionUpdatedArg::UpdateRolePermission(
                         role,
                         permissions
-                            .map(|ps| {
-                                ps.into_iter()
-                                    .map(|p| f(&p))
-                                    .collect::<Result<HashSet<_>, _>>()
-                            })
+                            .map(|ps| ps.into_iter().map(|p| f(&p)).collect::<Result<HashSet<_>, _>>())
                             .transpose()?,
                     )
                 }
@@ -442,10 +416,7 @@ pub mod basic {
     // ================= 工具方法 =================
 
     /// 解析所有权限
-    pub fn parse_all_permissions<'a, F, E>(
-        actions: &[&'a str],
-        parse: F,
-    ) -> Result<Vec<Permission>, E>
+    pub fn parse_all_permissions<'a, F, E>(actions: &[&'a str], parse: F) -> Result<Vec<Permission>, E>
     where
         F: Fn(&'a str) -> Result<Permission, E>,
     {
@@ -458,11 +429,7 @@ pub mod basic {
 
     /// 超级管理员获取所有授权权限
     pub fn permitted_permissions(permissions: &HashSet<Permission>) -> HashSet<Permission> {
-        permissions
-            .iter()
-            .filter(|p| p.is_permit())
-            .cloned()
-            .collect()
+        permissions.iter().filter(|p| p.is_permit()).cloned().collect()
     }
 
     /// 超级管理员获取所有权限

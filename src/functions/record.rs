@@ -7,9 +7,7 @@ use crate::{
 };
 
 /// 记录 id
-#[derive(
-    CandidType, Serialize, Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord,
-)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub struct RecordId(u64);
 
 impl From<u64> for RecordId {
@@ -145,44 +143,44 @@ pub mod basic {
         #[inline]
         fn test(&self, record: &Record) -> bool {
             if let Some((id_min, id_max)) = &self.id {
-                if let Some(id_min) = &id_min {
-                    if record.id < *id_min {
-                        return false;
-                    }
+                if let Some(id_min) = &id_min
+                    && record.id < *id_min
+                {
+                    return false;
                 }
-                if let Some(id_max) = &id_max {
-                    if *id_max < record.id {
-                        return false;
-                    }
+                if let Some(id_max) = &id_max
+                    && *id_max < record.id
+                {
+                    return false;
                 }
             }
             if let Some(created) = self.created {
                 let (created_min, created_max) = created;
-                if let Some(created_min) = created_min {
-                    if record.created < created_min {
-                        return false;
-                    }
+                if let Some(created_min) = created_min
+                    && record.created < created_min
+                {
+                    return false;
                 }
-                if let Some(created_max) = created_max {
-                    if created_max < record.created {
-                        return false;
-                    }
-                }
-            }
-            if let Some(caller) = &self.caller {
-                if !caller.contains(&record.caller) {
+                if let Some(created_max) = created_max
+                    && created_max < record.created
+                {
                     return false;
                 }
             }
-            if let Some(topic) = &self.topic {
-                if !topic.contains(&record.topic) {
-                    return false;
-                }
+            if let Some(caller) = &self.caller
+                && !caller.contains(&record.caller)
+            {
+                return false;
             }
-            if let Some(content) = &self.content {
-                if !record.content.contains(content) {
-                    return false;
-                }
+            if let Some(topic) = &self.topic
+                && !topic.contains(&record.topic)
+            {
+                return false;
+            }
+            if let Some(content) = &self.content
+                && !record.content.contains(content)
+            {
+                return false;
             }
             true
         }
@@ -221,12 +219,7 @@ pub mod basic {
         }
 
         // 修改
-        fn record_push(
-            &mut self,
-            caller: CallerId,
-            topic: RecordTopic,
-            content: String,
-        ) -> RecordId {
+        fn record_push(&mut self, caller: CallerId, topic: RecordTopic, content: String) -> RecordId {
             // 判断最大个数
             if self.max <= self.records.len() as u64 {
                 let (_migrated, left) = self.records.split_at(1);
@@ -307,26 +300,16 @@ pub mod basic {
 
     impl RecordSearchArg {
         /// 参数转变
-        pub fn into<E, F: Fn(&str) -> Result<RecordTopic, E>>(
-            self,
-            f: F,
-        ) -> Result<RecordSearch, E> {
+        pub fn into<E, F: Fn(&str) -> Result<RecordTopic, E>>(self, f: F) -> Result<RecordSearch, E> {
             Ok(RecordSearch {
-                id: self
-                    .id
-                    .map(|(a, b)| (a.map(|a| a.into()), b.map(|b| b.into()))),
+                id: self.id.map(|(a, b)| (a.map(|a| a.into()), b.map(|b| b.into()))),
                 created: self
                     .created
                     .map(|(a, b)| (a.map(|a| (a as i128).into()), b.map(|b| (b as i128).into()))),
                 caller: self.caller,
                 topic: self
                     .topic
-                    .map(|topic| {
-                        topic
-                            .iter()
-                            .map(|t| f(t))
-                            .collect::<Result<HashSet<_>, _>>()
-                    })
+                    .map(|topic| topic.iter().map(|t| f(t)).collect::<Result<HashSet<_>, _>>())
                     .transpose()?,
                 content: self.content,
             })

@@ -95,7 +95,7 @@ pub(super) struct CandidBuilder {
     chars: Vec<char>,
     length: usize,
     cursor: usize,
-    inner_types: HashMap<String, InnerCandidType>, // 临时类型
+    inner_types: HashMap<String, InnerCandidType>,     // 临时类型
     wrapped_types: HashMap<String, WrappedCandidType>, // 已经确定的类型, 循环类型不确定, 不应放入
     service: Option<WrappedCandidTypeService>,
 }
@@ -319,9 +319,7 @@ impl CandidBuilder {
         self.wrapped_types.insert(name, candid_type);
     }
 
-    pub(super) fn parse_service_candid(
-        candid: &str,
-    ) -> Result<WrappedCandidTypeService, ParsedCandidError> {
+    pub(super) fn parse_service_candid(candid: &str) -> Result<WrappedCandidTypeService, ParsedCandidError> {
         let mut builder = Self::new(candid);
         builder.read_inner_types()?;
         // println!("read inner done");
@@ -357,10 +355,7 @@ impl CandidBuilder {
         self.inner_types.insert(name, candid_type);
         Ok(())
     }
-    fn read_inner_candid_type(
-        &mut self,
-        name: Option<String>,
-    ) -> Result<InnerCandidType, ParsedCandidError> {
+    fn read_inner_candid_type(&mut self, name: Option<String>) -> Result<InnerCandidType, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let candid_type = self.read_name()?;
         let candid_type = match &candid_type[..] {
@@ -492,10 +487,7 @@ impl CandidBuilder {
         self.trim_start_blank_or_semicolon()?;
         Ok(candid_type)
     }
-    fn read_inner_func(
-        &mut self,
-        name: Option<String>,
-    ) -> Result<InnerCandidTypeFunction, ParsedCandidError> {
+    fn read_inner_func(&mut self, name: Option<String>) -> Result<InnerCandidTypeFunction, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
         let mut args: Vec<InnerCandidType> = Vec::new();
         self.remove_char('(')?;
@@ -583,29 +575,23 @@ impl CandidBuilder {
 
         if !self.is_next(&['{']) {
             let name = self.read_name()?;
-            if let Some(InnerCandidType::Service(InnerCandidTypeService {
-                args,
-                methods,
-                name,
-            })) = &self.inner_types.get(&name).cloned()
+            if let Some(InnerCandidType::Service(InnerCandidTypeService { args, methods, name })) =
+                &self.inner_types.get(&name).cloned()
             {
                 let mut rec_record = RecRecord::new();
                 let mut wrapped_args = Vec::new();
                 for inner in args {
-                    wrapped_args
-                        .push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
+                    wrapped_args.push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
                 }
                 let mut wrapped_methods = Vec::new();
                 for (name, inner) in methods {
                     let mut wrapped_args = Vec::new();
                     for inner in &inner.args {
-                        wrapped_args
-                            .push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
+                        wrapped_args.push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
                     }
                     let mut wrapped_results = Vec::new();
                     for inner in &inner.rets {
-                        wrapped_results
-                            .push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
+                        wrapped_results.push(self.read_wrapped_candid_type_by_inner(&mut rec_record, inner)?)
                     }
 
                     wrapped_methods.push((
@@ -626,16 +612,15 @@ impl CandidBuilder {
                 });
                 return Ok(());
             }
-            let ty = self.wrapped_types.get(&name).ok_or_else(|| {
-                ParsedCandidError::ParsedError(format!("can not find service type: {name}"))
-            })?;
+            let ty = self
+                .wrapped_types
+                .get(&name)
+                .ok_or_else(|| ParsedCandidError::ParsedError(format!("can not find service type: {name}")))?;
             if let WrappedCandidType::Service(service) = ty {
                 self.service = Some(service.clone());
                 return Ok(());
             }
-            return Err(ParsedCandidError::ParsedError(format!(
-                "type: {name} is not service"
-            )));
+            return Err(ParsedCandidError::ParsedError(format!("type: {name} is not service")));
         }
 
         self.remove_char('{')?;
@@ -791,10 +776,7 @@ impl CandidBuilder {
                             self.trim_start_blank_or_newline()?;
                         }
                         self.remove_char('}')?;
-                        WrappedCandidType::Tuple(WrappedCandidTypeTuple {
-                            subitems: list,
-                            name,
-                        })
+                        WrappedCandidType::Tuple(WrappedCandidTypeTuple { subitems: list, name })
                     }
                 }
             }
@@ -868,10 +850,10 @@ impl CandidBuilder {
                     match self.read_wrapped_candid_type(rec_record, Some(candid_type.clone())) {
                         Ok(candid_type) => candid_type,
                         Err(err) => {
-                            if let ParsedCandidError::ParsedError(err) = &err {
-                                if err.contains("can not read string") {
-                                    return Err(ParsedCandidError::MissingType(candid_type));
-                                }
+                            if let ParsedCandidError::ParsedError(err) = &err
+                                && err.contains("can not read string")
+                            {
+                                return Err(ParsedCandidError::MissingType(candid_type));
                             }
                             return Err(err);
                         }
@@ -918,50 +900,22 @@ impl CandidBuilder {
     ) -> Result<WrappedCandidType, ParsedCandidError> {
         // 如果没有
         let wrapped = match inner.clone() {
-            InnerCandidType::Bool(name) => {
-                WrappedCandidType::Bool(WrappedCandidTypeName::from(name))
-            }
+            InnerCandidType::Bool(name) => WrappedCandidType::Bool(WrappedCandidTypeName::from(name)),
             InnerCandidType::Nat(name) => WrappedCandidType::Nat(WrappedCandidTypeName::from(name)),
             InnerCandidType::Int(name) => WrappedCandidType::Int(WrappedCandidTypeName::from(name)),
-            InnerCandidType::Nat8(name) => {
-                WrappedCandidType::Nat8(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Nat16(name) => {
-                WrappedCandidType::Nat16(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Nat32(name) => {
-                WrappedCandidType::Nat32(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Nat64(name) => {
-                WrappedCandidType::Nat64(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Int8(name) => {
-                WrappedCandidType::Int8(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Int16(name) => {
-                WrappedCandidType::Int16(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Int32(name) => {
-                WrappedCandidType::Int32(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Int64(name) => {
-                WrappedCandidType::Int64(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Float32(name) => {
-                WrappedCandidType::Float32(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Float64(name) => {
-                WrappedCandidType::Float64(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Null(name) => {
-                WrappedCandidType::Null(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Text(name) => {
-                WrappedCandidType::Text(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Principal(name) => {
-                WrappedCandidType::Principal(WrappedCandidTypeName::from(name))
-            }
+            InnerCandidType::Nat8(name) => WrappedCandidType::Nat8(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Nat16(name) => WrappedCandidType::Nat16(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Nat32(name) => WrappedCandidType::Nat32(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Nat64(name) => WrappedCandidType::Nat64(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Int8(name) => WrappedCandidType::Int8(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Int16(name) => WrappedCandidType::Int16(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Int32(name) => WrappedCandidType::Int32(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Int64(name) => WrappedCandidType::Int64(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Float32(name) => WrappedCandidType::Float32(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Float64(name) => WrappedCandidType::Float64(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Null(name) => WrappedCandidType::Null(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Text(name) => WrappedCandidType::Text(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Principal(name) => WrappedCandidType::Principal(WrappedCandidTypeName::from(name)),
             InnerCandidType::Blob(name) => WrappedCandidType::Vec(WrappedCandidTypeSubtype {
                 subtype: Box::new(WrappedCandidType::Nat8(WrappedCandidTypeName::default())),
                 name,
@@ -982,45 +936,29 @@ impl CandidBuilder {
                         self.read_wrapped_candid_type_by_inner(rec_record, &inner)?,
                     ))
                 }
-                WrappedCandidType::Record(WrappedCandidTypeRecord {
-                    subitems: list,
-                    name,
-                })
+                WrappedCandidType::Record(WrappedCandidTypeRecord { subitems: list, name })
             }
             InnerCandidType::Variant(inners, name) => {
                 let mut list = Vec::new();
                 for (name, inner) in inners {
                     let mut inner_type = None;
                     if let Some(inner) = inner {
-                        inner_type =
-                            Some(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?);
+                        inner_type = Some(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?);
                     }
                     list.push((name.clone(), inner_type))
                 }
-                WrappedCandidType::Variant(WrappedCandidTypeVariant {
-                    subitems: list,
-                    name,
-                })
+                WrappedCandidType::Variant(WrappedCandidTypeVariant { subitems: list, name })
             }
             InnerCandidType::Tuple(inners, name) => {
                 let mut list = Vec::new();
                 for inner in inners {
                     list.push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
                 }
-                WrappedCandidType::Tuple(WrappedCandidTypeTuple {
-                    subitems: list,
-                    name,
-                })
+                WrappedCandidType::Tuple(WrappedCandidTypeTuple { subitems: list, name })
             }
-            InnerCandidType::Unknown(name) => {
-                WrappedCandidType::Unknown(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Empty(name) => {
-                WrappedCandidType::Empty(WrappedCandidTypeName::from(name))
-            }
-            InnerCandidType::Reserved(name) => {
-                WrappedCandidType::Reserved(WrappedCandidTypeName::from(name))
-            }
+            InnerCandidType::Unknown(name) => WrappedCandidType::Unknown(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Empty(name) => WrappedCandidType::Empty(WrappedCandidTypeName::from(name)),
+            InnerCandidType::Reserved(name) => WrappedCandidType::Reserved(WrappedCandidTypeName::from(name)),
             InnerCandidType::Func(InnerCandidTypeFunction {
                 args,
                 rets,
@@ -1033,8 +971,7 @@ impl CandidBuilder {
                 }
                 let mut wrapped_results = Vec::new();
                 for inner in rets {
-                    wrapped_results
-                        .push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
+                    wrapped_results.push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
                 }
                 WrappedCandidType::Func(WrappedCandidTypeFunction {
                     args: wrapped_args,
@@ -1043,11 +980,7 @@ impl CandidBuilder {
                     name,
                 })
             }
-            InnerCandidType::Service(InnerCandidTypeService {
-                args,
-                methods,
-                name,
-            }) => {
+            InnerCandidType::Service(InnerCandidTypeService { args, methods, name }) => {
                 let mut wrapped_args = Vec::new();
                 for inner in args {
                     wrapped_args.push(self.read_wrapped_candid_type_by_inner(rec_record, &inner)?)
@@ -1056,13 +989,11 @@ impl CandidBuilder {
                 for (name, inner) in methods {
                     let mut wrapped_args = Vec::new();
                     for inner in &inner.args {
-                        wrapped_args
-                            .push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
+                        wrapped_args.push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
                     }
                     let mut wrapped_results = Vec::new();
                     for inner in &inner.rets {
-                        wrapped_results
-                            .push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
+                        wrapped_results.push(self.read_wrapped_candid_type_by_inner(rec_record, inner)?)
                     }
 
                     wrapped_methods.push((
