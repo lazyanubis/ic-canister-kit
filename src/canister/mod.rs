@@ -39,7 +39,7 @@ use serde::Deserialize;
 pub fn self_canister_cycles() -> u128 {
     #[cfg(target_arch = "wasm32")]
     {
-        ic_cdk::api::canister_balance128()
+        ic_cdk::api::canister_cycle_balance()
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -52,7 +52,7 @@ pub fn self_canister_cycles() -> u128 {
 pub fn self_canister_stable_memory_size() -> u128 {
     #[cfg(target_arch = "wasm32")]
     {
-        (ic_cdk::api::stable::stable_size() as u128) * WASM_PAGE_SIZE as u128
+        (ic_cdk::api::stable_size() as u128) * WASM_PAGE_SIZE as u128
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
@@ -104,6 +104,5 @@ fn wrap_call_result<E: Display>(
     method: &str,
     call_result: Result<(), E>,
 ) -> types::CanisterCallResult<()> {
-    call_result
-        .map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, method, err))
+    call_result.map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, method, err))
 }
