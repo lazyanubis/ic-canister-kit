@@ -58,7 +58,7 @@ impl std::error::Error for MixNumberDecodeError {}
 
 /// 根据加密结果解析回序号
 pub fn decode_index_code(salt: &[u8], show: &[u8]) -> Result<u64, MixNumberDecodeError> {
-    if show.len() <= 4 || show.len() % 2 != 0 {
+    if show.len() <= 4 || !show.len().is_multiple_of(2) {
         return Err(MixNumberDecodeError::WrongLength); // 长度不对
     }
     let mix = &show[4..];
@@ -158,7 +158,7 @@ fn restore_numbers(ns: &[u8]) -> Vec<u8> {
             | ((n2 & 0b0000_0001) >> 0)
     }
 
-    assert!(ns.len() % 2 == 0); // ! 必须是偶数
+    assert!(ns.len().is_multiple_of(2)); // ! 必须是偶数
 
     let mut numbers = Vec::new();
     for i in 0..(ns.len() / 2) {

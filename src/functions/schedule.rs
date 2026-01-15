@@ -7,7 +7,7 @@ use crate::types::DurationNanos;
 #[inline]
 pub fn async_execute<Task>(task: Task) -> ic_cdk_timers::TimerId
 where
-    Task: FnOnce() + 'static,
+    Task: Future<Output = ()> + 'static,
 {
     ic_cdk_timers::set_timer(std::time::Duration::ZERO, task)
 }
@@ -34,15 +34,12 @@ pub fn schedule_stop(timer_id: Option<TimerId>) {
 
 /// 启动任务
 #[inline]
-pub fn schedule_start(
-    schedule: &Option<DurationNanos>,
-    task: impl FnMut() + 'static,
-) -> Option<TimerId> {
+pub fn schedule_start<F>(schedule: &Option<DurationNanos>, task: impl FnMut() -> F + 'static) -> Option<TimerId>
+where
+    F: Future<Output = ()> + 'static,
+{
     schedule.map(|interval| {
-        ic_cdk_timers::set_timer_interval(
-            std::time::Duration::from_nanos(interval.into_inner() as u64),
-            task,
-        )
+        ic_cdk_timers::set_timer_interval(std::time::Duration::from_nanos(interval.into_inner() as u64), task)
     })
 }
 
@@ -70,14 +67,15 @@ pub mod basic {
         /// 停止定时任务
         #[inline]
         pub fn stop_schedule() {
-            SCHEDULE.with_borrow_mut(|timer_id| {
-                crate::functions::schedule::schedule_stop(std::mem::take(timer_id))
-            });
+            SCHEDULE.with_borrow_mut(|timer_id| crate::functions::schedule::schedule_stop(std::mem::take(timer_id)));
         }
 
         /// 启动定时任务
         #[inline]
-        pub fn start_schedule(schedule: &Option<DurationNanos>, task: impl FnMut() + 'static) {
+        pub fn start_schedule<F>(schedule: &Option<DurationNanos>, task: impl FnMut() -> F + 'static)
+        where
+            F: Future<Output = ()> + 'static,
+        {
             stop_schedule();
             let new_timer_id = crate::functions::schedule::schedule_start(schedule, task);
             SCHEDULE.with_borrow_mut(|timer_id| *timer_id = new_timer_id);
