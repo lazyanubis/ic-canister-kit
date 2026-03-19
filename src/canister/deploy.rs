@@ -1,8 +1,10 @@
 //! 和 罐子 的 部署 相关
 
+use super::types::CanisterSettings;
+
 /// 部署罐子
 pub async fn deploy_canister(
-    settings: Option<ic_cdk::management_canister::CanisterSettings>,
+    settings: Option<CanisterSettings>,
     initial_cycles: u128,
     wasm_module: super::codes::CanisterCodeWasm,
     arg: super::codes::CanisterInitArg,

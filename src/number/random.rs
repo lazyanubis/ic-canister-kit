@@ -6,10 +6,10 @@ use crate::canister::types::CanisterCallResult;
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-raw_rand
 #[inline]
 pub async fn random() -> CanisterCallResult<[u8; 32]> {
-    let call_result = ic_cdk::management_canister::raw_rand().await;
+    let call_result = ic_cdk_management_canister::raw_rand().await;
 
     let random = call_result.map_err(|err| crate::canister::types::CanisterCallError {
-        canister_id: crate::identity::CanisterId::anonymous(),
+        canister_id: crate::identity::CanisterId::management_canister(),
         method: "ic#raw_rand".to_string(),
         message: err.to_string(),
     })?;

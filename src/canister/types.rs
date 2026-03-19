@@ -32,11 +32,7 @@ impl std::error::Error for CanisterCallError {}
 
 impl CanisterCallError {
     /// 新建
-    pub fn new<E: Display>(
-        canister_id: crate::identity::CanisterId,
-        method: impl Into<String>,
-        err: E,
-    ) -> Self {
+    pub fn new<E: Display>(canister_id: crate::identity::CanisterId, method: impl Into<String>, err: E) -> Self {
         Self {
             canister_id,
             method: method.into(),
@@ -60,3 +56,4 @@ pub type CanisterCallResult<T> = Result<T, CanisterCallError>;
 // ===================== 常用模块 =====================
 
 pub use super::codes::{CanisterCodeWasm, CanisterInitArg};
+pub use ic_cdk_management_canister::*;

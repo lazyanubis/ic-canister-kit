@@ -20,14 +20,8 @@ mod tests {
 
         // println!("wrapped1: {:#?}", wrapped1);
 
-        print_candid(
-            &format!("./tmp/{}_debug.tmp", name),
-            &format!("{:#?}", wrapped),
-        );
-        print_candid(
-            &format!("./tmp/{}_restore.tmp", name),
-            &format!("{}", wrapped.to_text()),
-        );
+        print_candid(&format!("./tmp/{}_debug.tmp", name), &format!("{:#?}", wrapped));
+        print_candid(&format!("./tmp/{}_restore.tmp", name), &wrapped.to_text());
 
         println!("\n ======= {} done =======\n", name);
     }

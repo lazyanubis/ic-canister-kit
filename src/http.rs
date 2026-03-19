@@ -111,21 +111,21 @@ pub fn http_transform(response: TransformArgs) -> HttpRequestResult {
 
 /// http 请求
 pub async fn do_http_request(
-    arg: ic_cdk::management_canister::HttpRequestArgs,
+    arg: HttpRequestArgs,
     cycles: u128,
-) -> super::types::CanisterCallResult<ic_cdk::management_canister::HttpRequestResult> {
-    let cost = ic_cdk::management_canister::cost_http_request(&arg);
+) -> super::types::CanisterCallResult<HttpRequestResult> {
+    let cost = ic_cdk_management_canister::cost_http_request(&arg);
     if cycles < cost {
         return Err(CanisterCallError {
-            canister_id: CanisterId::anonymous(),
+            canister_id: CanisterId::management_canister(),
             method: "ic#http_request".to_string(),
-            message: "Insufficient cycles".to_string(),
+            message: format!("Insufficient cycles. cost: {}, provided: {}", cost, cycles),
         });
     }
-    ic_cdk::management_canister::http_request(&arg)
+    ic_cdk_management_canister::http_request(&arg)
         .await
         .map_err(|err| CanisterCallError {
-            canister_id: CanisterId::anonymous(),
+            canister_id: CanisterId::management_canister(),
             method: "ic#http_request".to_string(),
             message: err.to_string(),
         })
@@ -134,25 +134,22 @@ pub async fn do_http_request(
 /// 带有转换函数的 http 请求
 #[allow(clippy::future_not_send)]
 pub async fn do_http_request_with_closure(
-    arg: ic_cdk::management_canister::HttpRequestArgs,
+    arg: HttpRequestArgs,
     cycles: u128,
-    transform_func: impl FnOnce(
-        ic_cdk::management_canister::HttpRequestResult,
-    ) -> ic_cdk::management_canister::HttpRequestResult
-    + 'static,
-) -> super::types::CanisterCallResult<ic_cdk::management_canister::HttpRequestResult> {
-    let cost = ic_cdk::management_canister::cost_http_request(&arg);
+    transform_func: impl FnOnce(HttpRequestResult) -> HttpRequestResult + 'static,
+) -> super::types::CanisterCallResult<HttpRequestResult> {
+    let cost = ic_cdk_management_canister::cost_http_request(&arg);
     if cycles < cost {
         return Err(CanisterCallError {
-            canister_id: CanisterId::anonymous(),
+            canister_id: CanisterId::management_canister(),
             method: "ic#http_request".to_string(),
-            message: "Insufficient cycles".to_string(),
+            message: format!("Insufficient cycles. cost: {}, provided: {}", cost, cycles),
         });
     }
-    ic_cdk::management_canister::http_request_with_closure(&arg, transform_func)
+    ic_cdk_management_canister::http_request_with_closure(&arg, transform_func)
         .await
         .map_err(|err| CanisterCallError {
-            canister_id: CanisterId::anonymous(),
+            canister_id: CanisterId::management_canister(),
             method: "ic#http_request".to_string(),
             message: err.to_string(),
         })

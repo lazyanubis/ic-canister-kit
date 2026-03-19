@@ -1,5 +1,6 @@
 //! 和 罐子 的 Cycles 相关
 
+use super::types::DepositCyclesArgs;
 use crate::identity::CanisterId;
 
 /*
@@ -54,15 +55,8 @@ where
 /// 充值余额
 /// ! 任何人都可以调用
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-deposit_cycles
-pub async fn deposit_cycles(
-    canister_id: CanisterId,
-    cycles: u128,
-) -> Result<(), super::types::CanisterCallError> {
-    let call_result = ic_cdk::management_canister::deposit_cycles(
-        &ic_cdk::management_canister::DepositCyclesArgs { canister_id },
-        cycles,
-    )
-    .await;
+pub async fn deposit_cycles(canister_id: CanisterId, cycles: u128) -> Result<(), super::types::CanisterCallError> {
+    let call_result = ic_cdk_management_canister::deposit_cycles(&DepositCyclesArgs { canister_id }, cycles).await;
     super::wrap_call_result(canister_id, "ic#deposit_cycles", call_result)
 }
 
@@ -70,9 +64,7 @@ pub async fn deposit_cycles(
 
 /// 查询罐子余额
 /// ! 必须实现 wallet_balance : () -> (nat) query 接口
-pub async fn call_wallet_balance(
-    canister_id: CanisterId,
-) -> super::types::CanisterCallResult<candid::Nat> {
+pub async fn call_wallet_balance(canister_id: CanisterId) -> super::types::CanisterCallResult<candid::Nat> {
     let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, "wallet_balance").await;
     super::fetch_and_wrap_call_result(canister_id, "deposit_cycles", call_result)
 }

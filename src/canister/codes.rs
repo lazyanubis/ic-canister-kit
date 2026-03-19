@@ -1,5 +1,6 @@
 //! 罐子代码
 
+use super::types::{CanisterInstallMode, InstallCodeArgs, UninstallCodeArgs, UpgradeFlags};
 use crate::identity::CanisterId;
 
 /// 部署罐子代码
@@ -17,14 +18,13 @@ pub async fn install_code(
     wasm_module: CanisterCodeWasm,
     arg: CanisterInitArg,
 ) -> super::types::CanisterCallResult<()> {
-    let call_result =
-        ic_cdk::management_canister::install_code(&ic_cdk::management_canister::InstallCodeArgs {
-            mode: ic_cdk::management_canister::CanisterInstallMode::Install,
-            canister_id,
-            wasm_module,
-            arg,
-        })
-        .await;
+    let call_result = ic_cdk_management_canister::install_code(&InstallCodeArgs {
+        mode: CanisterInstallMode::Install,
+        canister_id,
+        wasm_module,
+        arg,
+    })
+    .await;
     super::wrap_call_result(canister_id, "ic#install_code#install", call_result)
 }
 
@@ -37,16 +37,15 @@ pub async fn upgrade_code(
     canister_id: CanisterId,
     wasm_module: CanisterCodeWasm,
     arg: Option<CanisterInitArg>,
-    pre_upgrade: Option<ic_cdk::management_canister::UpgradeFlags>,
+    pre_upgrade: Option<UpgradeFlags>,
 ) -> super::types::CanisterCallResult<()> {
-    let call_result =
-        ic_cdk::management_canister::install_code(&ic_cdk::management_canister::InstallCodeArgs {
-            mode: ic_cdk::management_canister::CanisterInstallMode::Upgrade(pre_upgrade),
-            canister_id,
-            wasm_module,
-            arg: arg.unwrap_or_default(),
-        })
-        .await;
+    let call_result = ic_cdk_management_canister::install_code(&InstallCodeArgs {
+        mode: CanisterInstallMode::Upgrade(pre_upgrade),
+        canister_id,
+        wasm_module,
+        arg: arg.unwrap_or_default(),
+    })
+    .await;
     super::wrap_call_result(canister_id, "ic#install_code#upgrade", call_result)
 }
 
@@ -60,14 +59,13 @@ pub async fn reinstall_code(
     wasm_module: CanisterCodeWasm,
     arg: CanisterInitArg,
 ) -> super::types::CanisterCallResult<()> {
-    let call_result =
-        ic_cdk::management_canister::install_code(&ic_cdk::management_canister::InstallCodeArgs {
-            mode: ic_cdk::management_canister::CanisterInstallMode::Reinstall,
-            canister_id,
-            wasm_module,
-            arg,
-        })
-        .await;
+    let call_result = ic_cdk_management_canister::install_code(&InstallCodeArgs {
+        mode: CanisterInstallMode::Reinstall,
+        canister_id,
+        wasm_module,
+        arg,
+    })
+    .await;
     super::wrap_call_result(canister_id, "ic#install_code#reinstall", call_result)
 }
 
@@ -77,9 +75,6 @@ pub async fn reinstall_code(
 /// ! Only the controllers of the canister
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-uninstall_code
 pub async fn uninstall_code(canister_id: CanisterId) -> super::types::CanisterCallResult<()> {
-    let call_result = ic_cdk::management_canister::uninstall_code(
-        &ic_cdk::management_canister::UninstallCodeArgs { canister_id },
-    )
-    .await;
+    let call_result = ic_cdk_management_canister::uninstall_code(&UninstallCodeArgs { canister_id }).await;
     super::wrap_call_result(canister_id, "ic#uninstall_code", call_result)
 }

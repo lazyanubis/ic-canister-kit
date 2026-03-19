@@ -1,10 +1,8 @@
 use candid::CandidType;
-use ic_cdk::management_canister::{EcdsaPublicKeyArgs, SignWithEcdsaArgs};
-use serde::{Deserialize, Serialize};
-
-pub use ic_cdk::management_canister::{
-    EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyResult, SignWithEcdsaResult,
+pub use ic_cdk_management_canister::{
+    EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs, EcdsaPublicKeyResult, SignWithEcdsaArgs, SignWithEcdsaResult,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::{identity::CanisterId, types::CanisterCallError};
 
@@ -86,7 +84,7 @@ pub async fn ecdsa_public_key(
     canister_id: Option<CanisterId>, // 不写则是自身 id
     identity: EcdsaIdentity,
 ) -> super::types::CanisterCallResult<EcdsaPublicKeyResult> {
-    ic_cdk::management_canister::ecdsa_public_key(&EcdsaPublicKeyArgs {
+    ic_cdk_management_canister::ecdsa_public_key(&EcdsaPublicKeyArgs {
         canister_id,
         // derivation_path: identity.derivation_path.0,
         derivation_path: identity.derivation_path,
@@ -94,26 +92,26 @@ pub async fn ecdsa_public_key(
     })
     .await
     .map_err(|err| CanisterCallError {
-        canister_id: crate::identity::CanisterId::anonymous(),
+        canister_id: crate::identity::CanisterId::management_canister(),
         method: "ic#ecdsa_public_key".to_string(),
         message: err.to_string(),
     })
 }
 
-/// 进行签名
+/// 签名
 /// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_ecdsa
-pub async fn ecdsa_sign(
+pub async fn sign_with_ecdsa(
     identity: EcdsaIdentity,
     message_hash: MessageHash,
 ) -> super::types::CanisterCallResult<SignWithEcdsaResult> {
-    ic_cdk::management_canister::sign_with_ecdsa(&SignWithEcdsaArgs {
+    ic_cdk_management_canister::sign_with_ecdsa(&SignWithEcdsaArgs {
         message_hash: message_hash.0,
         derivation_path: identity.derivation_path,
         key_id: identity.key_id,
     })
     .await
     .map_err(|err| CanisterCallError {
-        canister_id: crate::identity::CanisterId::anonymous(),
+        canister_id: crate::identity::CanisterId::management_canister(),
         method: "ic#sign_with_ecdsa".to_string(),
         message: err.to_string(),
     })
