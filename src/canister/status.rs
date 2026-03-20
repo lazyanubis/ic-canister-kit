@@ -8,14 +8,14 @@ use crate::identity::CanisterId;
 引入包后, 直接使用如下方法即可增加查询罐子状态的接口
 
 #[ic_cdk::update]
-async fn canister_status() -> ic_canister_kit::CanisterStatusResult {
+async fn canister_status() -> ic_canister_kit::types::CanisterStatusResult {
     use ic_canister_kit::{canister::status::canister_status, identity::self_canister_id};
     let response = canister_status(self_canister_id()).await;
     ic_canister_kit::common::trap(response)
 }
 
 #[ic_cdk::update]
-async fn canister_info(num_requested_changes: Option<u64>) -> ic_canister_kit::CanisterInfoResult {
+async fn canister_info(num_requested_changes: Option<u64>) -> ic_canister_kit::types::CanisterInfoResult {
     use ic_canister_kit::{canister::status::canister_info, identity::self_canister_id};
     let response = canister_info(self_canister_id(), num_requested_changes).await;
     ic_canister_kit::common::trap(response)
