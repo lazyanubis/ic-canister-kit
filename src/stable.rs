@@ -36,7 +36,7 @@ thread_local! {
 
 // 最大支持 255 个内存片段
 // 这里将第 254 号用作保存堆内存序列化存档数据的内存，业务数据等不应该使用 254 号
-// https://github.com/dfinity/stable-structures/blob/bb9f819cc47669fcf07d4e72516dd715d0624ac8/src/memory_manager.rs#L55
+// https://github.com/dfinity/stable-structures/blob/29fad0d7b86333527b41924582bfede5bdc5dfc1/src/memory_manager.rs#L55
 const MEMORY_ID_UPGRADED: MemoryId = MemoryId::new(254);
 
 /// 获取虚拟内存

@@ -1,12 +1,12 @@
 use std::fmt::Display;
 
 use candid::CandidType;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 // ================== 罐子调用产生的错误信息 ==================
 
 /// 罐子调用会产生的错误
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct CanisterCallError {
     /// 罐子 id
     pub canister_id: crate::identity::CanisterId,
@@ -15,7 +15,7 @@ pub struct CanisterCallError {
     pub method: String,
 
     /// 错误消息
-    pub message: std::string::String,
+    pub message: String,
 }
 impl std::fmt::Display for CanisterCallError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
