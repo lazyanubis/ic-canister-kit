@@ -95,11 +95,7 @@ impl WrappedCandidTypeRecord {
             "record {{ {} }}",
             subitems
                 .iter()
-                .map(|(name, subtype)| format!(
-                    "{} : {}",
-                    wrapped_key_word(name),
-                    subtype.to_text()
-                ))
+                .map(|(name, subtype)| format!("{} : {}", wrapped_key_word(name), subtype.to_text()))
                 .collect::<Vec<_>>()
                 .join("; ")
         )
@@ -182,6 +178,9 @@ pub enum FunctionAnnotation {
     /// 查询函数, 可以用查询机制简化消耗的 cycles
     #[serde(rename = "query")]
     Query,
+    /// 复合查询函数
+    #[serde(rename = "composite_query")]
+    CompositeQuery,
     /// 用于不关心返回值的函数, 触发即忘场景
     #[serde(rename = "oneway")]
     Oneway,
@@ -191,18 +190,10 @@ pub enum FunctionAnnotation {
 #[derive(Debug, Clone, CandidType, Serialize, Deserialize, Eq, PartialEq)]
 pub struct WrappedCandidTypeFunction {
     /// args
-    #[serde(
-        rename = "args",
-        skip_serializing_if = "Vec::is_empty",
-        default = "Vec::new"
-    )]
+    #[serde(rename = "args", skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
     pub args: Vec<WrappedCandidType>,
     /// results
-    #[serde(
-        rename = "rets",
-        skip_serializing_if = "Vec::is_empty",
-        default = "Vec::new"
-    )]
+    #[serde(rename = "rets", skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
     pub rets: Vec<WrappedCandidType>,
     /// annotation update query
     #[serde(rename = "annotation", skip_serializing_if = "Option::is_none")]
@@ -217,25 +208,17 @@ impl WrappedCandidTypeFunction {
     /// 文本
     pub fn to_text(&self) -> String {
         let Self {
-            args,
-            rets,
-            annotation,
-            ..
+            args, rets, annotation, ..
         } = self;
 
         format!(
             "func ({}) -> ({}){}",
-            args.iter()
-                .map(|t| t.to_text())
-                .collect::<Vec<_>>()
-                .join(", "),
-            rets.iter()
-                .map(|t| t.to_text())
-                .collect::<Vec<_>>()
-                .join(", "),
+            args.iter().map(|t| t.to_text()).collect::<Vec<_>>().join(", "),
+            rets.iter().map(|t| t.to_text()).collect::<Vec<_>>().join(", "),
             match annotation.as_ref() {
                 Some(annotation) => match annotation {
                     FunctionAnnotation::Query => " query",
+                    FunctionAnnotation::CompositeQuery => " composite_query",
                     FunctionAnnotation::Oneway => " oneway",
                 },
                 None => "",
@@ -248,18 +231,10 @@ impl WrappedCandidTypeFunction {
 #[derive(Debug, Clone, CandidType, Serialize, Deserialize, Eq, PartialEq)]
 pub struct WrappedCandidTypeService {
     /// args
-    #[serde(
-        rename = "args",
-        skip_serializing_if = "Vec::is_empty",
-        default = "Vec::new"
-    )]
+    #[serde(rename = "args", skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
     pub args: Vec<WrappedCandidType>,
     /// methods
-    #[serde(
-        rename = "methods",
-        skip_serializing_if = "Vec::is_empty",
-        default = "Vec::new"
-    )]
+    #[serde(rename = "methods", skip_serializing_if = "Vec::is_empty", default = "Vec::new")]
     pub methods: Vec<(String, WrappedCandidTypeFunction)>,
 
     /// 有时候有名字
@@ -279,10 +254,7 @@ impl WrappedCandidTypeService {
             } else {
                 format!(
                     " ({}) ->",
-                    args.iter()
-                        .map(|t| t.to_text())
-                        .collect::<Vec<_>>()
-                        .join(", ")
+                    args.iter().map(|t| t.to_text()).collect::<Vec<_>>().join(", ")
                 )
             },
             if methods.is_empty() {

@@ -2,7 +2,7 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::candid::parse_service_candid;
+    use crate::candid::{parse_service_candid, types::FunctionAnnotation};
 
     #[allow(unused)]
     fn print_candid(filename: &str, candid: &str) {
@@ -26,11 +26,39 @@ mod tests {
         println!("\n ======= {} done =======\n", name);
     }
 
-    #[test]
-    fn test_parse_candid() {
-        std::fs::create_dir_all("./tmp").unwrap();
+    mod composite_query {
+        use super::*;
 
-        let candid1 = r##"type CanisterInitialArg = record {
+        #[test]
+        fn parses_composite_query_annotations() {
+            let candid = r##"service : {
+              get_estimated_cbktc_conversion_fee : () -> (nat64) composite_query;
+              query_conversion_status : (nat64) -> (text) composite_query;
+            }"##;
+
+            let wrapped = parse_service_candid(candid).unwrap();
+
+            assert_eq!(wrapped.methods.len(), 2);
+            assert!(
+                wrapped
+                    .methods
+                    .iter()
+                    .all(|(_, f)| f.annotation == Some(FunctionAnnotation::CompositeQuery))
+            );
+
+            let text = wrapped.to_text();
+            assert!(text.contains("composite_query"));
+        }
+    }
+
+    mod basic_parse {
+        use super::*;
+
+        #[test]
+        fn parses_common_service_candid_samples() {
+            std::fs::create_dir_all("./tmp").unwrap();
+
+            let candid1 = r##"type CanisterInitialArg = record {
       permission_host : opt principal;
       record_collector : opt principal;
       schedule : opt nat64;
@@ -133,9 +161,9 @@ mod tests {
       whoami : () -> (principal) query;
     }"##;
 
-        test_single_candid(candid1, "candid1");
+            test_single_candid(candid1, "candid1");
 
-        let candid2 = r##"type CanisterStatusResponse = record {
+            let candid2 = r##"type CanisterStatusResponse = record {
       status : CanisterStatusType;
       memory_size : nat;
       cycles : nat;
@@ -329,9 +357,9 @@ mod tests {
       whoami : () -> (principal) query;
     }"##;
 
-        test_single_candid(candid2, "candid2");
+            test_single_candid(candid2, "candid2");
 
-        let candid3 = r##"type definite_canister_settings =
+            let candid3 = r##"type definite_canister_settings =
     record {
       compute_allocation: nat;
       controllers: opt vec principal;
@@ -2086,9 +2114,9 @@ mod tests {
    }
    "##;
 
-        test_single_candid(candid3, "candid3");
+            test_single_candid(candid3, "candid3");
 
-        let candid4 = r##"type Tokens = nat;
+            let candid4 = r##"type Tokens = nat;
 
         type InitArg = record {
             ledger_id: principal;
@@ -2233,14 +2261,28 @@ mod tests {
         }
    "##;
 
-        test_single_candid(candid4, "candid4");
+            test_single_candid(candid4, "candid4");
+        }
+    }
 
-        let candid5 = r##"//123
+    mod comment_handling {
+        use super::*;
+
+        #[test]
+        fn parses_line_and_block_comments() {
+            let candid5 = r##"//123
         /*123*/
         service: { test: (text) -> (text) query }"##;
-        test_single_candid(candid5, "candid5");
+            test_single_candid(candid5, "candid5");
+        }
+    }
 
-        let candid6 = r##"type AccountIdentifier = record {
+    mod recursive_types {
+        use super::*;
+
+        #[test]
+        fn parses_recursive_governance_types() {
+            let candid6 = r##"type AccountIdentifier = record {
   hash : blob;
 };
 
@@ -3371,12 +3413,12 @@ service : (Governance) -> {
   update_node_provider : (UpdateNodeProvider) -> (Result);
 }
 "##;
-        test_single_candid(candid6, "candid6");
-    }
+            test_single_candid(candid6, "candid6");
+        }
 
-    #[test]
-    fn test_parse_candid2() {
-        let candid7 = r##"
+        #[test]
+        fn parses_recursive_proposal_types() {
+            let candid7 = r##"
         type Proposal = record {
   url : text;
   title : opt text;
@@ -3404,11 +3446,16 @@ service : {
   claim_gtc_neurons : (Proposal) -> (WrappedPropoasl);
 }
 "##;
-        test_single_candid(candid7, "candid7");
+            test_single_candid(candid7, "candid7");
+        }
     }
-    #[test]
-    fn test_parse_candid3() {
-        let candid8 = r##"
+
+    mod basic_parse_large_services {
+        use super::*;
+
+        #[test]
+        fn parses_assets_canister_service() {
+            let candid8 = r##"
         type BatchId = nat;
 type ChunkId = nat;
 type Key = text;
@@ -3673,6 +3720,7 @@ service: (asset_canister_args: opt AssetCanisterArgs) -> {
   validate_configure: (ConfigureArguments) -> (ValidationResult);
 }
 "##;
-        test_single_candid(candid8, "candid8");
+            test_single_candid(candid8, "candid8");
+        }
     }
 }

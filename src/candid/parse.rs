@@ -283,6 +283,17 @@ impl CandidBuilder {
         self.cursor += 5;
         Ok(true)
     }
+    // 检查并移除 'composite_query'
+    fn trim_composite_query(&mut self) -> Result<bool, ParsedCandidError> {
+        self.trim_start_blank_or_newline()?;
+        if !self.is_next(&[
+            'c', 'o', 'm', 'p', 'o', 's', 'i', 't', 'e', '_', 'q', 'u', 'e', 'r', 'y',
+        ]) {
+            return Ok(false);
+        }
+        self.cursor += 15;
+        Ok(true)
+    }
     // 检查并移除 'oneway'
     fn trim_oneway(&mut self) -> Result<bool, ParsedCandidError> {
         self.trim_start_blank_or_newline()?;
@@ -513,7 +524,9 @@ impl CandidBuilder {
         self.remove_char(')')?;
         self.trim_start_blank_or_newline()?;
         let mut annotation = None;
-        if self.trim_query()? {
+        if self.trim_composite_query()? {
+            annotation = Some(FunctionAnnotation::CompositeQuery)
+        } else if self.trim_query()? {
             annotation = Some(FunctionAnnotation::Query)
         } else if self.trim_oneway()? {
             annotation = Some(FunctionAnnotation::Oneway)
@@ -677,7 +690,9 @@ impl CandidBuilder {
         self.remove_char(')')?;
         self.trim_start_blank_or_newline()?;
         let mut annotation = None;
-        if self.trim_query()? {
+        if self.trim_composite_query()? {
+            annotation = Some(FunctionAnnotation::CompositeQuery)
+        } else if self.trim_query()? {
             annotation = Some(FunctionAnnotation::Query)
         } else if self.trim_oneway()? {
             annotation = Some(FunctionAnnotation::Oneway)
