@@ -15,5 +15,7 @@ pub mod once;
 pub mod types;
 
 /// 拆箱
+#[cfg(feature = "canister")]
 mod trap;
+#[cfg(feature = "canister")]
 pub use trap::*;

@@ -1,6 +1,6 @@
 [package]
 name = "ic-canister-kit"
-version = "1.2.2"
+version = "1.2.3"
 edition = "2024"
 license = "Apache-2.0"
 readme = "README.md"
@@ -35,7 +35,7 @@ default = [
 ]
 
 common = ["dep:candid", "dep:serde"] # 通用工具
-times = ["dep:ic-cdk"] # 时间相关
+times = ["dep:serde", "dep:candid", "dep:ic-cdk"] # 时间相关
 identity = [
     "dep:candid",
     "dep:ic-cdk",
@@ -53,10 +53,16 @@ token = ["canister"] # 代币标准
 http = ["canister"] # http 相关
 ecdsa = ["canister"] # ecdsa 相关
 bitcoin = ["canister", "dep:ic-cdk-bitcoin-canister"] # bitcoin 相关
-functions = ["times", "dep:ic-cdk-timers", "dep:ciborium"] # functions 相关
+functions = [
+    "common",
+    "times",
+    "canister",
+    "dep:ic-cdk-timers",
+    "dep:ciborium",
+] # functions 相关
 
-call-once = ["common"]            # 调用一次
-schedule = ["times", "functions"] # 定时任务
+call-once = ["common", "canister"] # 调用一次
+schedule = ["times", "functions"]  # 定时任务
 
 stable = ["functions", "dep:ic-stable-structures"] # 稳定内存
 
