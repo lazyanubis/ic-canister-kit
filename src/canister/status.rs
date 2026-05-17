@@ -44,7 +44,7 @@ pub async fn canister_info(
         num_requested_changes,
     })
     .await;
-    call_result.map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, "ic#canister_status", err))
+    call_result.map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, "ic#canister_info", err))
 }
 
 // ========================= 自定义接口调用 =========================
