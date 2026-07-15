@@ -1,5 +1,5 @@
 //! ICRC1 标准接口
-//! https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1
+//! <https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-1>
 
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
@@ -41,16 +41,12 @@ pub type Icrc1SupportedStandards = Vec<Icrc1SupportedStandard>;
 
 /// 查询支持的标准
 #[allow(unused)]
-pub async fn icrc1_supported_standards(
-    canister_id: CanisterId,
-) -> CanisterCallResult<Icrc1SupportedStandards> {
+pub async fn icrc1_supported_standards(canister_id: CanisterId) -> CanisterCallResult<Icrc1SupportedStandards> {
     call_canister::<_, Icrc1SupportedStandards>(canister_id, "icrc1_supported_standards", ()).await
 }
 /// 查询支持的标准
 #[allow(unused)]
-pub async fn icrc1_supported_standards_by(
-    canister_id: CanisterId,
-) -> CanisterCallResult<Vec<String>> {
+pub async fn icrc1_supported_standards_by(canister_id: CanisterId) -> CanisterCallResult<Vec<String>> {
     icrc1_supported_standards(canister_id)
         .await
         .map(|r| r.into_iter().map(|i| i.name).collect())
@@ -115,10 +111,7 @@ pub struct Icrc1Account {
 pub type Icrc1Balance = candid::Nat;
 /// 查询余额
 #[allow(unused)]
-pub async fn icrc1_balance_of(
-    canister_id: CanisterId,
-    account: Icrc1Account,
-) -> CanisterCallResult<Icrc1Balance> {
+pub async fn icrc1_balance_of(canister_id: CanisterId, account: Icrc1Account) -> CanisterCallResult<Icrc1Balance> {
     call_canister::<_, Icrc1Balance>(canister_id, "icrc1_balance_of", (account,)).await
 }
 /// 查询余额
@@ -227,8 +220,7 @@ pub type Icrc1TransferError = icrc_ledger_types::icrc1::transfer::TransferError;
 //     },
 // }
 /// 转账结果
-pub type Icrc1TransferResult =
-    Result<candid::Nat, icrc_ledger_types::icrc1::transfer::TransferError>;
+pub type Icrc1TransferResult = Result<candid::Nat, icrc_ledger_types::icrc1::transfer::TransferError>;
 /// 进行转账
 #[allow(unused)]
 pub async fn icrc1_transfer(

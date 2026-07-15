@@ -1,9 +1,15 @@
-//! 混合数字, 利用随机数进行数字混淆, 不容易猜中原数字
+//! 混合数字，利用随机填充和校验码降低连续编号的可猜测性。
+//!
+//! 该模块只提供编号混淆，不提供密码学意义上的加密或认证。
 
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
-/// 根据指定序号生成一个加密字符串
+const CHECKSUM_LENGTH: usize = 4;
+const MAX_INDEX_LENGTH: usize = std::mem::size_of::<u64>();
+const MAX_ENCODED_LENGTH: usize = CHECKSUM_LENGTH + MAX_INDEX_LENGTH * 2;
+
+/// 根据指定序号生成一个混淆后的字节串
 #[inline]
 pub fn encode_index_code(salt: &[u8], index: u64, random: Option<&[u8]>) -> Vec<u8> {
     let trimmed = trim_index(index); // 去除前置 0
@@ -17,7 +23,7 @@ pub fn encode_index_code(salt: &[u8], index: u64, random: Option<&[u8]>) -> Vec<
 
     let mut show = Vec::with_capacity(mix.len() + 4);
 
-    show.extend_from_slice(&digest[0..4]); // 取前 4 位作为校验
+    show.extend_from_slice(&digest[..CHECKSUM_LENGTH]); // 取前 4 位作为校验
 
     show.extend_from_slice(&mix); // 补上拓展后的数据
 
@@ -32,7 +38,7 @@ pub fn encode_index_code_with_base32(salt: &[u8], index: u64, random: Option<&[u
 }
 
 /// 混淆错误
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum MixNumberDecodeError {
     /// 长度错误
     WrongLength,
@@ -58,10 +64,10 @@ impl std::error::Error for MixNumberDecodeError {}
 
 /// 根据加密结果解析回序号
 pub fn decode_index_code(salt: &[u8], show: &[u8]) -> Result<u64, MixNumberDecodeError> {
-    if show.len() <= 4 || !show.len().is_multiple_of(2) {
+    if show.len() < CHECKSUM_LENGTH + 2 || MAX_ENCODED_LENGTH < show.len() || !show.len().is_multiple_of(2) {
         return Err(MixNumberDecodeError::WrongLength); // 长度不对
     }
-    let mix = &show[4..];
+    let mix = &show[CHECKSUM_LENGTH..];
 
     use sha2::Digest;
     let mut hasher = sha2::Sha256::new();
@@ -69,13 +75,13 @@ pub fn decode_index_code(salt: &[u8], show: &[u8]) -> Result<u64, MixNumberDecod
     hasher.update(salt); // 加盐
     let digest: [u8; 32] = hasher.finalize().into(); // 取得 hash 结果
 
-    if show[0..4] != digest[0..4] {
+    if show[..CHECKSUM_LENGTH] != digest[..CHECKSUM_LENGTH] {
         return Err(MixNumberDecodeError::WrongChecksum); // 校验失败
     }
 
-    let trimmed = restore_numbers(mix);
+    let trimmed = restore_numbers(mix)?;
 
-    let index = restore_index(&trimmed);
+    let index = restore_index(&trimmed)?;
 
     Ok(index)
 }
@@ -92,12 +98,17 @@ pub fn decode_index_code_by_base32(salt: &[u8], code: &str) -> Result<u64, MixNu
 // 保留有效位的数字, 最少一个 u8 // ? 也就是说前面太多 0 的情况下会只留下后面有效的
 fn trim_index(index: u64) -> Vec<u8> {
     let bytes = index.to_be_bytes();
-    bytes.into_iter().skip_while(|n| *n == 0).collect()
+    let trimmed: Vec<u8> = bytes.into_iter().skip_while(|n| *n == 0).collect();
+    if trimmed.is_empty() { vec![0] } else { trimmed }
 }
 
 // 恢复数字 大端法 高位在前
 #[allow(clippy::identity_op)]
-fn restore_index(numbers: &[u8]) -> u64 {
+fn restore_index(numbers: &[u8]) -> Result<u64, MixNumberDecodeError> {
+    if numbers.is_empty() || MAX_INDEX_LENGTH < numbers.len() {
+        return Err(MixNumberDecodeError::WrongLength);
+    }
+
     let mut bytes = [0_u8; 8];
 
     let len = numbers.len();
@@ -105,7 +116,7 @@ fn restore_index(numbers: &[u8]) -> u64 {
         bytes[8 - len + i] = numbers[i];
     }
 
-    u64::from_be_bytes(bytes)
+    Ok(u64::from_be_bytes(bytes))
 }
 
 // 混合数字 // 位数交叉
@@ -144,7 +155,7 @@ fn mix_numbers(numbers: &[u8], random: Option<&[u8]>) -> Vec<u8> {
 }
 
 // 恢复数字 // 位数交叉
-fn restore_numbers(ns: &[u8]) -> Vec<u8> {
+fn restore_numbers(ns: &[u8]) -> Result<Vec<u8>, MixNumberDecodeError> {
     #[allow(clippy::identity_op)]
     fn restore_single(n1: u8, n2: u8) -> u8 {
         0b0000_0000
@@ -158,11 +169,51 @@ fn restore_numbers(ns: &[u8]) -> Vec<u8> {
             | ((n2 & 0b0000_0001) >> 0)
     }
 
-    assert!(ns.len().is_multiple_of(2)); // ! 必须是偶数
+    if ns.is_empty() || !ns.len().is_multiple_of(2) || MAX_INDEX_LENGTH * 2 < ns.len() {
+        return Err(MixNumberDecodeError::WrongLength);
+    }
 
     let mut numbers = Vec::new();
     for i in 0..(ns.len() / 2) {
         numbers.push(restore_single(ns[i * 2], ns[i * 2 + 1]));
     }
-    numbers
+    Ok(numbers)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{MixNumberDecodeError, decode_index_code, decode_index_code_by_base32, encode_index_code};
+
+    #[test]
+    fn round_trips_boundary_values() {
+        let salt = b"private-salt";
+        for value in [0, 1, 255, 256, u64::MAX] {
+            let encoded = encode_index_code(salt, value, Some(b"random!!"));
+            assert_eq!(decode_index_code(salt, &encoded), Ok(value));
+        }
+    }
+
+    #[test]
+    fn rejects_invalid_checksum_and_oversized_payload() {
+        let salt = b"private-salt";
+        let mut encoded = encode_index_code(salt, 42, None);
+        encoded[0] ^= 1;
+        assert!(matches!(
+            decode_index_code(salt, &encoded),
+            Err(MixNumberDecodeError::WrongChecksum)
+        ));
+
+        assert!(matches!(
+            decode_index_code(salt, &[0; 22]),
+            Err(MixNumberDecodeError::WrongLength)
+        ));
+    }
+
+    #[test]
+    fn rejects_invalid_base32_without_panicking() {
+        assert!(matches!(
+            decode_index_code_by_base32(b"salt", "***"),
+            Err(MixNumberDecodeError::Base32DecodeError)
+        ));
+    }
 }

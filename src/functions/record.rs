@@ -30,9 +30,10 @@ impl RecordId {
 /// 迁移内容
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct MigratedRecords<Record> {
-    /// 一共被删除的记录个数
-    pub removed: u64,
-    /// 当前记录个数
+    /// 因保留上限被累计淘汰的记录数量
+    #[serde(alias = "removed")]
+    pub retention_evicted_count: u64,
+    /// 下一个未使用的记录 id
     pub next_id: u64,
     /// 本次迁移的记录
     pub records: Vec<Record>,
@@ -54,7 +55,7 @@ pub trait Recordable<Record, RecordTopic, Search: Searchable<Record>> {
     /// 插入记录
     fn record_push(&mut self, caller: CallerId, topic: RecordTopic, content: String) -> RecordId;
     /// 更新记录
-    fn record_update(&mut self, record_id: RecordId, done: String);
+    fn record_update(&mut self, record_id: RecordId, result: String);
     /// 迁移
     fn record_migrate(&mut self, max: u32) -> MigratedRecords<Record>;
 
@@ -62,14 +63,14 @@ pub trait Recordable<Record, RecordTopic, Search: Searchable<Record>> {
     fn record_find_by_page(
         &self,
         page: &QueryPage,
-        max: u32,
+        max_page_size: u32,
         search: &Option<Search>,
     ) -> Result<PageData<&Record>, QueryPageError> {
         let list = self.record_find_all();
         if let Some(search) = search {
-            return page.query_desc_by_list_and_filter(list, max, |item| search.test(item));
+            return page.query_desc_by_list_and_filter(list, max_page_size, |item| search.test(item));
         }
-        page.query_desc_by_list(list, max)
+        page.query_desc_by_list(list, max_page_size)
     }
 }
 
@@ -107,8 +108,9 @@ pub mod basic {
         pub topic: RecordTopic,
         /// 记录内容
         pub content: String,
-        /// 完成时间 完成结果
-        pub done: Option<(TimestampNanos, String)>,
+        /// 完成时间与执行结果
+        #[serde(alias = "done")]
+        pub completion: Option<(TimestampNanos, String)>,
     }
 
     impl Record {
@@ -116,20 +118,17 @@ pub mod basic {
         fn same(&self, id: &RecordId) -> bool {
             self.id == *id
         }
-
-        #[inline]
-        fn update(&mut self, done: String) {
-            self.done = Some((crate::times::now(), done));
-        }
     }
 
     /// 记录检索
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct RecordSearch {
-        /// id 过滤
-        pub id: Option<(Option<RecordId>, Option<RecordId>)>,
-        /// 创建时间过滤
-        pub created: Option<(Option<TimestampNanos>, Option<TimestampNanos>)>,
+        /// id 范围过滤，依次为包含下界和包含上界
+        #[serde(alias = "id")]
+        pub id_range: Option<(Option<RecordId>, Option<RecordId>)>,
+        /// 创建时间纳秒范围过滤，依次为包含下界和包含上界
+        #[serde(alias = "created")]
+        pub created_at_nanos_range: Option<(Option<TimestampNanos>, Option<TimestampNanos>)>,
         /// 调用人过滤
         pub caller: Option<HashSet<CallerId>>,
         /// 主题过滤
@@ -142,7 +141,7 @@ pub mod basic {
         #[allow(unused)]
         #[inline]
         fn test(&self, record: &Record) -> bool {
-            if let Some((id_min, id_max)) = &self.id {
+            if let Some((id_min, id_max)) = &self.id_range {
                 if let Some(id_min) = &id_min
                     && record.id < *id_min
                 {
@@ -154,7 +153,7 @@ pub mod basic {
                     return false;
                 }
             }
-            if let Some(created) = self.created {
+            if let Some(created) = self.created_at_nanos_range {
                 let (created_min, created_max) = created;
                 if let Some(created_min) = created_min
                     && record.created < created_min
@@ -189,23 +188,67 @@ pub mod basic {
     /// 持久化的记录对象
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct Records {
-        /// 最大保存个数
-        pub max: u64,
-        /// 删除的个数
-        pub removed: u64,
+        /// 最多保留的记录条数
+        #[serde(alias = "max")]
+        pub retention_limit: u64,
+        /// 因保留上限被累计淘汰的记录数量
+        #[serde(alias = "removed")]
+        pub retention_evicted_count: u64,
         /// 下一个未使用的 id
         pub next_id: RecordId,
-        /// 当前保存的个数
+        /// 当前保留的记录列表
         pub records: Vec<Record>,
     }
 
     impl Default for Records {
         fn default() -> Self {
             Self {
-                max: 1024 * 64, // 假设一条占用 1KB 则最大 64MB 记录
-                removed: Default::default(),
+                retention_limit: 1024 * 64, // 假设一条占用 1KB 则最大 64MB 记录
+                retention_evicted_count: Default::default(),
                 next_id: Default::default(),
                 records: Default::default(),
+            }
+        }
+    }
+
+    impl Records {
+        fn push_at(
+            &mut self,
+            caller: CallerId,
+            topic: RecordTopic,
+            content: String,
+            created: TimestampNanos,
+        ) -> RecordId {
+            let id = self.next_id;
+            self.next_id = self.next_id.next();
+
+            if self.retention_limit == 0 {
+                self.retention_evicted_count = self.retention_evicted_count.saturating_add(1);
+                return id;
+            }
+
+            let retention_limit = usize::try_from(self.retention_limit).unwrap_or(usize::MAX);
+            if retention_limit <= self.records.len() {
+                let remove_count = self.records.len() - retention_limit + 1;
+                self.records.drain(..remove_count);
+                self.retention_evicted_count = self.retention_evicted_count.saturating_add(remove_count as u64);
+            }
+
+            self.records.push(Record {
+                id,
+                created,
+                caller,
+                topic,
+                content,
+                completion: None,
+            });
+
+            id
+        }
+
+        fn update_at(&mut self, record_id: RecordId, result: String, completed_at: TimestampNanos) {
+            if let Some(item) = self.records.iter_mut().rev().find(|item| item.same(&record_id)) {
+                item.completion = Some((completed_at, result));
             }
         }
     }
@@ -220,63 +263,22 @@ pub mod basic {
 
         // 修改
         fn record_push(&mut self, caller: CallerId, topic: RecordTopic, content: String) -> RecordId {
-            // 判断最大个数
-            if self.max <= self.records.len() as u64 {
-                let (_migrated, left) = self.records.split_at(1);
-                self.records = left.to_owned();
-                self.removed += 1;
-            }
-
-            let id = self.next_id;
-
-            self.next_id = self.next_id.next();
-
-            self.records.push(Record {
-                id,
-                created: crate::times::now(),
-                caller,
-                topic,
-                content,
-                done: None,
-            });
-
-            id
+            self.push_at(caller, topic, content, crate::times::now())
         }
 
         /// 更新记录
-        fn record_update(&mut self, record_id: RecordId, done: String) {
-            let list = &mut self.records;
-            let mut index = list.len();
-            loop {
-                index -= 1;
-                if let Some(item) = list.get_mut(index) {
-                    if item.same(&record_id) {
-                        item.update(done);
-                        break;
-                    }
-                } else {
-                    break;
-                }
-                if index == 0 {
-                    break;
-                }
-            }
+        fn record_update(&mut self, record_id: RecordId, result: String) {
+            self.update_at(record_id, result, crate::times::now());
         }
 
         // 迁移
         fn record_migrate(&mut self, max: u32) -> MigratedRecords<Record> {
-            let removed = self.removed;
+            let retention_evicted_count = self.retention_evicted_count;
             let next_id = self.next_id.into_inner();
-            let records = if self.records.len() < max as usize {
-                std::mem::take(&mut self.records) // 全部取走
-            } else {
-                let (migrated, left) = self.records.split_at(max as usize);
-                let migrated = migrated.to_owned();
-                self.records = left.to_owned();
-                migrated
-            };
+            let take = self.records.len().min(max as usize);
+            let records = self.records.drain(..take).collect();
             MigratedRecords {
-                removed,
+                retention_evicted_count,
                 next_id,
                 records,
             }
@@ -286,10 +288,12 @@ pub mod basic {
     /// 记录检索
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct RecordSearchArg {
-        /// id 过滤
-        pub id: Option<(Option<u64>, Option<u64>)>,
-        /// 创建时间过滤
-        pub created: Option<(Option<u64>, Option<u64>)>,
+        /// id 范围过滤，依次为包含下界和包含上界
+        #[serde(alias = "id")]
+        pub id_range: Option<(Option<u64>, Option<u64>)>,
+        /// 创建时间纳秒范围过滤，依次为包含下界和包含上界
+        #[serde(alias = "created")]
+        pub created_at_nanos_range: Option<(Option<u64>, Option<u64>)>,
         /// 调用人过滤
         pub caller: Option<HashSet<CallerId>>,
         /// 主题过滤
@@ -302,9 +306,9 @@ pub mod basic {
         /// 参数转变
         pub fn into<E, F: Fn(&str) -> Result<RecordTopic, E>>(self, f: F) -> Result<RecordSearch, E> {
             Ok(RecordSearch {
-                id: self.id.map(|(a, b)| (a.map(|a| a.into()), b.map(|b| b.into()))),
-                created: self
-                    .created
+                id_range: self.id_range.map(|(a, b)| (a.map(|a| a.into()), b.map(|b| b.into()))),
+                created_at_nanos_range: self
+                    .created_at_nanos_range
                     .map(|(a, b)| (a.map(|a| (a as i128).into()), b.map(|b| (b as i128).into()))),
                 caller: self.caller,
                 topic: self
@@ -313,6 +317,202 @@ pub mod basic {
                     .transpose()?,
                 content: self.content,
             })
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use std::collections::HashSet;
+
+        use candid::Principal;
+        use ciborium::value::Value;
+        use serde::Serialize;
+
+        use super::{Record, RecordSearchArg, Records};
+        use crate::{
+            functions::record::{MigratedRecords, RecordId},
+            types::TimestampNanos,
+        };
+
+        #[derive(Serialize)]
+        struct LegacyRecord {
+            id: RecordId,
+            created: TimestampNanos,
+            caller: Principal,
+            topic: u8,
+            content: String,
+            done: Option<(TimestampNanos, String)>,
+        }
+
+        #[derive(Serialize)]
+        struct LegacyRecords {
+            max: u64,
+            removed: u64,
+            next_id: RecordId,
+            records: Vec<LegacyRecord>,
+        }
+
+        #[derive(Serialize)]
+        struct LegacyMigratedRecords {
+            removed: u64,
+            next_id: u64,
+            records: Vec<LegacyRecord>,
+        }
+
+        #[derive(Serialize)]
+        struct LegacyRecordSearchArg {
+            id: Option<(Option<u64>, Option<u64>)>,
+            created: Option<(Option<u64>, Option<u64>)>,
+            caller: Option<HashSet<Principal>>,
+            topic: Option<HashSet<String>>,
+            content: Option<String>,
+        }
+
+        fn map_keys(value: &Value) -> Vec<&str> {
+            let Value::Map(entries) = value else {
+                panic!("expected a CBOR map")
+            };
+            entries
+                .iter()
+                .filter_map(|(key, _)| match key {
+                    Value::Text(key) => Some(key.as_str()),
+                    _ => None,
+                })
+                .collect()
+        }
+
+        fn push(records: &mut Records, value: &str, time: i128) -> RecordId {
+            records.push_at(Principal::anonymous(), 1, value.to_string(), TimestampNanos::from(time))
+        }
+
+        #[test]
+        fn zero_capacity_discards_records_without_panicking() {
+            let mut records = Records {
+                retention_limit: 0,
+                ..Default::default()
+            };
+
+            let id = push(&mut records, "discarded", 1);
+            records.update_at(id, "ignored".to_string(), TimestampNanos::from(2));
+
+            assert!(records.records.is_empty());
+            assert_eq!(records.retention_evicted_count, 1);
+            assert_eq!(records.next_id.into_inner(), 1);
+        }
+
+        #[test]
+        fn enforces_capacity_after_capacity_is_reduced() {
+            let mut records = Records {
+                retention_limit: 4,
+                ..Default::default()
+            };
+            push(&mut records, "zero", 0);
+            push(&mut records, "one", 1);
+            push(&mut records, "two", 2);
+            records.retention_limit = 2;
+
+            let newest = push(&mut records, "three", 3);
+
+            assert_eq!(records.records.len(), 2);
+            assert_eq!(records.records[0].content, "two");
+            assert_eq!(records.records[1].id, newest);
+            assert_eq!(records.retention_evicted_count, 2);
+        }
+
+        #[test]
+        fn updates_existing_record_and_ignores_missing_record() {
+            let mut records = Records::default();
+            records.update_at(RecordId::from(99), "missing".to_string(), TimestampNanos::from(1));
+
+            let id = push(&mut records, "created", 2);
+            records.update_at(id, "done".to_string(), TimestampNanos::from(3));
+
+            assert_eq!(
+                records.records[0].completion.as_ref().map(|(_, value)| value.as_str()),
+                Some("done")
+            );
+        }
+
+        #[test]
+        fn deserializes_legacy_aliases_and_serializes_current_names() {
+            let legacy = LegacyRecords {
+                max: 42,
+                removed: 3,
+                next_id: RecordId::from(7),
+                records: vec![LegacyRecord {
+                    id: RecordId::from(6),
+                    created: TimestampNanos::from(1),
+                    caller: Principal::anonymous(),
+                    topic: 1,
+                    content: "legacy".to_string(),
+                    done: Some((TimestampNanos::from(2), "ok".to_string())),
+                }],
+            };
+
+            let mut cbor = Vec::new();
+            ciborium::ser::into_writer(&legacy, &mut cbor).unwrap();
+            let decoded: Records = ciborium::de::from_reader(cbor.as_slice()).unwrap();
+            assert_eq!(decoded.retention_limit, 42);
+            assert_eq!(decoded.retention_evicted_count, 3);
+            assert_eq!(decoded.records[0].completion.as_ref().unwrap().1, "ok");
+
+            let mut current_cbor = Vec::new();
+            ciborium::ser::into_writer(&decoded, &mut current_cbor).unwrap();
+            let current: Value = ciborium::de::from_reader(current_cbor.as_slice()).unwrap();
+            let current_keys = map_keys(&current);
+            assert!(current_keys.contains(&"retention_limit"));
+            assert!(current_keys.contains(&"retention_evicted_count"));
+            assert!(!current_keys.contains(&"max"));
+            assert!(!current_keys.contains(&"removed"));
+
+            let Value::Map(entries) = current else { unreachable!() };
+            let records = entries
+                .iter()
+                .find_map(|(key, value)| (key == &Value::Text("records".to_string())).then_some(value))
+                .unwrap();
+            let Value::Array(records) = records else {
+                panic!("expected records to be a CBOR array")
+            };
+            let record_keys = map_keys(&records[0]);
+            assert!(record_keys.contains(&"completion"));
+            assert!(!record_keys.contains(&"done"));
+
+            let legacy_migrated = LegacyMigratedRecords {
+                removed: 5,
+                next_id: 8,
+                records: Vec::new(),
+            };
+            let mut migrated_cbor = Vec::new();
+            ciborium::ser::into_writer(&legacy_migrated, &mut migrated_cbor).unwrap();
+            let migrated: MigratedRecords<Record> = ciborium::de::from_reader(migrated_cbor.as_slice()).unwrap();
+            assert_eq!(migrated.retention_evicted_count, 5);
+            let mut current_migrated_cbor = Vec::new();
+            ciborium::ser::into_writer(&migrated, &mut current_migrated_cbor).unwrap();
+            let current_migrated: Value = ciborium::de::from_reader(current_migrated_cbor.as_slice()).unwrap();
+            let migrated_keys = map_keys(&current_migrated);
+            assert!(migrated_keys.contains(&"retention_evicted_count"));
+            assert!(!migrated_keys.contains(&"removed"));
+
+            let legacy_search = LegacyRecordSearchArg {
+                id: Some((Some(1), Some(2))),
+                created: Some((Some(3), Some(4))),
+                caller: None,
+                topic: None,
+                content: None,
+            };
+            let mut search_cbor = Vec::new();
+            ciborium::ser::into_writer(&legacy_search, &mut search_cbor).unwrap();
+            let search: RecordSearchArg = ciborium::de::from_reader(search_cbor.as_slice()).unwrap();
+            assert_eq!(search.id_range, Some((Some(1), Some(2))));
+            assert_eq!(search.created_at_nanos_range, Some((Some(3), Some(4))));
+            let mut current_search_cbor = Vec::new();
+            ciborium::ser::into_writer(&search, &mut current_search_cbor).unwrap();
+            let current_search: Value = ciborium::de::from_reader(current_search_cbor.as_slice()).unwrap();
+            let search_keys = map_keys(&current_search);
+            assert!(search_keys.contains(&"id_range"));
+            assert!(search_keys.contains(&"created_at_nanos_range"));
+            assert!(!search_keys.contains(&"id"));
+            assert!(!search_keys.contains(&"created"));
         }
     }
 }

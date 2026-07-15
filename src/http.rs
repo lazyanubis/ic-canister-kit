@@ -46,7 +46,7 @@ pub struct StreamingCallbackHttpResponse {
     ///  响应体
     pub body: Vec<u8>,
 
-    ///  是否要继续流式响应
+    /// 下一次流式回调需要使用的 token，`None` 表示响应结束
     pub token: Option<StreamingCallbackToken>,
 }
 
@@ -94,7 +94,7 @@ pub struct CustomHttpResponse {
     /// 如果有额外的数据需要通过流的方式继续传输 每个 http 请求最大只能支持 3M 的响应数据，因此太大的话需要采用此种方式
     pub streaming_strategy: Option<StreamingStrategy>, // 如果需要使用流式响应
 
-    /// 升级
+    /// 是否将 HTTP query 请求升级为 update 调用
     pub upgrade: Option<bool>,
 }
 

@@ -40,6 +40,10 @@ pub mod http;
 #[cfg(feature = "ecdsa")]
 pub mod ecdsa;
 
+/// Schnorr 签名相关
+#[cfg(feature = "schnorr")]
+pub mod schnorr;
+
 /// 比特币相关
 #[cfg(feature = "bitcoin")]
 pub mod bitcoin;
@@ -51,9 +55,6 @@ pub mod functions;
 /// 基本的持久化
 #[cfg(feature = "stable")]
 pub mod stable;
-
-// #[cfg(feature = "nft")]
-// pub mod nft;
 
 /// candid 解析
 #[cfg(feature = "canister-did")]

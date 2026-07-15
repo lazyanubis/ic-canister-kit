@@ -25,18 +25,19 @@ pub enum QueryPageError {
         /// 页面大小
         size: u32,
         /// 最大页面大小
-        max: u32,
+        #[serde(alias = "max")]
+        max_page_size: u32,
     }, // size can not be 0 and has max value
 }
 impl std::fmt::Display for QueryPageError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             QueryPageError::WrongPage => write!(f, "page can not be 0"),
-            QueryPageError::WrongSize { size, max } => {
+            QueryPageError::WrongSize { size, max_page_size } => {
                 if *size == 0 {
                     write!(f, "size can not be 0")
                 } else {
-                    write!(f, "max({max}) < size({size})")
+                    write!(f, "max_page_size({max_page_size}) < size({size})")
                 }
             }
         }
@@ -83,14 +84,14 @@ impl QueryPage {
 
     /// 检查分页选项是否有效
     #[inline]
-    pub fn check(&self, max: u32) -> Result<(), QueryPageError> {
+    pub fn check(&self, max_page_size: u32) -> Result<(), QueryPageError> {
         if self.page == 0 {
             return Err(QueryPageError::WrongPage);
         }
-        if self.size == 0 || max < self.size {
+        if self.size == 0 || max_page_size < self.size {
             return Err(QueryPageError::WrongSize {
                 size: self.size,
-                max,
+                max_page_size,
             });
         }
         Ok(())
@@ -108,44 +109,45 @@ impl QueryPage {
     }
 
     #[inline]
-    fn inner_query_by_list<'a, T>(
-        &self,
-        list: &'a [T],
-        max: u32,
-    ) -> Result<Vec<&'a T>, QueryPageError> {
-        self.check(max)?;
+    fn page_start(&self) -> Option<usize> {
+        let start = (self.page - 1).checked_mul(u64::from(self.size))?;
+        usize::try_from(start).ok()
+    }
+
+    #[inline]
+    fn page_window(&self, total_items: usize) -> Option<(usize, usize)> {
+        let start = self.page_start()?;
+        if total_items <= start {
+            return None;
+        }
+
+        let end = start.saturating_add(self.size as usize).min(total_items);
+        Some((start, end))
+    }
+
+    #[inline]
+    fn inner_query_by_list<'a, T>(&self, list: &'a [T], max_page_size: u32) -> Result<Vec<&'a T>, QueryPageError> {
+        self.check(max_page_size)?;
 
         if list.is_empty() {
             return Ok(Vec::new());
         }
 
-        let mut data = Vec::with_capacity(self.size as usize);
+        let Some((start, end)) = self.page_window(list.len()) else {
+            return Ok(Vec::new());
+        };
 
-        // 偏移序号
-        let start = ((self.page - 1) * self.size as u64) as usize;
-        let end = ((self.page) * self.size as u64) as usize;
-
-        if end < list.len() {
-            data = list[start..end].iter().collect();
-        } else if start < list.len() {
-            data = list[start..].iter().collect();
-        }
-
-        Ok(data)
+        Ok(list[start..end].iter().collect())
     }
 
     /// 对所有数据进行分页查询
     #[inline]
-    pub fn query_by_list<'a, T>(
-        &self,
-        list: &'a [T],
-        max: u32,
-    ) -> Result<PageData<&'a T>, QueryPageError> {
-        let total = list.len() as u64;
+    pub fn query_by_list<'a, T>(&self, list: &'a [T], max_page_size: u32) -> Result<PageData<&'a T>, QueryPageError> {
+        let total_items = list.len() as u64;
 
-        let data = self.inner_query_by_list(list, max)?;
+        let data = self.inner_query_by_list(list, max_page_size)?;
 
-        Ok(self.from_data(total, data))
+        Ok(self.from_data(total_items, data))
     }
 
     /// 对所有数据进行倒序分页查询
@@ -153,18 +155,16 @@ impl QueryPage {
     pub fn query_desc_by_list<'a, T>(
         &self,
         list: &'a [T],
-        max: u32,
+        max_page_size: u32,
     ) -> Result<PageData<&'a T>, QueryPageError> {
-        // 取出倒序索引
-        let index_list: Vec<usize> = (0..list.len()).rev().collect();
+        self.check(max_page_size)?;
+        let total_items = list.len() as u64;
+        let data = self
+            .page_window(list.len())
+            .map(|(start, end)| list.iter().rev().skip(start).take(end - start).collect())
+            .unwrap_or_default();
 
-        let total = index_list.len() as u64;
-
-        let data = self.inner_query_by_list(&index_list, max)?;
-
-        let data = data.into_iter().map(|i| &list[*i]).collect::<Vec<_>>();
-
-        Ok(self.from_data(total, data))
+        Ok(self.from_data(total_items, data))
     }
 
     /// 倒序过滤分页查询
@@ -172,25 +172,26 @@ impl QueryPage {
     pub fn query_desc_by_list_and_filter<'a, T, F>(
         &self,
         list: &'a [T],
-        max: u32,
+        max_page_size: u32,
         filter: F, // 过滤条件
     ) -> Result<PageData<&'a T>, QueryPageError>
     where
         F: Fn(&T) -> bool,
     {
-        // 取出过滤后的倒序索引
-        let index_list: Vec<usize> = (0..list.len())
-            .filter(|i| filter(&list[*i]))
-            .rev()
-            .collect();
+        self.check(max_page_size)?;
+        let start = self.page_start();
+        let mut total_items = 0_usize;
+        let mut data = Vec::with_capacity((self.size as usize).min(list.len()));
+        for item in list.iter().rev() {
+            if filter(item) {
+                if start.is_some_and(|start| start <= total_items) && data.len() < self.size as usize {
+                    data.push(item);
+                }
+                total_items += 1;
+            }
+        }
 
-        let total = index_list.len() as u64;
-
-        let data = self.inner_query_by_list(&index_list, max)?;
-
-        let data = data.into_iter().map(|i| &list[*i]).collect::<Vec<_>>();
-
-        Ok(self.from_data(total, data))
+        Ok(self.from_data(total_items as u64, data))
     }
 
     /// 按条件分页查询
@@ -198,7 +199,7 @@ impl QueryPage {
     pub fn custom_query_by_list<T, R, Filter, Compare, Transform>(
         &self,
         list: &[T],
-        max: u32,
+        max_page_size: u32,
         filter: Filter,       // 过滤条件
         compare: Compare,     // 排序方法
         transform: Transform, // 变形方法
@@ -216,10 +217,155 @@ impl QueryPage {
 
         let total = list.len() as u64;
 
-        let data = self.inner_query_by_list(&list, max)?;
+        let data = self.inner_query_by_list(&list, max_page_size)?;
 
         let data = data.into_iter().map(|t| transform(t)).collect::<Vec<_>>();
 
         Ok(self.from_data(total, data))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use ciborium::value::Value;
+    use serde::Serialize;
+
+    use super::{PageData, QueryPage, QueryPageError};
+
+    #[test]
+    fn rejects_zero_page_and_invalid_size() {
+        assert!(matches!(
+            QueryPage { page: 0, size: 1 }.check(10),
+            Err(QueryPageError::WrongPage)
+        ));
+        assert!(matches!(
+            QueryPage { page: 1, size: 0 }.check(10),
+            Err(QueryPageError::WrongSize { .. })
+        ));
+        assert!(matches!(
+            QueryPage { page: 1, size: 11 }.check(10),
+            Err(QueryPageError::WrongSize { .. })
+        ));
+    }
+
+    #[test]
+    fn returns_empty_for_overflowing_or_out_of_range_page() {
+        let data = [1, 2, 3];
+        let overflow = QueryPage {
+            page: u64::MAX,
+            size: 10,
+        };
+        assert!(overflow.query_by_list(&data, 10).unwrap().data.is_empty());
+
+        let out_of_range = QueryPage { page: 3, size: 2 };
+        assert!(out_of_range.query_by_list(&data, 10).unwrap().data.is_empty());
+    }
+
+    #[test]
+    fn paginates_forward_reverse_and_filtered_data() {
+        use std::cell::Cell;
+
+        let data = [1, 2, 3, 4, 5];
+        let page = QueryPage { page: 2, size: 2 };
+
+        assert_eq!(page.query_by_list(&data, 10).unwrap().data, vec![&3, &4]);
+        assert_eq!(page.query_desc_by_list(&data, 10).unwrap().data, vec![&3, &2]);
+
+        let calls = Cell::new(0);
+        let filtered = page.query_desc_by_list_and_filter(&data, 10, |value| {
+            calls.set(calls.get() + 1);
+            value % 2 == 1
+        });
+        let filtered = filtered.unwrap();
+        assert_eq!(filtered.total, 3);
+        assert_eq!(filtered.data, vec![&1]);
+        assert_eq!(calls.get(), data.len());
+    }
+
+    #[test]
+    fn preserves_page_total_and_deserializes_legacy_error_name() {
+        #[derive(Serialize)]
+        struct LegacyPageData {
+            page: u64,
+            size: u32,
+            total: u64,
+            data: Vec<u8>,
+        }
+
+        #[derive(Serialize)]
+        enum LegacyQueryPageError {
+            WrongSize { size: u32, max: u32 },
+        }
+
+        let mut legacy_page_cbor = Vec::new();
+        ciborium::ser::into_writer(
+            &LegacyPageData {
+                page: 1,
+                size: 10,
+                total: 2,
+                data: vec![1, 2],
+            },
+            &mut legacy_page_cbor,
+        )
+        .unwrap();
+        let page: PageData<u8> = ciborium::de::from_reader(legacy_page_cbor.as_slice()).unwrap();
+        assert_eq!(page.total, 2);
+
+        let mut current_page_cbor = Vec::new();
+        ciborium::ser::into_writer(&page, &mut current_page_cbor).unwrap();
+        let current: Value = ciborium::de::from_reader(current_page_cbor.as_slice()).unwrap();
+        let Value::Map(entries) = current else {
+            panic!("expected a CBOR map")
+        };
+        let keys: Vec<&str> = entries
+            .iter()
+            .filter_map(|(key, _)| match key {
+                Value::Text(key) => Some(key.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert!(keys.contains(&"total"));
+        assert!(!keys.contains(&"total_items"));
+
+        let mut legacy_error_cbor = Vec::new();
+        ciborium::ser::into_writer(
+            &LegacyQueryPageError::WrongSize { size: 11, max: 10 },
+            &mut legacy_error_cbor,
+        )
+        .unwrap();
+        let error: QueryPageError = ciborium::de::from_reader(legacy_error_cbor.as_slice()).unwrap();
+        assert!(matches!(
+            error,
+            QueryPageError::WrongSize {
+                size: 11,
+                max_page_size: 10
+            }
+        ));
+
+        let mut current_error_cbor = Vec::new();
+        ciborium::ser::into_writer(
+            &QueryPageError::WrongSize {
+                size: 11,
+                max_page_size: 10,
+            },
+            &mut current_error_cbor,
+        )
+        .unwrap();
+        let current_error: Value = ciborium::de::from_reader(current_error_cbor.as_slice()).unwrap();
+        let Value::Map(variant) = current_error else {
+            panic!("expected a CBOR enum map")
+        };
+        let Value::Map(fields) = &variant[0].1 else {
+            panic!("expected WrongSize fields")
+        };
+        let keys: Vec<&str> = fields
+            .iter()
+            .filter_map(|(key, _)| match key {
+                Value::Text(key) => Some(key.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert!(keys.contains(&"max_page_size"));
+        assert!(!keys.contains(&"max"));
     }
 }

@@ -1,4 +1,3 @@
-
 /// 随机数
 pub mod random;
 

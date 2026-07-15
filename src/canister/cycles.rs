@@ -3,6 +3,9 @@
 use super::types::DepositCyclesArgs;
 use crate::identity::CanisterId;
 
+const WALLET_BALANCE_METHOD: &str = "wallet_balance";
+const WALLET_RECEIVE_METHOD: &str = "wallet_receive";
+
 /*
 
 引入包后, 直接使用如下方法即可增加查询和接收 cycles 的接口
@@ -54,7 +57,7 @@ where
 
 /// 充值余额
 /// ! 任何人都可以调用
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-deposit_cycles
+/// <https://docs.internetcomputer.org/references/management-canister/#deposit_cycles>
 pub async fn deposit_cycles(canister_id: CanisterId, cycles: u128) -> Result<(), super::types::CanisterCallError> {
     let call_result = ic_cdk_management_canister::deposit_cycles(&DepositCyclesArgs { canister_id }, cycles).await;
     super::wrap_call_result(canister_id, "ic#deposit_cycles", call_result)
@@ -65,8 +68,8 @@ pub async fn deposit_cycles(canister_id: CanisterId, cycles: u128) -> Result<(),
 /// 查询罐子余额
 /// ! 必须实现 wallet_balance : () -> (nat) query 接口
 pub async fn call_wallet_balance(canister_id: CanisterId) -> super::types::CanisterCallResult<candid::Nat> {
-    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, "wallet_balance").await;
-    super::fetch_and_wrap_call_result(canister_id, "deposit_cycles", call_result)
+    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, WALLET_BALANCE_METHOD).await;
+    super::fetch_and_wrap_call_result(canister_id, WALLET_BALANCE_METHOD, call_result)
 }
 
 /// 充值罐子余额
@@ -75,8 +78,8 @@ pub async fn call_wallet_receive(
     canister_id: CanisterId,
     cycles: u64,
 ) -> super::types::CanisterCallResult<candid::Nat> {
-    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, "wallet_receive")
+    let call_result = ic_cdk::call::Call::unbounded_wait(canister_id, WALLET_RECEIVE_METHOD)
         .with_cycles(cycles as u128)
         .await;
-    super::fetch_and_wrap_call_result(canister_id, "wallet_receive", call_result)
+    super::fetch_and_wrap_call_result(canister_id, WALLET_RECEIVE_METHOD, call_result)
 }

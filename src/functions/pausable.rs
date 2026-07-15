@@ -63,8 +63,9 @@ pub mod basic {
     /// 维护原因对象
     #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
     pub struct PauseReason {
-        /// 维护时间
-        pub timestamp_nanos: TimestampNanos,
+        /// 进入维护状态的时间
+        #[serde(alias = "timestamp_nanos")]
+        pub paused_at: TimestampNanos,
 
         /// 维护原因
         pub message: String,
@@ -88,7 +89,7 @@ pub mod basic {
         /// 构造维护原因
         pub fn new(message: String) -> Self {
             PauseReason {
-                timestamp_nanos: crate::times::now(),
+                paused_at: crate::times::now(),
                 message,
             }
         }
@@ -107,6 +108,49 @@ pub mod basic {
         // 设置维护状态
         fn pause_replace(&mut self, reason: Option<PauseReason>) {
             self.0 = reason;
+        }
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use ciborium::value::Value;
+        use serde::Serialize;
+
+        use super::PauseReason;
+        use crate::types::TimestampNanos;
+
+        #[derive(Serialize)]
+        struct LegacyPauseReason {
+            timestamp_nanos: TimestampNanos,
+            message: String,
+        }
+
+        #[test]
+        fn deserializes_legacy_pause_time_and_serializes_current_name() {
+            let legacy = LegacyPauseReason {
+                timestamp_nanos: TimestampNanos::from(42),
+                message: "maintenance".to_string(),
+            };
+            let mut legacy_cbor = Vec::new();
+            ciborium::ser::into_writer(&legacy, &mut legacy_cbor).unwrap();
+            let decoded: PauseReason = ciborium::de::from_reader(legacy_cbor.as_slice()).unwrap();
+            assert_eq!(decoded.paused_at, TimestampNanos::from(42));
+
+            let mut current_cbor = Vec::new();
+            ciborium::ser::into_writer(&decoded, &mut current_cbor).unwrap();
+            let current: Value = ciborium::de::from_reader(current_cbor.as_slice()).unwrap();
+            let Value::Map(entries) = current else {
+                panic!("expected a CBOR map")
+            };
+            let keys: Vec<&str> = entries
+                .iter()
+                .filter_map(|(key, _)| match key {
+                    Value::Text(key) => Some(key.as_str()),
+                    _ => None,
+                })
+                .collect();
+            assert!(keys.contains(&"paused_at"));
+            assert!(!keys.contains(&"timestamp_nanos"));
         }
     }
 }

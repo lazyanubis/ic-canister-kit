@@ -345,107 +345,107 @@ pub enum WrappedCandidType {
     // 基本类型
     /// bool
     /// boolean type: true false Motoko Bool / Rust bool / JavaScript true false
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-bool
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-bool>
     #[serde(rename = "bool")]
     Bool(WrappedCandidTypeName),
     /// nat
     /// nature number: Motoko Nat / Rust candid:Nat or u128 / JavaScript BigInt(10000) or 10000n
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-nat
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-nat>
     #[serde(rename = "nat")]
     Nat(WrappedCandidTypeName),
     /// int
     /// integer number: Motoko Int / Rust candid::Int or i128 / JavaScript BigInt(-10000) or -10000n
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-int
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-int>
     #[serde(rename = "int")]
     Int(WrappedCandidTypeName),
     /// nat8
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "nat8")]
     Nat8(WrappedCandidTypeName),
     /// nat16
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "nat16")]
     Nat16(WrappedCandidTypeName),
     /// nat32
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "nat32")]
     Nat32(WrappedCandidTypeName),
     /// nat64
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "nat64")]
     Nat64(WrappedCandidTypeName),
     /// int8
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "int8")]
     Int8(WrappedCandidTypeName),
     /// int16
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "int16")]
     Int16(WrappedCandidTypeName),
     /// int32
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "int32")]
     Int32(WrappedCandidTypeName),
     /// int64
     /// integer with limit bits
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-natn-and-intn
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-natn-and-intn>
     #[serde(rename = "int64")]
     Int64(WrappedCandidTypeName),
     /// float32
     /// float number: Motoko Float is 64 bits / Rust f32 f64 / JavaScript float
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-float32-and-float64
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-float32-and-float64>
     #[serde(rename = "float32")]
     Float32(WrappedCandidTypeName),
     /// float64
     /// float number: Motoko Float is 64 bits / Rust f32 f64 / JavaScript float
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-float32-and-float64
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-float32-and-float64>
     #[serde(rename = "float64")]
     Float64(WrappedCandidTypeName),
     /// null
     /// null type: only value is null Motoko Null / Rust None / JavaScript null
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-null
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-null>
     #[serde(rename = "null")]
     Null(WrappedCandidTypeName),
     /// text
     /// text type: Motoko Text / Rust String or &str / JavaScript string
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-text
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-text>
     #[serde(rename = "text")]
     Text(WrappedCandidTypeName),
     /// principal
     /// principal type: like "zwigo-aiaaa-aaaaa-qaa3a-cai" Motoko Principal / candid::Principal / JavaScript Principal.fromText("aaaaa-aa")
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-principal
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-principal>
     #[serde(rename = "principal")]
     Principal(WrappedCandidTypeName),
     // Blob, // 一律以 vec nat8 替代
     // 子类型
     /// vec T
-    /// binary data: vec nat8 Motoko Blob / Rust Vec<u8> or &[u8] / JavaScript [1, 2, 3]
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-blob
-    /// array of some type: vec {1,3} Motoko [T] / Rust Vec<T> &[T] / JavaScript Array
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-vec-t
+    /// binary data: `vec nat8` / Motoko `Blob` / Rust `Vec<u8>` or `&[u8]` / JavaScript `[1, 2, 3]`
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-blob>
+    /// array of some type: `vec {1,3}` / Motoko `[T]` / Rust `Vec<T>` or `&[T]` / JavaScript `Array`
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-vec-t>
     #[serde(rename = "vec")]
     Vec(WrappedCandidTypeSubtype),
     /// opt T
-    /// option type: null opt t Motoko ?T / Rust Option<T> / [] [t]
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-opt-t
+    /// option type: `null` or `opt t` / Motoko `?T` / Rust `Option<T>` / JavaScript `[]` or `[t]`
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-opt-t>
     #[serde(rename = "opt")]
     Opt(WrappedCandidTypeSubtype),
     // 多个子类型
     /// record { .. } // name=T
     /// object type: record { name="123"; } Motoko record { name: "123" } / Rust struct / JavaScript object
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-record--n--t--
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-record--n--t-->
     #[serde(rename = "record")]
     Record(WrappedCandidTypeRecord),
     /// variant { .. }
     /// enumerate type: variant { ok : nat; error : text } / Rust enum / JavaScript { dot: null }
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-variant--n--t--
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-variant--n--t-->
     #[serde(rename = "variant")]
     Variant(WrappedCandidTypeVariant),
     /// tuple record { .. } // T
@@ -460,22 +460,22 @@ pub enum WrappedCandidType {
     Unknown(WrappedCandidTypeName),
     /// empty
     /// empty type
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-empty
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-empty>
     #[serde(rename = "empty")]
     Empty(WrappedCandidTypeName), // 没有值的类型, 是其他类型的子类型
     /// reserved
     /// reserved type: some function arguments can be ignore
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-reserved
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-reserved>
     #[serde(rename = "reserved")]
     Reserved(WrappedCandidTypeName), // 占位不使用的类型
     /// func
     /// func type
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-func---
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-func--->
     #[serde(rename = "func")]
     Func(WrappedCandidTypeFunction),
     /// service
     /// service type: canister's api
-    /// https://internetcomputer.org/docs/current/references/candid-ref/#type-service-
+    /// <https://docs.internetcomputer.org/languages/motoko/reference/language-manual/#type-service->
     #[serde(rename = "service")]
     Service(WrappedCandidTypeService),
     /// rec
@@ -524,5 +524,113 @@ impl WrappedCandidType {
             Self::Rec(recursion) => recursion.to_text(),
             Self::Reference(reference) => reference.to_text(),
         }
+    }
+}
+
+#[cfg(test)]
+mod serialization_tests {
+    use ciborium::value::Value;
+    use serde::Serialize;
+
+    use super::*;
+
+    #[derive(Serialize)]
+    struct RecordPayload {
+        subitems: Vec<(String, WrappedCandidType)>,
+        name: Option<String>,
+    }
+
+    #[derive(Serialize)]
+    struct VariantPayload {
+        subitems: Vec<(String, Option<WrappedCandidType>)>,
+        name: Option<String>,
+    }
+
+    #[derive(Serialize)]
+    struct TuplePayload {
+        subitems: Vec<WrappedCandidType>,
+        name: Option<String>,
+    }
+
+    #[derive(Serialize)]
+    struct LegacyFunction {
+        args: Vec<WrappedCandidType>,
+        rets: Vec<WrappedCandidType>,
+        annotation: Option<FunctionAnnotation>,
+        name: Option<String>,
+    }
+
+    #[derive(Serialize)]
+    struct LegacyRecursion {
+        ty: Box<WrappedCandidType>,
+        id: u32,
+        name: Option<String>,
+    }
+
+    fn nat() -> WrappedCandidType {
+        WrappedCandidType::Nat(WrappedCandidTypeName::default())
+    }
+
+    fn round_trip_legacy<Legacy: Serialize, Current: serde::de::DeserializeOwned>(legacy: &Legacy) -> Current {
+        let mut cbor = Vec::new();
+        ciborium::ser::into_writer(legacy, &mut cbor).unwrap();
+        ciborium::de::from_reader(cbor.as_slice()).unwrap()
+    }
+
+    fn serialized_keys(value: &impl Serialize) -> Vec<String> {
+        let mut cbor = Vec::new();
+        ciborium::ser::into_writer(value, &mut cbor).unwrap();
+        let value: Value = ciborium::de::from_reader(cbor.as_slice()).unwrap();
+        let Value::Map(entries) = value else {
+            panic!("expected a CBOR map")
+        };
+        entries
+            .into_iter()
+            .filter_map(|(key, _)| match key {
+                Value::Text(key) => Some(key),
+                _ => None,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn deserializes_legacy_candid_type_fields_and_serializes_current_names() {
+        let record: WrappedCandidTypeRecord = round_trip_legacy(&RecordPayload {
+            subitems: vec![("value".to_string(), nat())],
+            name: None,
+        });
+        assert_eq!(record.subitems.len(), 1);
+        assert_eq!(serialized_keys(&record), vec!["subitems"]);
+
+        let variant: WrappedCandidTypeVariant = round_trip_legacy(&VariantPayload {
+            subitems: vec![("ok".to_string(), Some(nat()))],
+            name: None,
+        });
+        assert_eq!(variant.subitems.len(), 1);
+        assert_eq!(serialized_keys(&variant), vec!["subitems"]);
+
+        let tuple: WrappedCandidTypeTuple = round_trip_legacy(&TuplePayload {
+            subitems: vec![nat()],
+            name: None,
+        });
+        assert_eq!(tuple.subitems.len(), 1);
+        assert_eq!(serialized_keys(&tuple), vec!["subitems"]);
+
+        let function: WrappedCandidTypeFunction = round_trip_legacy(&LegacyFunction {
+            args: Vec::new(),
+            rets: vec![nat()],
+            annotation: None,
+            name: None,
+        });
+        assert_eq!(function.rets.len(), 1);
+        assert_eq!(serialized_keys(&function), vec!["rets"]);
+
+        let recursion: WrappedCandidTypeRecursion = round_trip_legacy(&LegacyRecursion {
+            ty: Box::new(nat()),
+            id: 1,
+            name: None,
+        });
+        assert!(matches!(*recursion.ty, WrappedCandidType::Nat(_)));
+        assert_eq!(serialized_keys(&recursion), vec!["ty", "id"]);
     }
 }

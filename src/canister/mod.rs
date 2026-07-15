@@ -10,6 +10,9 @@ pub mod life;
 /// codes
 pub mod codes;
 
+/// Wasm 分块存储
+pub mod chunks;
+
 /// deploy
 pub mod deploy;
 

@@ -3,7 +3,7 @@
 use crate::canister::types::CanisterCallResult;
 
 /// 得到随机数
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-raw_rand
+/// <https://docs.internetcomputer.org/references/management-canister/#raw_rand>
 #[inline]
 pub async fn random() -> CanisterCallResult<[u8; 32]> {
     let call_result = ic_cdk_management_canister::raw_rand().await;
@@ -29,7 +29,7 @@ pub async fn random() -> CanisterCallResult<[u8; 32]> {
 #[derive(Debug)]
 pub struct RandomGenerator {
     random: [u8; 32],
-    current: u8,
+    cursor: u8,
 }
 
 impl RandomGenerator {
@@ -37,7 +37,7 @@ impl RandomGenerator {
     pub fn new() -> Self {
         RandomGenerator {
             random: [0; 32],
-            current: 32,
+            cursor: 32,
         }
     }
     /// 下一组随机数
@@ -51,24 +51,24 @@ impl RandomGenerator {
             remain -= 32;
         }
 
-        let available = 32 - self.current as usize;
+        let available = 32 - self.cursor as usize;
         if remain <= available {
-            let current = self.current as usize;
-            data.extend_from_slice(&self.random[current..current + remain]);
-            self.current += remain as u8;
+            let cursor = self.cursor as usize;
+            data.extend_from_slice(&self.random[cursor..cursor + remain]);
+            self.cursor += remain as u8;
         } else {
             // 剩下的全加入
-            let current = self.current as usize;
-            data.extend_from_slice(&self.random[current..current + available]);
+            let cursor = self.cursor as usize;
+            data.extend_from_slice(&self.random[cursor..cursor + available]);
             remain -= available;
 
             // 随机新的一组
             self.random = random().await?;
-            self.current = 0;
+            self.cursor = 0;
 
             // 取出剩下的个数
             data.extend_from_slice(&self.random[0..remain]);
-            self.current += remain as u8;
+            self.cursor += remain as u8;
         }
 
         Ok(data)

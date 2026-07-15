@@ -5,7 +5,7 @@ use crate::identity::CanisterId;
 
 /// 创建罐子
 /// ! Only the controllers of the canister
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-create_canister
+/// <https://docs.internetcomputer.org/references/management-canister/#create_canister>
 pub async fn create_canister(
     settings: Option<CanisterSettings>,
     cycles: u128,
@@ -19,7 +19,7 @@ pub async fn create_canister(
 
 /// 启动罐子
 /// ! Only the controllers of the canister
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-start_canister
+/// <https://docs.internetcomputer.org/references/management-canister/#start_canister>
 pub async fn start_canister(canister_id: CanisterId) -> super::types::CanisterCallResult<()> {
     let call_result = ic_cdk_management_canister::start_canister(&StartCanisterArgs { canister_id }).await;
     super::wrap_call_result(canister_id, "ic#start_canister", call_result)
@@ -27,7 +27,7 @@ pub async fn start_canister(canister_id: CanisterId) -> super::types::CanisterCa
 
 /// 停止罐子
 /// ! Only the controllers of the canister
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-stop_canister
+/// <https://docs.internetcomputer.org/references/management-canister/#stop_canister>
 pub async fn stop_canister(canister_id: CanisterId) -> super::types::CanisterCallResult<()> {
     let call_result = ic_cdk_management_canister::stop_canister(&StopCanisterArgs { canister_id }).await;
     super::wrap_call_result(canister_id, "ic#stop_canister", call_result)
@@ -38,7 +38,7 @@ pub async fn stop_canister(canister_id: CanisterId) -> super::types::CanisterCal
 /// 删除罐子
 /// ! Only the controllers of the canister
 /// ! already be stopped
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-delete_canister
+/// <https://docs.internetcomputer.org/references/management-canister/#delete_canister>
 pub async fn delete_canister(canister_id: CanisterId) -> super::types::CanisterCallResult<()> {
     let call_result = ic_cdk_management_canister::delete_canister(&DeleteCanisterArgs { canister_id }).await;
     super::wrap_call_result(canister_id, "ic#delete_canister", call_result)

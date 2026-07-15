@@ -4,7 +4,7 @@ use super::types::{CanisterSettings, UpdateSettingsArgs};
 
 /// 更新罐子设置
 /// ! Only the controllers of the canister
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-update_settings
+/// <https://docs.internetcomputer.org/references/management-canister/#update_settings>
 pub async fn update_settings(
     canister_id: crate::identity::CanisterId,
     settings: CanisterSettings,

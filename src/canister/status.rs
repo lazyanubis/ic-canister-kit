@@ -1,6 +1,9 @@
 //! 和 罐子 的 状态 相关
 
-use super::types::{CanisterInfoArgs, CanisterInfoResult, CanisterStatusArgs, CanisterStatusResult};
+use super::types::{
+    CanisterInfoArgs, CanisterInfoResult, CanisterMetricsArgs, CanisterMetricsResult, CanisterStatusArgs,
+    CanisterStatusResult,
+};
 use crate::identity::CanisterId;
 
 /*
@@ -26,7 +29,7 @@ async fn canister_info(num_requested_changes: Option<u64>) -> ic_canister_kit::t
 
 /// 查询罐子状态
 /// ! Only the controllers of the canister
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-canister_status
+/// <https://docs.internetcomputer.org/references/management-canister/#canister_status>
 pub async fn canister_status(canister_id: CanisterId) -> super::types::CanisterCallResult<CanisterStatusResult> {
     let call_result = ic_cdk_management_canister::canister_status(&CanisterStatusArgs { canister_id }).await;
     call_result.map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, "ic#canister_status", err))
@@ -34,7 +37,7 @@ pub async fn canister_status(canister_id: CanisterId) -> super::types::CanisterC
 
 /// 查询罐子信息
 /// ! 罐子可以调用，用户身份不可以调用
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-canister-info
+/// <https://docs.internetcomputer.org/references/management-canister/#canister_info>
 pub async fn canister_info(
     canister_id: CanisterId,
     num_requested_changes: Option<u64>,
@@ -45,6 +48,18 @@ pub async fn canister_info(
     })
     .await;
     call_result.map_err(|err| crate::canister::types::CanisterCallError::new(canister_id, "ic#canister_info", err))
+}
+
+/// 查询 Canister 自创建以来按用途累计消耗的 cycles；旧 Canister 从该指标启用时开始累计。
+///
+/// 这些值是单调递增的累计计数器，不是当前 cycles 余额。调用者必须是目标 Canister 的 controller
+/// 或子网管理员。
+/// <https://docs.internetcomputer.org/references/management-canister/#canister_metrics>
+pub async fn canister_metrics(canister_id: CanisterId) -> super::types::CanisterCallResult<CanisterMetricsResult> {
+    let call_result = ic_cdk::call::Call::bounded_wait(CanisterId::management_canister(), "canister_metrics")
+        .with_arg(&CanisterMetricsArgs { canister_id })
+        .await;
+    super::fetch_and_wrap_call_result(canister_id, "ic#canister_metrics", call_result)
 }
 
 // ========================= 自定义接口调用 =========================

@@ -1,13 +1,14 @@
 pub use ic_cdk_bitcoin_canister::{
-    Address as BitcoinAddress, BlockHash, GetBalanceRequest, GetCurrentFeePercentilesRequest, GetUtxosRequest,
-    GetUtxosResponse, MillisatoshiPerByte, Network as BitcoinNetwork, Satoshi, SendTransactionRequest, Utxo,
-    UtxosFilter, UtxosFilterInRequest,
+    Address as BitcoinAddress, BlockHash, BlockHeader, GetBalanceRequest, GetBlockHeadersRequest,
+    GetBlockHeadersResponse, GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, Height,
+    MillisatoshiPerByte, Network as BitcoinNetwork, Satoshi, SendTransactionRequest, Utxo, UtxosFilter,
+    UtxosFilterInRequest,
 };
 
 use crate::types::CanisterCallError;
 
 /// 查询余额
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_balance
+/// <https://docs.internetcomputer.org/references/management-canister/#bitcoin_get_balance>
 pub async fn bitcoin_get_balance(
     network: BitcoinNetwork,
     address: BitcoinAddress,
@@ -26,8 +27,28 @@ pub async fn bitcoin_get_balance(
     })
 }
 
+/// 查询指定高度范围内的区块头
+/// <https://docs.internetcomputer.org/references/management-canister/#bitcoin_get_block_headers>
+pub async fn bitcoin_get_block_headers(
+    network: BitcoinNetwork,
+    start_height: Height,
+    end_height: Option<Height>,
+) -> super::types::CanisterCallResult<GetBlockHeadersResponse> {
+    ic_cdk_bitcoin_canister::bitcoin_get_block_headers(&GetBlockHeadersRequest {
+        start_height,
+        end_height,
+        network: network.into(),
+    })
+    .await
+    .map_err(|err| CanisterCallError {
+        canister_id: crate::identity::CanisterId::management_canister(),
+        method: "ic#bitcoin_get_block_headers".to_string(),
+        message: err.to_string(),
+    })
+}
+
 /// 查询网络费用
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_current_fee_percentiles
+/// <https://docs.internetcomputer.org/references/management-canister/#bitcoin_get_current_fee_percentiles>
 pub async fn bitcoin_get_current_fee_percentiles(
     network: BitcoinNetwork,
 ) -> super::types::CanisterCallResult<Vec<MillisatoshiPerByte>> {
@@ -43,7 +64,7 @@ pub async fn bitcoin_get_current_fee_percentiles(
 }
 
 /// 查询 UTXO
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_utxos
+/// <https://docs.internetcomputer.org/references/management-canister/#bitcoin_get_utxos>
 pub async fn bitcoin_get_utxos(
     network: BitcoinNetwork,
     address: BitcoinAddress,
@@ -66,7 +87,7 @@ pub async fn bitcoin_get_utxos(
 }
 
 /// 发送交易
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_send_transaction
+/// <https://docs.internetcomputer.org/references/management-canister/#bitcoin_send_transaction>
 pub async fn bitcoin_send_transaction(
     network: BitcoinNetwork,
     transaction: Vec<u8>,

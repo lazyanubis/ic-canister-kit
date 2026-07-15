@@ -16,11 +16,6 @@ pub type CanisterId = candid::Principal; // 类型别名
 /// 字符串格式罐子 id
 pub type CanisterIdText = String; // ? 字符串格式
 
-/// 集合 id NFT 集合
-pub type CollectionId = candid::Principal; // 类型别名
-/// 字符串格式的 集合 id
-pub type CollectionIdText = String; // ? 字符串格式
-
 /// 用户 ID
 pub type UserId = candid::Principal; // 类型别名
 /// 字符串格式的 用户 ID

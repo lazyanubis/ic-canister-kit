@@ -1,5 +1,5 @@
 //! ICRC2 标准接口
-//! https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-2
+//! <https://github.com/dfinity/ICRC-1/tree/main/standards/ICRC-2>
 
 use crate::{
     canister::{call::call_canister, types::CanisterCallResult},
@@ -43,10 +43,7 @@ pub type Icrc2Allowance = icrc_ledger_types::icrc2::allowance::Allowance;
 
 /// 查询授权额度
 #[allow(unused)]
-pub async fn icrc2_allowance(
-    canister_id: CanisterId,
-    args: Icrc2AllowanceArgs,
-) -> CanisterCallResult<Icrc2Allowance> {
+pub async fn icrc2_allowance(canister_id: CanisterId, args: Icrc2AllowanceArgs) -> CanisterCallResult<Icrc2Allowance> {
     call_canister::<_, Icrc2Allowance>(canister_id, "icrc2_allowance", (args,)).await
 }
 
@@ -153,10 +150,7 @@ pub type Icrc2ApproveResult = Result<candid::Nat, Icrc2ApproveError>;
 
 /// 授权额度
 #[allow(unused)]
-pub async fn icrc2_approve(
-    canister_id: CanisterId,
-    args: Icrc2ApproveArgs,
-) -> CanisterCallResult<Icrc2ApproveResult> {
+pub async fn icrc2_approve(canister_id: CanisterId, args: Icrc2ApproveArgs) -> CanisterCallResult<Icrc2ApproveResult> {
     call_canister::<_, Icrc2ApproveResult>(canister_id, "icrc2_approve", (args,)).await
 }
 

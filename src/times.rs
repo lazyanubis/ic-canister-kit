@@ -6,15 +6,11 @@ use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
 /// 时间戳 纳秒
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, CandidType,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, CandidType)]
 pub struct TimestampNanos(i128);
 
 /// 时间跨度 纳秒
-#[derive(
-    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, CandidType,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, CandidType)]
 pub struct DurationNanos(u128);
 
 impl From<i128> for TimestampNanos {

@@ -47,7 +47,7 @@ pub type EcdsaDerivationPath = Vec<Vec<u8>>;
 /// 罐子管理的私钥路径，确定使用哪一个私钥
 #[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
 pub struct EcdsaIdentity {
-    /// 加密曲线
+    /// 阈值 ECDSA 密钥标识，包含曲线类型和密钥名称
     pub key_id: EcdsaKeyId,
 
     /// 派生路径
@@ -79,7 +79,7 @@ impl TryFrom<Vec<u8>> for MessageHash {
 }
 
 /// 查询公钥
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-ecdsa_public_key
+/// <https://docs.internetcomputer.org/references/management-canister/#ecdsa_public_key>
 pub async fn ecdsa_public_key(
     canister_id: Option<CanisterId>, // 不写则是自身 id
     identity: EcdsaIdentity,
@@ -99,7 +99,7 @@ pub async fn ecdsa_public_key(
 }
 
 /// 签名
-/// https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-sign_with_ecdsa
+/// <https://docs.internetcomputer.org/references/management-canister/#sign_with_ecdsa>
 pub async fn sign_with_ecdsa(
     identity: EcdsaIdentity,
     message_hash: MessageHash,

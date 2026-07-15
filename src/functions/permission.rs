@@ -299,13 +299,16 @@ pub mod basic {
             &mut self,
             args: Vec<PermissionUpdatedArg<Permission>>,
         ) -> Result<(), PermissionUpdatedError<Permission>> {
+            // 在副本上依次应用，既保留“先创建角色、再给用户分配角色”的批次语义，
+            // 又保证任意一项失败时原权限状态完全不变。
+            let mut updated = self.clone();
             for arg in args.iter() {
                 match arg {
                     PermissionUpdatedArg::UpdateUserPermission(user_id, permissions) => {
                         // 先检查权限是否都存在
-                        self.assure_permission_exist(permissions)?;
+                        updated.assure_permission_exist(permissions)?;
 
-                        let exist = self.user_permissions.get(user_id);
+                        let exist = updated.user_permissions.get(user_id);
                         if let Some(permissions) = &permissions {
                             if let Some(exist) = exist
                                 && exist == permissions
@@ -316,16 +319,16 @@ pub mod basic {
                             continue;
                         }
                         if let Some(permissions) = permissions {
-                            self.user_permissions.insert(*user_id, permissions.clone());
+                            updated.user_permissions.insert(*user_id, permissions.clone());
                         } else {
-                            self.user_permissions.remove(user_id);
+                            updated.user_permissions.remove(user_id);
                         }
                     }
                     PermissionUpdatedArg::UpdateRolePermission(role, permissions) => {
                         // 先检查权限是否都存在
-                        self.assure_permission_exist(permissions)?;
+                        updated.assure_permission_exist(permissions)?;
 
-                        let exist = self.role_permissions.get(role);
+                        let exist = updated.role_permissions.get(role);
                         if let Some(permissions) = permissions {
                             if let Some(exist) = exist
                                 && exist == permissions
@@ -336,14 +339,15 @@ pub mod basic {
                             continue;
                         }
                         if let Some(permissions) = permissions {
-                            self.role_permissions.insert(role.clone(), permissions.clone());
+                            updated.role_permissions.insert(role.clone(), permissions.clone());
                         } else {
-                            self.role_permissions.remove(role);
+                            updated.role_permissions.remove(role);
                             // 移除要检查用户角色数据对不对
-                            self.user_roles.iter_mut().for_each(|(_, roles)| {
+                            let valid_roles: HashSet<String> = updated.role_permissions.keys().cloned().collect();
+                            updated.user_roles.iter_mut().for_each(|(_, roles)| {
                                 let mut removed = Vec::new();
                                 for role in roles.iter() {
-                                    if !self.role_permissions.contains_key(role) {
+                                    if !valid_roles.contains(role) {
                                         removed.push(role.clone());
                                     }
                                 }
@@ -355,9 +359,9 @@ pub mod basic {
                     }
                     PermissionUpdatedArg::UpdateUserRole(user_id, roles) => {
                         // 先检查角色是否都存在
-                        self.assure_role_exist(roles)?;
+                        updated.assure_role_exist(roles)?;
 
-                        let exist = self.user_roles.get(user_id);
+                        let exist = updated.user_roles.get(user_id);
                         if let Some(roles) = &roles {
                             if let Some(exist) = exist
                                 && exist == roles
@@ -368,13 +372,14 @@ pub mod basic {
                             continue;
                         }
                         if let Some(roles) = roles {
-                            self.user_roles.insert(*user_id, roles.clone());
+                            updated.user_roles.insert(*user_id, roles.clone());
                         } else {
-                            self.user_roles.remove(user_id);
+                            updated.user_roles.remove(user_id);
                         }
                     }
                 }
             }
+            *self = updated;
             Ok(())
         }
     }
@@ -442,5 +447,57 @@ pub mod basic {
             .iter()
             .map(|su| PermissionUpdatedArg::UpdateUserPermission(*su, Some(permitted.clone())))
             .collect()
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use std::collections::HashSet;
+
+        use candid::Principal;
+
+        use super::{Permission, Permissions};
+        use crate::functions::permission::{Permissable, PermissionUpdatedArg, PermissionUpdatedError};
+
+        fn permissions() -> Permissions {
+            Permissions {
+                permissions: HashSet::from([Permission::by_permit("read")]),
+                ..Default::default()
+            }
+        }
+
+        #[test]
+        fn batch_update_is_atomic_when_a_later_item_is_invalid() {
+            let user = Principal::anonymous();
+            let read = Permission::by_permit("read");
+            let invalid = Permission::by_permit("missing");
+            let mut permissions = permissions();
+
+            let result = permissions.permission_update(vec![
+                PermissionUpdatedArg::UpdateUserPermission(user, Some(HashSet::from([read]))),
+                PermissionUpdatedArg::UpdateUserPermission(user, Some(HashSet::from([invalid]))),
+            ]);
+
+            assert!(matches!(result, Err(PermissionUpdatedError::InvalidPermission(_))));
+            assert!(permissions.user_permissions.is_empty());
+        }
+
+        #[test]
+        fn batch_can_create_and_assign_a_role_atomically() {
+            let user = Principal::anonymous();
+            let read = Permission::by_permit("read");
+            let mut permissions = permissions();
+
+            permissions
+                .permission_update(vec![
+                    PermissionUpdatedArg::UpdateRolePermission(
+                        "reader".to_string(),
+                        Some(HashSet::from([read.clone()])),
+                    ),
+                    PermissionUpdatedArg::UpdateUserRole(user, Some(HashSet::from(["reader".to_string()]))),
+                ])
+                .unwrap();
+
+            assert!(permissions.permission_has(&user, &read));
+        }
     }
 }

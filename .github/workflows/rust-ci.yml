@@ -2,32 +2,74 @@ name: Rust CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
-      - name: Install cargo-deny
-        run: cargo install --locked cargo-deny
-      - name: Build
-        run: cargo build --all --features "full" --verbose
-      - name: Test
-        run: cargo test --all --features "full" --verbose
-      - name: Deny
-        run: cargo deny check --show-stats
-      - name: Clippy
-        run: cargo clippy --all --features "full" --verbose -- -D warnings
-      - name: Audit
+      - uses: actions/checkout@v6
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Run tests
+        run: cargo test --all-features --locked
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features --locked -- -D warnings
+      - name: Build documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --no-deps --all-features --locked
+      - name: Check Wasm target
+        run: cargo check --target wasm32-unknown-unknown --all-features --locked
+      - name: Check feature matrix
+        shell: bash
+        run: |
+          features=(
+            common times identity canister number token http ecdsa bitcoin
+            functions call-once schedule
+            stable canister-did full
+          )
+          for feature in "${features[@]}"; do
+            cargo check --no-default-features --features "$feature" --locked
+          done
+
+  examples:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example: [template, service, storage, assets]
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check ${{ matrix.example }} for Wasm
+        run: >-
+          cargo check
+          --manifest-path examples/${{ matrix.example }}/Cargo.toml
+          --target wasm32-unknown-unknown
+          --locked
+
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install dependency auditors
+        run: |
+          cargo install --locked cargo-deny --version 0.19.4
+          cargo install --locked cargo-audit --version 0.22.2
+      - name: Check dependency policy
+        run: cargo deny --all-features check --show-stats
+      - name: Check RustSec advisories
         run: cargo audit
