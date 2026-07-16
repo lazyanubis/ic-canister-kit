@@ -15,7 +15,7 @@ pub use super::permission::{
 };
 
 pub use super::record::{
-    MigratedRecords, RecordId, Recordable, Searchable,
+    RecordId, Recordable, Searchable,
     basic::{Record, RecordSearch, RecordSearchArg, RecordTopic, Records},
 };
 

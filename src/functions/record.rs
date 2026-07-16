@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
@@ -7,7 +9,7 @@ use crate::{
 };
 
 /// 记录 id
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(CandidType, Serialize, Deserialize, Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RecordId(u64);
 
 impl From<u64> for RecordId {
@@ -27,18 +29,6 @@ impl RecordId {
     }
 }
 
-/// 迁移内容
-#[derive(CandidType, Serialize, Deserialize, Debug, Clone)]
-pub struct MigratedRecords<Record> {
-    /// 因保留上限被累计淘汰的记录数量
-    #[serde(alias = "removed")]
-    pub retention_evicted_count: u64,
-    /// 下一个未使用的记录 id
-    pub next_id: u64,
-    /// 本次迁移的记录
-    pub records: Vec<Record>,
-}
-
 /// 查询
 pub trait Searchable<Record> {
     /// 查询
@@ -56,8 +46,8 @@ pub trait Recordable<Record, RecordTopic, Search: Searchable<Record>> {
     fn record_push(&mut self, caller: CallerId, topic: RecordTopic, content: String) -> RecordId;
     /// 更新记录
     fn record_update(&mut self, record_id: RecordId, result: String);
-    /// 迁移
-    fn record_migrate(&mut self, max: u32) -> MigratedRecords<Record>;
+    /// 按 id 批量删除记录，返回实际删除的记录数量
+    fn record_delete(&mut self, ids: &HashSet<RecordId>) -> u64;
 
     /// 分页查询
     fn record_find_by_page(
@@ -84,10 +74,7 @@ pub mod basic {
     use serde::{Deserialize, Serialize};
 
     use crate::{
-        functions::{
-            record::MigratedRecords,
-            types::{RecordId, Recordable, Searchable},
-        },
+        functions::types::{RecordId, Recordable, Searchable},
         identity::CallerId,
         types::TimestampNanos,
     };
@@ -271,17 +258,15 @@ pub mod basic {
             self.update_at(record_id, result, crate::times::now());
         }
 
-        // 迁移
-        fn record_migrate(&mut self, max: u32) -> MigratedRecords<Record> {
-            let retention_evicted_count = self.retention_evicted_count;
-            let next_id = self.next_id.into_inner();
-            let take = self.records.len().min(max as usize);
-            let records = self.records.drain(..take).collect();
-            MigratedRecords {
-                retention_evicted_count,
-                next_id,
-                records,
+        // 删除
+        fn record_delete(&mut self, ids: &HashSet<RecordId>) -> u64 {
+            if ids.is_empty() {
+                return 0;
             }
+
+            let before = self.records.len();
+            self.records.retain(|record| !ids.contains(&record.id));
+            u64::try_from(before - self.records.len()).unwrap_or(u64::MAX)
         }
     }
 
@@ -328,9 +313,9 @@ pub mod basic {
         use ciborium::value::Value;
         use serde::Serialize;
 
-        use super::{Record, RecordSearchArg, Records};
+        use super::{RecordSearchArg, Records};
         use crate::{
-            functions::record::{MigratedRecords, RecordId},
+            functions::{record::RecordId, types::Recordable},
             types::TimestampNanos,
         };
 
@@ -349,13 +334,6 @@ pub mod basic {
             max: u64,
             removed: u64,
             next_id: RecordId,
-            records: Vec<LegacyRecord>,
-        }
-
-        #[derive(Serialize)]
-        struct LegacyMigratedRecords {
-            removed: u64,
-            next_id: u64,
             records: Vec<LegacyRecord>,
         }
 
@@ -434,6 +412,24 @@ pub mod basic {
         }
 
         #[test]
+        fn deletes_only_requested_ids_and_is_safe_to_retry() {
+            let mut records = Records::default();
+            let first = push(&mut records, "first", 1);
+            let second = push(&mut records, "second", 2);
+            let third = push(&mut records, "third", 3);
+            let ids = HashSet::from([first, third, RecordId::from(99)]);
+
+            assert_eq!(records.record_delete(&ids), 2);
+            assert_eq!(records.records.len(), 1);
+            assert_eq!(records.records[0].id, second);
+            assert_eq!(records.next_id.into_inner(), 3);
+            assert_eq!(records.retention_evicted_count, 0);
+
+            assert_eq!(records.record_delete(&ids), 0);
+            assert_eq!(records.records.len(), 1);
+        }
+
+        #[test]
         fn deserializes_legacy_aliases_and_serializes_current_names() {
             let legacy = LegacyRecords {
                 max: 42,
@@ -476,22 +472,6 @@ pub mod basic {
             let record_keys = map_keys(&records[0]);
             assert!(record_keys.contains(&"completion"));
             assert!(!record_keys.contains(&"done"));
-
-            let legacy_migrated = LegacyMigratedRecords {
-                removed: 5,
-                next_id: 8,
-                records: Vec::new(),
-            };
-            let mut migrated_cbor = Vec::new();
-            ciborium::ser::into_writer(&legacy_migrated, &mut migrated_cbor).unwrap();
-            let migrated: MigratedRecords<Record> = ciborium::de::from_reader(migrated_cbor.as_slice()).unwrap();
-            assert_eq!(migrated.retention_evicted_count, 5);
-            let mut current_migrated_cbor = Vec::new();
-            ciborium::ser::into_writer(&migrated, &mut current_migrated_cbor).unwrap();
-            let current_migrated: Value = ciborium::de::from_reader(current_migrated_cbor.as_slice()).unwrap();
-            let migrated_keys = map_keys(&current_migrated);
-            assert!(migrated_keys.contains(&"retention_evicted_count"));
-            assert!(!migrated_keys.contains(&"removed"));
 
             let legacy_search = LegacyRecordSearchArg {
                 id: Some((Some(1), Some(2))),

@@ -79,12 +79,6 @@ mod tests {
       compute_allocation : nat;
     };
     type MaintainingReason = record { created : nat64; message : text };
-    type MigratedRecords = record {
-      records : vec Record;
-      topics : vec text;
-      updated : vec record { nat64; nat64; text };
-      next_id : nat64;
-    };
     type Page = record { page : nat32; size : nat32 };
     type PageData = record {
       total : nat32;
@@ -150,7 +144,7 @@ mod tests {
       record_collector_update : (opt principal) -> ();
       record_find_all : (opt RecordSearch) -> (vec Record) query;
       record_find_by_page : (opt RecordSearch, Page) -> (PageData) query;
-      record_migrate : (nat32) -> (MigratedRecords);
+      record_delete : (vec nat64) -> (nat64);
       record_topics : () -> (vec text) query;
       schedule_find : () -> (opt nat64) query;
       schedule_replace : (opt nat64) -> ();
