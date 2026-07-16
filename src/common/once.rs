@@ -5,6 +5,7 @@ thread_local! {
 }
 
 /// 拦截对象
+#[non_exhaustive]
 pub struct CallOnceGuard;
 
 impl Drop for CallOnceGuard {

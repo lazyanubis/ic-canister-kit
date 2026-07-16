@@ -1,4 +1,56 @@
+use std::cell::Cell;
+
 use crate::types::DurationNanos;
+
+const MIN_SCHEDULE_INTERVAL_NANOS: u128 = 1_000_000_000;
+
+thread_local! {
+    static SCHEDULE_TASK_RUNNING: Cell<bool> = const { Cell::new(false) };
+}
+
+/// 定时任务执行锁。
+///
+/// 锁离开作用域时会自动释放，使后续定时任务可以继续执行。
+#[must_use = "dropping the guard immediately releases the schedule task lock"]
+#[non_exhaustive]
+pub struct ScheduleTaskGuard;
+
+impl Drop for ScheduleTaskGuard {
+    fn drop(&mut self) {
+        SCHEDULE_TASK_RUNNING.with(|running| running.set(false));
+    }
+}
+
+/// 尝试取得定时任务执行锁，防止自动任务和手动触发并发执行。
+pub fn try_schedule_task_guard() -> Result<ScheduleTaskGuard, String> {
+    SCHEDULE_TASK_RUNNING.with(|running| {
+        if running.get() {
+            return Err("Schedule task is already running.".to_string());
+        }
+        running.set(true);
+        Ok(ScheduleTaskGuard)
+    })
+}
+
+/// 验证定时任务间隔是否能够被 IC 定时器安全执行。
+///
+/// 已启用的任务间隔不得少于一秒，也不得超过定时器的 `u64` 纳秒范围或导致当前 Canister 时间溢出。
+pub fn validate_schedule(schedule: Option<DurationNanos>) -> Result<Option<DurationNanos>, String> {
+    if let Some(interval) = schedule {
+        let nanos = interval.into_inner();
+        if nanos < MIN_SCHEDULE_INTERVAL_NANOS {
+            return Err(format!(
+                "Schedule interval must be at least {MIN_SCHEDULE_INTERVAL_NANOS} nanoseconds."
+            ));
+        }
+        let nanos = u64::try_from(nanos)
+            .map_err(|_| "Schedule interval exceeds the timer's u64 nanosecond range.".to_string())?;
+        if ic_cdk::api::time().checked_add(nanos).is_none() {
+            return Err("Schedule interval is too large for the current canister time.".to_string());
+        }
+    }
+    Ok(schedule)
+}
 
 // ================== 异步执行代码 ==================
 // 不知道和 ic_cdk::spawn(future) 区别在哪里
@@ -102,3 +154,22 @@ pub mod basic {
 
 #[cfg(feature = "schedule")]
 pub use basic::{start_schedule, stop_schedule};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn schedule_task_guard_prevents_reentry_until_dropped() {
+        let first = try_schedule_task_guard().expect("first schedule task should acquire the guard");
+        assert!(try_schedule_task_guard().is_err());
+        drop(first);
+        assert!(try_schedule_task_guard().is_ok());
+    }
+
+    #[test]
+    fn schedule_interval_rejects_unsafe_values_before_reading_canister_time() {
+        assert!(validate_schedule(Some(0_u128.into())).is_err());
+        assert!(validate_schedule(Some((u64::MAX as u128 + 1).into())).is_err());
+    }
+}
