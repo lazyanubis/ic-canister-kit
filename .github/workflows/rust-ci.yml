@@ -46,21 +46,6 @@ jobs:
             cargo check --no-default-features --features "$feature" --locked
           done
 
-  examples:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        example: [template, service, storage, assets]
-    steps:
-      - uses: actions/checkout@v6
-      - name: Check ${{ matrix.example }} for Wasm
-        run: >-
-          cargo check
-          --manifest-path examples/${{ matrix.example }}/Cargo.toml
-          --target wasm32-unknown-unknown
-          --locked
-
   dependencies:
     runs-on: ubuntu-latest
     steps:

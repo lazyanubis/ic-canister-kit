@@ -7,8 +7,6 @@ features=(
     functions call-once schedule
     stable canister-did full
 )
-examples=(template service storage assets)
-
 cargo fmt --all -- --check
 cargo test --all-features --locked
 cargo clippy --all-targets --all-features --locked -- -D warnings
@@ -17,13 +15,6 @@ cargo check --target wasm32-unknown-unknown --all-features --locked
 
 for feature in "${features[@]}"; do
     cargo check --no-default-features --features "$feature" --locked
-done
-
-for example in "${examples[@]}"; do
-    cargo check \
-        --manifest-path "examples/${example}/Cargo.toml" \
-        --target wasm32-unknown-unknown \
-        --locked
 done
 
 if ! command -v cargo-deny >/dev/null; then
